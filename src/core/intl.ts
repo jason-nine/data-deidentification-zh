@@ -8,10 +8,10 @@ const digitsOf = (s: string) => s.replace(/\D/g, '');
 /**
  * The longest valid phone number at the start of the match, dropping trailing groups that ran on into
  * the next number. Numbers with a + are checked by their country code, others as North American
- * (+1: the US and Canada). Taiwan (+886) is left to the 手機 and 市話 rules.
+ * (+1: the US and Canada). Mainland China (+86) is left to the 手机 and 固定电话 rules.
  */
 export function phoneLength(match: string): number | false {
-  if (/^\+\s*886/.test(match)) return false;
+  if (/^\+\s*86(?![0-9])/.test(match)) return false;
   const groups = match.split(/(?<=\d|\))(?=[\s.-])/);
   for (let n = groups.length; n >= 1; n--) {
     const candidate = groups.slice(0, n).join('');
@@ -98,7 +98,7 @@ export function isIpv6(match: string): boolean {
 
 const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
-/** A date of birth whose month and day are possible (the year is not checked: 民國 years are short). */
+/** A date of birth whose month and day are possible (the year is not checked). */
 export function isBirthDate(match: string): boolean {
   const word = match.match(/[A-Za-z]{3,}/)?.[0];
   const numbers = (match.match(/\d+/g) ?? []).map(Number);
@@ -118,7 +118,7 @@ export function isBirthDate(match: string): boolean {
 
 /** How many characters at each end of a date of birth are its year (with the separator next to it). */
 export function birthYearSplit(value: string): { head: number; tail: number } {
-  const head = value.match(/^(?:(?:民國\s*)?\d{2,4}\s*年|\d{4}[-/.])\s*/)?.[0];
+  const head = value.match(/^(?:\d{2,4}\s*年|\d{4}[-/.])\s*/)?.[0];
   if (head) return { head: head.length, tail: 0 };
   const tail = value.match(/[\s,/.-]+\d{4}$/)?.[0];
   return tail ? { head: 0, tail: tail.length } : { head: 0, tail: 0 };

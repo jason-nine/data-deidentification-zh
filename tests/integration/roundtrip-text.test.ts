@@ -25,7 +25,7 @@ describe.each(FIXTURES)('roundtrip for $label', ({ path }) => {
 
   // KNOWN SRC BUG (see final report): the zh-name NAME_FOLLOW lookahead in
   // src/core/patterns.ts does not include the common continuation word "另", so the
-  // third occurrence of 王小明 in sample.txt ("王小明另提供緊急聯絡人...") is never
+  // third occurrence of 王小明 in sample.txt ("王小明另提供紧急联络人...") is never
   // detected. That leaves this original's third occurrence un-redacted, failing this
   // assertion. Left in place per instructions rather than weakened to match the bug.
   it('removes every active original from the redacted text and leaves one marker per active item', () => {
@@ -89,7 +89,7 @@ describe('sample.txt specifics', () => {
     const items = detect(original, BUILTIN_PATTERNS);
     const { mapping } = applyRedactions(original, items);
     const categories = new Set(mapping.map((m) => m.category));
-    for (const cat of ['姓名', '身分證', '手機', '市話', '地址', '電子郵件']) {
+    for (const cat of ['姓名', '身份证', '手机', '固定电话', '地址', '邮箱']) {
       expect(categories.has(cat)).toBe(true);
     }
   });
@@ -100,16 +100,16 @@ describe('sample.txt specifics', () => {
     const originals = mapping.map((m) => m.original);
 
     const expected = [
-      'A123456789',
-      'B223456782',
-      '0912-345-678',
-      '(02)2712-3456',
+      '110101199003078515',
+      '440305198512250027',
+      '138-1234-5678',
+      '(010)88886666',
       'xiaoming.wang@example.com',
-      '台北市信義區市府路45號8樓',
+      '北京市朝阳区建国路88号',
       '王小明',
       '林美玲',
-      '歐陽志遠',
-      '陳大文',
+      '欧阳志远',
+      '陈大文',
     ];
     for (const value of expected) {
       expect(originals).toContain(value);
@@ -121,7 +121,7 @@ describe('sample.txt specifics', () => {
     const { mapping } = applyRedactions(original, items);
     const originals = mapping.map((m) => m.original);
 
-    for (const value of ['高雄市政府', '方法論', '任何人', 'EMP-004521']) {
+    for (const value of ['高雄市政府', '方法论', '任何人', 'EMP-004521']) {
       expect(originals).not.toContain(value);
     }
   });

@@ -16,28 +16,28 @@ describe('xlsx round trip', () => {
     const doc = await parseXlsx(file);
 
     expect(doc.text).toContain('王小明');
-    expect(doc.text).toContain('A123456789');
+    expect(doc.text).toContain('110101199003078515');
     expect(doc.text).toContain('Email: xiaoming.wang@example.com');
-    expect(doc.text).toContain('聯絡人：歐陽志遠');
-    expect(doc.text).toContain('陳大文');
-    expect(doc.text).toContain('(02)2712-3456');
+    expect(doc.text).toContain('联系人：欧阳志远');
+    expect(doc.text).toContain('陈大文');
+    expect(doc.text).toContain('(010)88886666');
 
     // Documented limitation: numeric cells (e.g. the phone number stored as a raw
     // number 912345678 in row 3) are not processed at all.
     expect(doc.text).not.toContain('912345678');
 
     // Cells in a row are tab-joined; rows are newline-joined.
-    expect(doc.text).toContain('姓名\t身分證字號\t手機\t地址\t備註');
+    expect(doc.text).toContain('姓名\t身份证号\t手机\t地址\t备注');
     expect(doc.text).toContain(
-      '王小明\tA123456789\t0912-345-678\t台北市信義區市府路45號8樓\tEmail: xiaoming.wang@example.com',
+      '王小明\t110101199003078515\t138-1234-5678\t北京市朝阳区建国路88号\tEmail: xiaoming.wang@example.com',
     );
-    expect(doc.text).toContain('林美玲\tB223456782\t新北市板橋區文化路一段188巷3號之2\t聯絡人：歐陽志遠');
-    expect(doc.text).toContain('承辦社工\t陳大文');
-    expect(doc.text).toContain('市話\t(02)2712-3456');
+    expect(doc.text).toContain('林美玲\t440305198512250027\t杭州市西湖区文一西路969号\t联系人：欧阳志远');
+    expect(doc.text).toContain('承办社工\t陈大文');
+    expect(doc.text).toContain('固定电话\t(010)88886666');
 
     // Sheets are separated by a blank line: sheet 1's last row ("...同上") is followed
-    // by a blank line and then sheet 2's first row ("承辦社工...").
-    expect(doc.text).toContain('同上\n\n承辦社工');
+    // by a blank line and then sheet 2's first row ("承办社工...").
+    expect(doc.text).toContain('同上\n\n承办社工');
   });
 
   it('redacts every active item, regenerates the xlsx, and gives both shared-string 王小明 cells one code', async () => {
@@ -58,7 +58,7 @@ describe('xlsx round trip', () => {
     for (const item of items.filter((i) => i.active)) {
       expect(newDoc.text.includes(item.original)).toBe(false);
     }
-    expect(newDoc.text).not.toContain('A123456789');
+    expect(newDoc.text).not.toContain('110101199003078515');
 
     // 王小明 appears in two cells that share ONE sharedStrings entry in the input. Each cell is
     // a separate detected item, but the same value shares one code, so the mapping lists it once.
@@ -91,7 +91,7 @@ describe('xlsx round trip', () => {
     expect(entries.length).toBe(origEntries.length);
     expect(entries[origEntries.indexOf('姓名')]).toBe('姓名');
     expect(entries[origEntries.indexOf('王小明')]).toBe('');
-    expect(entries[origEntries.indexOf('A123456789')]).toBe('');
+    expect(entries[origEntries.indexOf('110101199003078515')]).toBe('');
 
     const sheet1Xml = await newZip.file('xl/worksheets/sheet1.xml')!.async('string');
     const sheet1Doc = new DOMParser().parseFromString(sheet1Xml, 'application/xml');
@@ -113,7 +113,7 @@ describe('xlsx round trip', () => {
     expect(b2.getAttribute('s')).toBe('1');
     expect(b2.getAttribute('r')).toBe('B2');
     const b2Text = b2.getElementsByTagName('is')[0]?.getElementsByTagName('t')[0]?.textContent ?? '';
-    expect(b2Text).toMatch(/^\[身分證:[0-9a-f]{6}\]$/);
+    expect(b2Text).toMatch(/^\[身份证:[0-9a-f]{6}\]$/);
 
     // A1 ("姓名") was never touched, so it still references the shared strings table.
     const a1 = cellByRef('A1');
@@ -121,7 +121,7 @@ describe('xlsx round trip', () => {
     expect(a1.getElementsByTagName('is').length).toBe(0);
 
     // The worksheet itself no longer shows any redacted original in cleartext.
-    expect(sheet1Xml).not.toContain('A123456789');
+    expect(sheet1Xml).not.toContain('110101199003078515');
     for (const item of items.filter((i) => i.active)) {
       expect(sheet1Xml).not.toContain(item.original);
     }
@@ -211,7 +211,7 @@ describe('xlsx round trip', () => {
 
   it('parses a workbook that has no sharedStrings.xml (inline strings and numbers only)', async () => {
     const spec: XlsxSpec = {
-      sheets: [{ name: 'S', rows: [[{ inline: '無共用字串測試' }, 42]] }],
+      sheets: [{ name: 'S', rows: [[{ inline: '无共用字串测试' }, 42]] }],
     };
     const bytes = await buildXlsx(spec);
     const zip = await JSZip.loadAsync(bytes);
@@ -219,7 +219,7 @@ describe('xlsx round trip', () => {
     const strippedBytes = await zip.generateAsync({ type: 'uint8array' });
 
     const doc = await parseXlsx(toXlsxFile(strippedBytes, 'no-shared-strings.xlsx'));
-    expect(doc.text).toContain('無共用字串測試');
+    expect(doc.text).toContain('无共用字串测试');
   });
 
   it('rejects a zip that is not an Excel workbook (e.g. a docx file)', async () => {

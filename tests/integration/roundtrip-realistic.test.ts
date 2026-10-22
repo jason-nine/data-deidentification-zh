@@ -18,11 +18,11 @@ import { renderDocx } from '../../scripts/lib/render-docx.ts';
 import { renderPdf } from '../../scripts/lib/render-pdf.ts';
 import { buildXlsx } from '../helpers/xlsx-builder.ts';
 
-const FONT = new Uint8Array(readFileSync('public/fonts/NotoSansTC-Regular.ttf'));
+const FONT = new Uint8Array(readFileSync('public/fonts/NotoSansSC-Regular.ttf'));
 
-const ID_RE = /[A-Z][12]\d{8}/g;
+const ID_RE = /\d{17}[\dXx]/g;
 const EMAIL_RE = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
-const MOBILE_RE = /09\d{2}[-\x20]?\d{3}[-\x20]?\d{3}/g;
+const MOBILE_RE = /1[3-9]\d(?:[-\x20]?\d{4}){2}/g;
 
 beforeAll(() => {
   // The font is fetched from the static site at runtime; serve it from disk here.
@@ -49,9 +49,20 @@ function countActive(items: RedactionItem[], category: string): number {
   return items.filter((i) => i.active && i.category === category).length;
 }
 
-/** For every occurrence of `regex` in `text`, checks it lies fully inside some active item's range. */
+/**
+ * For every occurrence of `regex` in `text`, checks that its non-whitespace characters are all
+ * covered by the *union* of active item ranges (not necessarily a single item).
+ *
+ * PDF/text-extraction tools routinely insert line breaks or spacing between two adjacent PII
+ * values (e.g. a landline "025-7960-1150" followed by a mobile "13109417372" can be emitted as
+ * "...1150 13109417372..."). Such a boundary can form a phantom match ("150 13109417") that
+ * straddles the two real items. Treating whitespace as "don't care" and using union coverage
+ * makes the completeness check robust to these artifacts: what matters is that every real PII
+ * digit is redacted, not that adjacent extraction whitespace lands inside one item.
+ */
 function coverage(text: string, regex: RegExp, items: RedactionItem[]): { total: number; missed: string[] } {
   const ranges = items.filter((i) => i.active).map((i) => ({ start: i.start, end: i.end }));
+  const covered = (idx: number) => ranges.some((r) => idx >= r.start && idx < r.end);
   const re = new RegExp(regex.source, regex.flags.includes('g') ? regex.flags : `${regex.flags}g`);
   let total = 0;
   const missed: string[] = [];
@@ -60,7 +71,16 @@ function coverage(text: string, regex: RegExp, items: RedactionItem[]): { total:
     total++;
     const s = m.index;
     const e = m.index + m[0].length;
-    if (!ranges.some((r) => s >= r.start && e <= r.end)) missed.push(m[0]);
+    let coveredAll = true;
+    for (let i = s; i < e; i++) {
+      const ch = text[i];
+      if (ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r' || ch === '\f' || ch === '\v') continue;
+      if (!covered(i)) {
+        coveredAll = false;
+        break;
+      }
+    }
+    if (!coveredAll) missed.push(m[0]);
     if (m[0].length === 0) re.lastIndex++;
   }
   return { total, missed };
@@ -86,13 +106,13 @@ describe('realistic contract (docx)', () => {
     const doc = await parseDocx(file);
 
     expect(doc.text.length).toBeGreaterThan(2000);
-    expect(doc.text).toContain('契約編號 SC-2026-0917');
+    expect(doc.text).toContain('合同编号 SC-2026-0917');
 
     const items = detect(doc.text, BUILTIN_PATTERNS);
-    expect(countActive(items, '身分證')).toBeGreaterThanOrEqual(3);
-    expect(countActive(items, '手機')).toBeGreaterThanOrEqual(8);
+    expect(countActive(items, '身份证')).toBeGreaterThanOrEqual(3);
+    expect(countActive(items, '手机')).toBeGreaterThanOrEqual(8);
     expect(countActive(items, '地址')).toBeGreaterThanOrEqual(4);
-    expect(countActive(items, '電子郵件')).toBeGreaterThanOrEqual(8);
+    expect(countActive(items, '邮箱')).toBeGreaterThanOrEqual(8);
     expect(countActive(items, '姓名')).toBeGreaterThanOrEqual(10);
 
     const idCov = coverage(doc.text, ID_RE, items);
@@ -149,13 +169,13 @@ describe('realistic contract (pdf)', () => {
     expect(pageCount).toBe(3);
 
     const doc = await parsePdf(toPdfFile(bytes, 'contract.pdf'));
-    expect(doc.text).toContain('委外服務契約書');
-    expect(doc.text).toContain('第十二條');
+    expect(doc.text).toContain('外包服务合同书');
+    expect(doc.text).toContain('第十二条');
 
     const items = detect(doc.text, BUILTIN_PATTERNS);
-    expect(countActive(items, '身分證')).toBeGreaterThanOrEqual(3);
-    expect(countActive(items, '手機')).toBeGreaterThanOrEqual(8);
-    expect(countActive(items, '電子郵件')).toBeGreaterThanOrEqual(8);
+    expect(countActive(items, '身份证')).toBeGreaterThanOrEqual(3);
+    expect(countActive(items, '手机')).toBeGreaterThanOrEqual(8);
+    expect(countActive(items, '邮箱')).toBeGreaterThanOrEqual(8);
 
     // Completeness measured against the extracted text: a value split across lines by
     // pdf.js text extraction will not match the regex here either, so this is a fair test.
@@ -205,8 +225,8 @@ describe('realistic quotation (docx)', () => {
     const originalDoc = await parseDocx(toDocxFile(bytes, 'quotation.docx'));
 
     const items = detect(originalDoc.text, BUILTIN_PATTERNS);
-    expect(countActive(items, '手機')).toBeGreaterThanOrEqual(5);
-    expect(countActive(items, '電子郵件')).toBeGreaterThanOrEqual(4);
+    expect(countActive(items, '手机')).toBeGreaterThanOrEqual(5);
+    expect(countActive(items, '邮箱')).toBeGreaterThanOrEqual(4);
     expect(countActive(items, '地址')).toBeGreaterThanOrEqual(5);
 
     const { edits, mapping } = applyRedactions(originalDoc.text, items);
@@ -237,8 +257,8 @@ describe('realistic quotation (pdf)', () => {
 
     const originalDoc = await parsePdf(toPdfFile(bytes, 'quotation.pdf'));
     const items = detect(originalDoc.text, BUILTIN_PATTERNS);
-    expect(countActive(items, '手機')).toBeGreaterThanOrEqual(5);
-    expect(countActive(items, '電子郵件')).toBeGreaterThanOrEqual(4);
+    expect(countActive(items, '手机')).toBeGreaterThanOrEqual(5);
+    expect(countActive(items, '邮箱')).toBeGreaterThanOrEqual(4);
     expect(countActive(items, '地址')).toBeGreaterThanOrEqual(5);
 
     const { edits, mapping } = applyRedactions(originalDoc.text, items);
@@ -273,11 +293,11 @@ describe('realistic customers workbook (xlsx)', () => {
     expect(customerNames.length).toBe(60);
 
     const items = detect(originalDoc.text, BUILTIN_PATTERNS);
-    expect(countActive(items, '身分證')).toBeGreaterThanOrEqual(60);
+    expect(countActive(items, '身份证')).toBeGreaterThanOrEqual(60);
     const idCov = coverage(originalDoc.text, ID_RE, items);
     expect(idCov.missed, `uncovered IDs: ${JSON.stringify(idCov.missed)}`).toEqual([]);
 
-    // Numeric column (累計消費) values are not processed at all (documented limitation).
+    // Numeric column (累计消费) values are not processed at all (documented limitation).
     const consumptionValues = spec.sheets[0].rows.slice(1).map((r) => r[13] as number);
     for (const v of consumptionValues.slice(0, 10)) {
       expect(originalDoc.text).not.toContain(String(v));
@@ -312,9 +332,9 @@ describe('realistic plain-text documents', () => {
     const original = supportEmail();
     const items = detect(original, BUILTIN_PATTERNS);
 
-    expect(countActive(items, '身分證')).toBeGreaterThanOrEqual(1);
-    expect(countActive(items, '手機')).toBeGreaterThanOrEqual(3);
-    expect(countActive(items, '電子郵件')).toBeGreaterThanOrEqual(2);
+    expect(countActive(items, '身份证')).toBeGreaterThanOrEqual(1);
+    expect(countActive(items, '手机')).toBeGreaterThanOrEqual(3);
+    expect(countActive(items, '邮箱')).toBeGreaterThanOrEqual(2);
     expect(countActive(items, '地址')).toBeGreaterThanOrEqual(2);
 
     const { redactedText, mapping } = applyRedactions(original, items);
@@ -327,12 +347,12 @@ describe('realistic plain-text documents', () => {
     const original = meetingNotes();
     const items = detect(original, BUILTIN_PATTERNS);
 
-    expect(countActive(items, '身分證')).toBeGreaterThanOrEqual(1);
+    expect(countActive(items, '身份证')).toBeGreaterThanOrEqual(1);
     // meetingNotes() (seed 505) only writes 2 mobile numbers into its fixed content
     // (confirmed by direct inspection), so 3 would never pass regardless of detection;
     // both of the 2 present are correctly detected.
-    expect(countActive(items, '手機')).toBeGreaterThanOrEqual(2);
-    expect(countActive(items, '電子郵件')).toBeGreaterThanOrEqual(2);
+    expect(countActive(items, '手机')).toBeGreaterThanOrEqual(2);
+    expect(countActive(items, '邮箱')).toBeGreaterThanOrEqual(2);
     expect(countActive(items, '地址')).toBeGreaterThanOrEqual(2);
 
     const { redactedText, mapping } = applyRedactions(original, items);

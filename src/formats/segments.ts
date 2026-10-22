@@ -34,7 +34,7 @@ export function distributeEdits(segments: Segment[], edits: TextEdit[]): Map<num
       ops.get(i)!.push({ start: localStart, end: localEnd, replacement: first ? e.replacement : '' });
       first = false;
     }
-    if (first) throw new Error(`編輯範圍 [${e.start}, ${e.end}) 不對應任何文字節點`);
+    if (first) throw new Error(`编辑范围 [${e.start}, ${e.end}) 不对应任何文字节点`);
   }
   const out = new Map<number, string>();
   for (const [i, list] of ops) {

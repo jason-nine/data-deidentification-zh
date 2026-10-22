@@ -2,9 +2,9 @@ import type { MappingEntry, RedactionItem, TextEdit } from './types';
 import { buildMarker } from './codes';
 
 /**
- * How the hidden part of a value is written: a code the mapping table restores ([類別:編碼]), or —
- * when the user needs no restoring — the category alone ([類別]) or ○ for each hidden letter or
- * digit (separators stay, so 0912-345-678 keeps its shape).
+ * How the hidden part of a value is written: a code the mapping table restores ([类别:编码]), or —
+ * when the user needs no restoring — the category alone ([类别]) or ○ for each hidden letter or
+ * digit (separators stay, so 138-1234-5678 keeps its shape).
  */
 export type MarkerStyle = 'code' | 'label' | 'blank';
 
@@ -32,7 +32,7 @@ export function outputFor(it: RedactionItem, style: MarkerStyle = 'code'): strin
   return prefix + marker + suffix;
 }
 
-/** On-screen stand-in for the output: the output itself, except that a code shows as [類別]. */
+/** On-screen stand-in for the output: the output itself, except that a code shows as [类别]. */
 export function previewLabel(it: RedactionItem, style: MarkerStyle = 'code'): string {
   return outputFor(it, style === 'code' ? 'label' : style);
 }
@@ -53,7 +53,7 @@ export function applyEdits(text: string, edits: TextEdit[]): string {
   let out = '';
   let cursor = 0;
   for (const e of sorted) {
-    if (e.start < cursor) throw new Error('編輯範圍重疊');
+    if (e.start < cursor) throw new Error('编辑范围重叠');
     out += text.slice(cursor, e.start) + e.replacement;
     cursor = e.end;
   }

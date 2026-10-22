@@ -12,16 +12,16 @@ const BASE = `${import.meta.env.BASE_URL}samples/`;
 
 /** One sample per format, shown as a single compact row on the upload screen. */
 export const SAMPLES: Sample[] = [
-  { file: 'contract.docx', name: '委外服務契約書.docx', format: 'Word', description: '4 頁契約，含表格與頁首頁尾' },
-  { file: 'quotation.pdf', name: '報價單.pdf', format: 'PDF', description: '3 頁報價單，跨頁明細表' },
-  { file: 'scanned.pdf', name: '掃描文件.pdf', format: '掃描 PDF', description: '5 頁影像需辨識，含手寫與表格' },
-  { file: 'customers.xlsx', name: '客戶資料.xlsx', format: 'Excel', description: '60 筆客戶，三個工作表' },
-  { file: 'meeting-notes.md', name: '專案會議紀錄.md', format: 'Markdown', description: '出席者、決議、待辦' },
+  { file: 'contract.docx', name: '外包服务合同书.docx', format: 'Word', description: '4 页合同，含表格与页眉页脚' },
+  { file: 'quotation.pdf', name: '报价单.pdf', format: 'PDF', description: '3 页报价单，跨页明细表' },
+  { file: 'scanned.pdf', name: '扫描文件.pdf', format: '扫描 PDF', description: '5 页影像需识别，含手写与表格' },
+  { file: 'customers.xlsx', name: '客户数据.xlsx', format: 'Excel', description: '60 条客户，三个工作表' },
+  { file: 'meeting-notes.md', name: '项目会议记录.md', format: 'Markdown', description: '出席者、决议、待办' },
 ];
 
 export const RESTORE_SAMPLE = {
-  doc: { file: 'contract.deid.docx', name: '委外服務契約書.deid.docx', format: 'DOCX', description: '已去識別化的契約書' },
-  csv: { file: 'contract.mapping.csv', name: '委外服務契約書.mapping.csv', format: 'CSV', description: '對應的編碼表' },
+  doc: { file: 'contract.deid.docx', name: '外包服务合同书.deid.docx', format: 'DOCX', description: '已去标识化的合同书' },
+  csv: { file: 'contract.mapping.csv', name: '外包服务合同书.mapping.csv', format: 'CSV', description: '对应的编码表' },
 };
 
 export function sampleUrl(file: string): string {
@@ -31,7 +31,7 @@ export function sampleUrl(file: string): string {
 /** Fetches a bundled sample (same-origin static asset) as a File carrying its display name. */
 export async function fetchSample(s: Pick<Sample, 'file' | 'name'>): Promise<File> {
   const res = await fetch(sampleUrl(s.file));
-  if (!res.ok) throw new Error(`無法載入範例 ${s.name}`);
+  if (!res.ok) throw new Error(`无法加载示例 ${s.name}`);
   return new File([await res.blob()], s.name);
 }
 
@@ -45,11 +45,11 @@ export function sampleCard(s: Sample, onLoad?: (file: File) => void | Promise<vo
     ),
     el('div', { class: 'sample-actions' },
       onLoad
-        ? button('載入', () => {
-            withBusy('載入範例中…', () => fetchSample(s).then((file) => onLoad(file))).catch((e: Error) => toast(e.message, 'error'));
+        ? button('加载', () => {
+            withBusy('加载示例中…', () => fetchSample(s).then((file) => onLoad(file))).catch((e: Error) => toast(e.message, 'error'));
           }, 'btn btn-small btn-primary')
         : null,
-      el('a', { class: 'btn btn-small', href: sampleUrl(s.file), download: s.name }, '下載'),
+      el('a', { class: 'btn btn-small', href: sampleUrl(s.file), download: s.name }, '下载'),
     ),
   );
 }
@@ -60,7 +60,7 @@ export function samplesSection(title: string, samples: Sample[], onLoad?: (file:
     { class: 'samples' },
     el('div', { class: 'samples-head' },
       el('h3', {}, title),
-      el('span', { class: 'muted small' }, '皆為程式產生的虛構資料；「載入」直接送進本頁處理，「下載」取得原始檔'),
+      el('span', { class: 'muted small' }, '均为程序产生的虚构数据；「加载」直接送进本页处理，「下载」取得原始文件'),
     ),
     el('div', { class: 'sample-row' }, ...samples.map((s) => sampleCard(s, onLoad))),
     extra ?? null,

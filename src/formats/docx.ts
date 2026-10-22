@@ -104,7 +104,7 @@ function partOrder(paths: string[]): string[] {
 export async function parseDocx(file: File): Promise<LoadedDocument> {
   const zip = await JSZip.loadAsync(await file.arrayBuffer());
   const paths = partOrder(Object.keys(zip.files));
-  if (!paths.includes('word/document.xml')) throw new Error('不是有效的 Word (.docx) 檔案');
+  if (!paths.includes('word/document.xml')) throw new Error('不是有效的 Word (.docx) 文件');
 
   const parser = new DOMParser();
   const parts: PartInfo[] = [];
@@ -112,7 +112,7 @@ export async function parseDocx(file: File): Promise<LoadedDocument> {
   for (const path of paths) {
     const xml = await zip.file(path)!.async('string');
     const doc = parser.parseFromString(xml, 'application/xml');
-    if (doc.getElementsByTagName('parsererror').length > 0) throw new Error(`無法解析 ${path}`);
+    if (doc.getElementsByTagName('parsererror').length > 0) throw new Error(`无法解析 ${path}`);
     const { part, text: partText } = extractPart(path, doc, text.length);
     parts.push(part);
     text += partText;

@@ -12,7 +12,7 @@ import {
 } from '../../src/core/pattern-store';
 import type { CustomPatternConfig } from '../../src/core/types';
 
-const BUILTIN_IDS = ['zh-name', 'tw-id', 'tw-mobile', 'tw-landline', 'tw-address', 'email'];
+const BUILTIN_IDS = ['zh-name', 'cn-id', 'cn-mobile', 'cn-landline', 'cn-address', 'email'];
 
 beforeEach(() => {
   localStorage.clear();
@@ -37,7 +37,7 @@ describe('loadConfig', () => {
   it('resets to default when version is not 1', () => {
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ version: 2, disabledBuiltins: ['tw-id'], customPatterns: [] }),
+      JSON.stringify({ version: 2, disabledBuiltins: ['cn-id'], customPatterns: [] }),
     );
     expect(loadConfig()).toEqual({ version: 1, disabledBuiltins: [], customPatterns: [] });
   });
@@ -46,7 +46,7 @@ describe('loadConfig', () => {
     const good: CustomPatternConfig = {
       id: 'c-good',
       name: 'good',
-      category: '識別碼',
+      category: '标识符',
       regex: '\\d{4}',
       example: '1234',
       enabled: true,
@@ -54,7 +54,7 @@ describe('loadConfig', () => {
     const bad: CustomPatternConfig = {
       id: 'c-bad',
       name: 'bad',
-      category: '識別碼',
+      category: '标识符',
       regex: '(', // invalid regex
       example: 'x',
       enabled: true,
@@ -89,23 +89,23 @@ describe('getEffectivePatterns', () => {
 describe('setBuiltinEnabled + save/load round-trip', () => {
   it('disables and re-enables a builtin pattern', () => {
     let config = loadConfig();
-    config = setBuiltinEnabled(config, 'tw-mobile', false);
+    config = setBuiltinEnabled(config, 'cn-mobile', false);
     saveConfig(config);
 
     let effective = getEffectivePatterns(loadConfig());
-    const mobile = effective.find((p) => p.id === 'tw-mobile');
+    const mobile = effective.find((p) => p.id === 'cn-mobile');
     expect(mobile).toBeDefined();
     expect(mobile!.enabled).toBe(false);
 
     let reloaded = loadConfig();
-    expect(reloaded.disabledBuiltins).toContain('tw-mobile');
+    expect(reloaded.disabledBuiltins).toContain('cn-mobile');
 
-    reloaded = setBuiltinEnabled(reloaded, 'tw-mobile', true);
+    reloaded = setBuiltinEnabled(reloaded, 'cn-mobile', true);
     saveConfig(reloaded);
-    expect(loadConfig().disabledBuiltins).not.toContain('tw-mobile');
+    expect(loadConfig().disabledBuiltins).not.toContain('cn-mobile');
 
     effective = getEffectivePatterns(loadConfig());
-    expect(effective.find((p) => p.id === 'tw-mobile')!.enabled).toBe(true);
+    expect(effective.find((p) => p.id === 'cn-mobile')!.enabled).toBe(true);
   });
 });
 
@@ -114,8 +114,8 @@ describe('upsertCustom / removeCustom', () => {
     let config = loadConfig();
     const custom: CustomPatternConfig = {
       id: 'c-abc123',
-      name: '員工編號',
-      category: '識別碼',
+      name: '员工编号',
+      category: '标识符',
       regex: 'EMP\\d{4}',
       example: 'EMP1234',
       enabled: true,
@@ -131,7 +131,7 @@ describe('upsertCustom / removeCustom', () => {
     const found = effective.find((p) => p.id === 'c-abc123');
     expect(found).toBeDefined();
     expect(found!.source).toBe('custom');
-    expect(found!.name).toBe('員工編號');
+    expect(found!.name).toBe('员工编号');
     expect(found!.regex).toBe('EMP\\d{4}');
   });
 
@@ -140,7 +140,7 @@ describe('upsertCustom / removeCustom', () => {
     const v1: CustomPatternConfig = {
       id: 'c-dup',
       name: 'v1',
-      category: '識別碼',
+      category: '标识符',
       regex: 'V1',
       example: 'V1',
       enabled: true,
@@ -158,7 +158,7 @@ describe('upsertCustom / removeCustom', () => {
     const custom: CustomPatternConfig = {
       id: 'c-remove-me',
       name: 'temp',
-      category: '識別碼',
+      category: '标识符',
       regex: 'TEMP',
       example: 'TEMP',
       enabled: true,
@@ -174,7 +174,7 @@ describe('upsertCustom / removeCustom', () => {
     const bad: CustomPatternConfig = {
       id: 'c-bad',
       name: 'bad',
-      category: '識別碼',
+      category: '标识符',
       regex: '(',
       example: 'x',
       enabled: true,
@@ -209,7 +209,7 @@ describe('privacy: saveConfig writes only the expected shape', () => {
     config = upsertCustom(config, {
       id: 'c-priv',
       name: 'priv',
-      category: '識別碼',
+      category: '标识符',
       regex: 'PRIV',
       example: 'PRIV',
       enabled: true,

@@ -103,10 +103,10 @@ export async function rejectOversized(files: File[]): Promise<File[]> {
   const tooBig = files.filter((f) => f.size > MAX_FILE_BYTES);
   if (tooBig.length > 0) {
     await alertDialog(
-      `檔案超過 ${MAX_FILE_BYTES / 1024 / 1024} MB 上限`,
-      el('p', {}, tooBig.length === files.length ? '以下檔案太大，無法載入：' : '以下檔案太大，不會載入；其他檔案會照常處理：'),
+      `文件超过 ${MAX_FILE_BYTES / 1024 / 1024} MB 上限`,
+      el('p', {}, tooBig.length === files.length ? '以下文件太大，无法加载：' : '以下文件太大，不会加载；其他文件会照常处理：'),
       el('ul', { class: 'alert-dialog-list' }, ...tooBig.map((f) => el('li', {}, `${f.name}（${megabytes(f.size)}）`))),
-      el('p', { class: 'muted small' }, '所有處理都在瀏覽器記憶體內進行，過大的檔案可能讓分頁當掉。請先分割檔案（例如依章節、工作表或頁數拆開）再上傳。'),
+      el('p', { class: 'muted small' }, '所有处理都在浏览器记忆体内进行，过大的文件可能让分页当掉。请先分割文件（例如依章节、工作表或页数拆开）再上传。'),
     );
   }
   return files.filter((f) => f.size <= MAX_FILE_BYTES);

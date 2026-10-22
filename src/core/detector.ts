@@ -32,7 +32,7 @@ function applySplit(item: RedactionItem, retention: Retention | undefined, book:
 }
 
 /**
- * Re-splits every item for a new output mode (全部隱藏／部分保留／自訂). Codes follow the split, so an
+ * Re-splits every item for a new output mode (全部隐藏／部分保留／自定义). Codes follow the split, so an
  * item whose kept characters change gets the code for its new split (see CodeBook).
  */
 export function resplitItems(items: RedactionItem[], book: CodeBook, resolve: (it: RedactionItem) => Retention | undefined): void {
@@ -71,7 +71,7 @@ export function detect(text: string, patterns: Pattern[], book: CodeBook = new C
       }
       const verdict = p.validate ? p.validate(m[0], text.slice(Math.max(0, m.index - 3), m.index)) : true;
       if (verdict === false || verdict === 0) {
-        // Skip only the rejected word, not the whole match: 工程師程大偉 rejects「程師程」but holds「程大偉」.
+        // Skip only the rejected word, not the whole match: 工程师程大伟 rejects「程师程」but holds「程大伟」.
         re.lastIndex = m.index + Math.min(2, m[0].length);
         continue;
       }
@@ -86,7 +86,7 @@ export function detect(text: string, patterns: Pattern[], book: CodeBook = new C
 
 export class OverlapError extends Error {
   constructor() {
-    super('選取範圍與既有項目重疊，請調整選取範圍');
+    super('选取范围与既有项目重叠，请调整选取范围');
   }
 }
 
@@ -99,7 +99,7 @@ export function addManualItem(
   book: CodeBook,
   retention?: Retention,
 ): RedactionItem {
-  if (start < 0 || end > text.length || start >= end) throw new Error('選取範圍無效');
+  if (start < 0 || end > text.length || start >= end) throw new Error('选取范围无效');
   const overlaps = items.some((it) => it.active && start < it.end && end > it.start);
   if (overlaps) throw new OverlapError();
   const item = makeItem(text, start, end, category, book, 'manual', retention);

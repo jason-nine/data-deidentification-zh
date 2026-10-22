@@ -4,110 +4,108 @@ import type { Category } from '../../src/core/types';
 
 describe('maskDisplay', () => {
   describe('姓名', () => {
-    it('masks a common 3-char name, keeping only the surname', () => {
+    it('只保留姓氏', () => {
       expect(maskDisplay('姓名', '王小明')).toBe('王OO');
+      expect(maskDisplay('姓名', '李娜')).toBe('李O');
     });
 
-    it('masks another common 3-char name', () => {
-      expect(maskDisplay('姓名', '林美玲')).toBe('林OO');
+    it('复姓整体保留', () => {
+      expect(maskDisplay('姓名', '欧阳志远')).toBe('欧阳OO');
     });
 
-    it('keeps a 2-char compound surname intact', () => {
-      expect(maskDisplay('姓名', '歐陽志遠')).toBe('歐陽OO');
-    });
-
-    it('masks a 2-char name', () => {
-      expect(maskDisplay('姓名', '王明')).toBe('王O');
-    });
-
-    it('never reveals more than the surname for a single-char name', () => {
+    it('单字姓名全部隐藏', () => {
       expect(maskDisplay('姓名', '王')).toBe('OO');
     });
   });
 
-  describe('身分證', () => {
-    it('keeps first 3 and last 1 characters', () => {
-      expect(maskDisplay('身分證', 'A123456789')).toBe('A12******9');
+  describe('身份证', () => {
+    it('保留前 3 位与后 2 位', () => {
+      expect(maskDisplay('身份证', '110101199003078515')).toBe('110*************15');
     });
   });
 
-  describe('手機', () => {
-    it('masks a hyphenated mobile number', () => {
-      expect(maskDisplay('手機', '0912-345-678')).toBe('0912-***-678');
-    });
-
-    it('masks a plain-digit mobile number', () => {
-      expect(maskDisplay('手機', '0912345678')).toBe('0912-***-678');
-    });
-
-    it('masks a space-separated mobile number', () => {
-      expect(maskDisplay('手機', '0912 345 678')).toBe('0912-***-678');
-    });
-
-    it('normalizes an international-format mobile number', () => {
-      expect(maskDisplay('手機', '+886-955-123-456')).toBe('0955-***-456');
+  describe('手机', () => {
+    it('统一显示为 138****5678', () => {
+      expect(maskDisplay('手机', '13812345678')).toBe('138****5678');
+      expect(maskDisplay('手机', '138-1234-5678')).toBe('138****5678');
+      expect(maskDisplay('手机', '+86 138 1234 5678')).toBe('138****5678');
     });
   });
 
-  describe('市話', () => {
-    it('masks a landline with area code in parentheses (documents current behavior)', () => {
-      expect(maskDisplay('市話', '(02)2712-3456')).toBe('02-****-56');
-    });
-
-    it('masks a landline with a 3-digit area code (documents current behavior)', () => {
-      expect(maskDisplay('市話', '037-123456')).toBe('03-****-56');
+  describe('固定电话', () => {
+    it('保留区号与末 2 位', () => {
+      expect(maskDisplay('固定电话', '01088886666')).toBe('0108-****-66');
+      expect(maskDisplay('固定电话', '0571-88886666')).toBe('0571-****-66');
     });
   });
 
   describe('地址', () => {
-    it('masks a Taipei address, keeping city/district prefix', () => {
-      expect(maskDisplay('地址', '台北市信義區市府路45號8樓')).toBe('台北市信義區***');
+    it('保留省市区前缀', () => {
+      expect(maskDisplay('地址', '北京市朝阳区建国路88号')).toBe('北京市朝阳区***');
+      expect(maskDisplay('地址', '浙江省杭州市西湖区文一西路969号')).toBe('浙江省杭州市西湖区***');
     });
 
-    it('masks a New Taipei address, keeping city/district prefix', () => {
-      expect(maskDisplay('地址', '新北市板橋區文化路一段188巷3號之2')).toBe('新北市板橋區***');
-    });
-
-    it('falls back to keepEnds when the input is only the city/district prefix', () => {
-      // '台北市信義區' has length 6, and matches its own full length as prefix,
-      // so it must not equal the original — falls back to keepEnds(3,0).
-      expect(maskDisplay('地址', '台北市信義區')).toBe('台北市***');
-      expect(maskDisplay('地址', '台北市信義區')).not.toBe('台北市信義區');
+    it('只有省市前缀时退回保留前 3 个字，且不等于原文', () => {
+      expect(maskDisplay('地址', '北京市朝阳区')).toBe('北京市***');
+      expect(maskDisplay('地址', '北京市朝阳区')).not.toBe('北京市朝阳区');
     });
   });
 
-  describe('電子郵件', () => {
-    it('masks a longer local-part email', () => {
-      expect(maskDisplay('電子郵件', 'xiaoming.wang@example.com')).toBe('xi***@example.com');
-    });
-
-    it('masks a 1-char local-part email', () => {
-      expect(maskDisplay('電子郵件', 'a@b.co')).toBe('a***@b.co');
+  describe('邮箱', () => {
+    it('保留域名', () => {
+      expect(maskDisplay('邮箱', 'xiaoming.wang@example.com')).toBe('xi***@example.com');
+      expect(maskDisplay('邮箱', 'a@b.co')).toBe('a***@b.co');
     });
   });
 
-  describe('識別碼', () => {
-    it('masks a typical employee id, keeping first 3 chars', () => {
-      expect(maskDisplay('識別碼', 'EMP-004521')).toBe('EMP*******');
-    });
-
-    it('fully masks a short id that is too short to keep a prefix', () => {
-      expect(maskDisplay('識別碼', 'AB')).toBe('**');
+  describe('单位名称', () => {
+    it('保留前两字与组织形式', () => {
+      expect(maskDisplay('单位名称', '北京筑梦科技有限公司')).toBe('北京**有限公司');
     });
   });
 
-  describe('generic invariants (all categories)', () => {
+  describe('银行卡 / 车牌 / 统一社会信用代码', () => {
+    it('银行卡只留后 4 位', () => {
+      expect(maskDisplay('银行卡', '6222021234567894')).toBe('************7894');
+    });
+
+    it('车牌只留省份简称', () => {
+      expect(maskDisplay('车牌', '京A12345')).toBe('京******');
+    });
+
+    it('统一社会信用代码保留前 2 后 1', () => {
+      expect(maskDisplay('统一社会信用代码', '91110108MA01ABCD2H')).toBe('91***************H');
+    });
+  });
+
+  describe('标识符', () => {
+    it('保留前 3 个字符', () => {
+      expect(maskDisplay('标识符', 'EMP-004521')).toBe('EMP*******');
+    });
+
+    it('过短的标识符全部隐藏', () => {
+      expect(maskDisplay('标识符', 'AB')).toBe('**');
+    });
+  });
+
+  describe('通用不变量（所有类别）', () => {
     const table: Array<{ category: Category; original: string }> = [
       { category: '姓名', original: '王小明' },
-      { category: '身分證', original: 'A123456789' },
-      { category: '手機', original: '0912-345-678' },
-      { category: '市話', original: '(02)2712-3456' },
-      { category: '地址', original: '台北市信義區市府路45號8樓' },
-      { category: '電子郵件', original: 'xiaoming.wang@example.com' },
-      { category: '識別碼', original: 'EMP-004521' },
+      { category: '身份证', original: '110101199003078515' },
+      { category: '护照', original: 'E12345678' },
+      { category: '手机', original: '138-1234-5678' },
+      { category: '固定电话', original: '(010)88886666' },
+      { category: '地址', original: '北京市朝阳区建国路88号' },
+      { category: '邮箱', original: 'xiaoming.wang@example.com' },
+      { category: '单位名称', original: '北京筑梦科技有限公司' },
+      { category: '统一社会信用代码', original: '91110108MA01ABCD2H' },
+      { category: '银行卡', original: '6222021234567894' },
+      { category: '车牌', original: '京11010119905' },
+      { category: '出生日期', original: '1990年3月14日' },
+      { category: '标识符', original: 'EMP-004521' },
     ];
 
-    it.each(table)('masks $category without leaking the original and without being empty', ({ category, original }) => {
+    it.each(table)('$category 的掩码不泄露原文且不为空', ({ category, original }) => {
       const masked = maskDisplay(category, original);
       expect(masked).not.toBe(original);
       expect(masked.length).toBeGreaterThan(0);

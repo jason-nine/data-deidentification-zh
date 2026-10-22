@@ -1,17 +1,17 @@
 // Renders ScanPage layouts to page images that look scanned (paper tone, grain, slight skew,
 // JPEG compression) and wraps them in an image-only PDF: no text layer, like a real scanner output.
-// Needs a local Chrome (CHROME_PATH overrides the macOS default).
+// Needs a local Chrome; scripts/lib/chrome.ts finds it (CHROME_PATH overrides).
 import { PDFDocument, degrees } from 'pdf-lib';
 import puppeteer from 'puppeteer-core';
+import { chromePath } from './chrome.ts';
 import { rng } from './fake.ts';
 import type { ScanPage } from './scan-pages.ts';
 
-const CHROME = process.env.CHROME_PATH ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const DPI = 200;
 const A4_CSS = { w: 794, h: 1123 }; // 96 DPI
 const A4_PT = { w: 595.28, h: 841.89 };
 /** Handwriting and fallback fonts; only fetched while generating the sample, never by the site. */
-const FONTS = 'https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&family=Caveat:wght@500&family=Noto+Sans+TC&family=Noto+Serif+TC&display=block';
+const FONTS = 'https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Noto+Sans+SC&family=Noto+Serif+SC&family=Kaiti+SC&display=block';
 const GRAIN =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E";
 
@@ -124,7 +124,7 @@ function readLayout() {
 
 /** Returns the PDF, each page image (JPEG) and each page's answer key. */
 export async function renderScanPdf(pages: ScanPage[]): Promise<{ pdf: Uint8Array; images: Uint8Array[]; truth: PageTruth[] }> {
-  const browser = await puppeteer.launch({ executablePath: CHROME });
+  const browser = await puppeteer.launch({ executablePath: chromePath() });
   const out = await PDFDocument.create();
   const images: Uint8Array[] = [];
   const truth: PageTruth[] = [];
@@ -163,7 +163,7 @@ export async function renderScanPdf(pages: ScanPage[]): Promise<{ pdf: Uint8Arra
         rules: mergeSegments(layout.rules).map((s) => ({ x1: X(s.x1), y1: Y(s.y1), x2: X(s.x2), y2: Y(s.y2), dashed: s.dashed })),
         fills: layout.fills.map((f) => ({ x: X(f.x), y: Y(f.y + f.height), width: X(f.width), height: X(f.height), color: tone(f.color) })),
         checkboxes: layout.checkboxes.map((c) => ({ x: X(c.x), y: Y(c.y), size: X(c.size), checked: c.checked })),
-        ...((page.tilt >= 1 || turn) && { rotation: turn ? `轉向 ${turn}°` : `傾斜 ${page.tilt}°` }),
+        ...((page.tilt >= 1 || turn) && { rotation: turn ? `转向 ${turn}°` : `倾斜 ${page.tilt}°` }),
       });
     }
   } finally {

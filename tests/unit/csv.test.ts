@@ -17,8 +17,8 @@ describe('serializeMapping', () => {
   });
 
   it('quotes fields containing a comma, doubling is not needed for commas', () => {
-    const csv = serializeMapping([{ code: 'abcdef', category: '地址', original: '台北市, 信義區' }]);
-    expect(csv).toContain('"台北市, 信義區"');
+    const csv = serializeMapping([{ code: 'abcdef', category: '地址', original: '台北市, 信义区' }]);
+    expect(csv).toContain('"台北市, 信义区"');
   });
 
   it('quotes fields containing a double quote, doubling the quote', () => {
@@ -27,13 +27,13 @@ describe('serializeMapping', () => {
   });
 
   it('quotes fields containing a newline', () => {
-    const csv = serializeMapping([{ code: 'abcdef', category: '備註', original: '第一行\n第二行' }]);
+    const csv = serializeMapping([{ code: 'abcdef', category: '备注', original: '第一行\n第二行' }]);
     expect(csv).toContain('"第一行\n第二行"');
   });
 
   it('does not quote plain fields', () => {
-    const csv = serializeMapping([{ code: 'abcdef', category: '手機', original: '0912345678' }]);
-    expect(csv).toContain('abcdef,手機,0912345678');
+    const csv = serializeMapping([{ code: 'abcdef', category: '手机', original: '13812345678' }]);
+    expect(csv).toContain('abcdef,手机,13812345678');
     expect(csv).not.toContain('"abcdef"');
   });
 });
@@ -42,9 +42,9 @@ describe('round-trip: parseMapping(serializeMapping(entries))', () => {
   it('deep-equals the original entries, including special characters', () => {
     const entries: MappingEntry[] = [
       { code: 'a3f9c2', category: '姓名', original: '王小明' },
-      { code: '0f1e2d', category: '地址', original: '台北市, 信義區"市府路"45號\n8樓' },
-      { code: '112233', category: '電子郵件', original: 'a.b+c@example.com' },
-      { code: '445566', category: '備註', original: '多行\n內容\n測試' },
+      { code: '0f1e2d', category: '地址', original: '台北市, 信义区"市府路"45号\n8楼' },
+      { code: '112233', category: '邮箱', original: 'a.b+c@example.com' },
+      { code: '445566', category: '备注', original: '多行\n内容\n测试' },
     ];
     const csv = serializeMapping(entries);
     const result = parseMapping(csv);

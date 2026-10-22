@@ -51,13 +51,13 @@ export function saveConfig(config: PatternConfig): void {
 
 /** Returns an error message, or null when the regex compiles with the 'gu' flags. */
 export function validateRegex(src: string): string | null {
-  if (!src.trim()) return '規則不可為空';
+  if (!src.trim()) return '规则不可为空';
   try {
     const re = new RegExp(src, 'gu');
-    if (re.test('')) return '規則不可比對空字串';
+    if (re.test('')) return '规则不可比对空字符串';
     return null;
   } catch (e) {
-    return `無效的規則：${(e as Error).message}`;
+    return `无效的规则：${(e as Error).message}`;
   }
 }
 
@@ -92,7 +92,7 @@ export function removeCustom(config: PatternConfig, id: string): PatternConfig {
   return { ...config, customPatterns: config.customPatterns.filter((c) => c.id !== id), retention };
 }
 
-/** Applies one retention to every rule of a category (the 設為預設 button on the processing page). */
+/** Applies one retention to every rule of a category (the 设为默认 button on the processing page). */
 export function setCategoryRetention(config: PatternConfig, category: Category, r: Retention): PatternConfig {
   let next = config;
   for (const p of getEffectivePatterns(config)) if (p.category === category) next = setRetention(next, p.id, r);

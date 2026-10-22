@@ -43,13 +43,13 @@ describe('restore error handling', () => {
       'code,category,original\r\n' + 'a1b2c3,姓名,王小明\r\n' + 'a1b2c3,姓名,林美玲\r\n';
     const { entries, errors } = parseMapping(csv);
 
-    expect(errors.some((e) => e.includes('重複'))).toBe(true);
+    expect(errors.some((e) => e.includes('重复'))).toBe(true);
     expect(entries.length).toBe(1);
     expect(entries[0]).toEqual({ code: 'a1b2c3', category: '姓名', original: '王小明' });
   });
 
   it('leaves marker-like text unchanged and reports its code as missing when the mapping is empty', () => {
-    const text = '請參考 [姓名:abcdef] 條款';
+    const text = '请参考 [姓名:abcdef] 条款';
     const result = restore(text, []);
 
     expect(result.restoredText).toBe(text);
@@ -58,12 +58,12 @@ describe('restore error handling', () => {
   });
 
   it('restores a marker by code alone, even when the CSV category text differs from the marker category', () => {
-    const text = '個案為 [姓名:abcdef]，特此紀錄。';
+    const text = '个案为 [姓名:abcdef]，特此纪录。';
     const entries = [{ code: 'abcdef', category: '地址', original: '王小明' }];
 
     const result = restore(text, entries);
 
-    expect(result.restoredText).toBe('個案為 王小明，特此紀錄。');
+    expect(result.restoredText).toBe('个案为 王小明，特此纪录。');
     expect(result.missingCodes).toEqual([]);
     expect(result.restoredCount).toBe(1);
   });

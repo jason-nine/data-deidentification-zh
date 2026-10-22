@@ -16,11 +16,11 @@ export interface OcrOverlay {
  */
 export function ocrOverlay(fileName: string, onCancel: () => void): OcrOverlay {
   const thumb = el('img', { class: 'ocr-thumb-img', alt: '', hidden: true });
-  const count = el('span', { class: 'ocr-count' }, '準備中');
+  const count = el('span', { class: 'ocr-count' }, '准备中');
   const fill = el('div', { class: 'ocr-bar-fill' });
-  const bar = el('div', { class: 'ocr-bar is-indeterminate', role: 'progressbar', 'aria-label': '辨識進度', 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-valuenow': '0' }, fill);
+  const bar = el('div', { class: 'ocr-bar is-indeterminate', role: 'progressbar', 'aria-label': '识别进度', 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-valuenow': '0' }, fill);
   const stage = el('div', { class: 'muted small' });
-  const cancel = button('取消辨識', onCancel, 'btn');
+  const cancel = button('取消识别', onCancel, 'btn');
   const box = el(
     'div',
     { class: 'ocr-overlay', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'ocr-title' },
@@ -28,14 +28,14 @@ export function ocrOverlay(fileName: string, onCancel: () => void): OcrOverlay {
       el('div', { class: 'ocr-main' },
         el('div', { class: 'ocr-thumb' }, thumb, el('div', { class: 'ocr-scanline' })),
         el('div', { class: 'ocr-info' },
-          el('h2', { id: 'ocr-title' }, '正在辨識圖片文字'),
+          el('h2', { id: 'ocr-title' }, '正在识别图片文字'),
           el('div', { class: 'ocr-file', title: fileName }, fileName),
           count,
           bar,
           stage,
         ),
       ),
-      el('p', { class: 'ocr-note muted small' }, `這是圖片型（掃描）PDF，需在瀏覽器內辨識文字。首次使用會從本站下載約 ${DOWNLOAD_MB} MB 的辨識模型；文件只在本機處理，不會上傳。`),
+      el('p', { class: 'ocr-note muted small' }, `这是图片型（扫描）PDF，需在浏览器内识别文字。首次使用会从本站下载约 ${DOWNLOAD_MB} MB 的识别模型；文件只在本机处理，不会上传。`),
       el('div', { class: 'ocr-actions' }, cancel),
     ),
   );
@@ -47,14 +47,14 @@ export function ocrOverlay(fileName: string, onCancel: () => void): OcrOverlay {
       }
       const engine = p.stage === 'engine';
       const pct = Math.round(p.progress * 100);
-      count.textContent = engine ? '準備中' : `第 ${p.page} / ${p.pages} 頁・${pct}%`;
+      count.textContent = engine ? '准备中' : `第 ${p.page} / ${p.pages} 页・${pct}%`;
       stage.textContent = engine
-        ? '準備辨識引擎（首次需下載模型）…'
+        ? '准备识别引擎（首次需下载模型）…'
         : p.step === 'orient'
-          ? `判斷第 ${p.page} 頁方向並轉正…`
+          ? `判断第 ${p.page} 页方向并转正…`
           : p.step === 'layout'
-            ? `分析第 ${p.page} 頁的表格、勾選框與圖片…`
-            : `辨識第 ${p.page} 頁文字…`;
+            ? `分析第 ${p.page} 页的表格、勾选框与图片…`
+            : `识别第 ${p.page} 页文字…`;
       bar.classList.toggle('is-indeterminate', engine);
       bar.setAttribute('aria-valuenow', String(pct));
       fill.style.width = engine ? '' : `${pct}%`;

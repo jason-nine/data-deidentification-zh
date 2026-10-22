@@ -2,3 +2,6 @@ node_modules
 dist
 .DS_Store
 *.local
+
+# Playwright MCP 页面快照（开发期临时产物）
+.playwright-mcp

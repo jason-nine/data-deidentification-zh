@@ -21,28 +21,38 @@ const dom = new JSDOM('');
 Object.assign(globalThis, { DOMParser: dom.window.DOMParser, XMLSerializer: dom.window.XMLSerializer });
 
 const ROOT = 'examples';
+// Keep the hand-written index when regenerating the scenario files.
+const keptReadme = (() => {
+  try {
+    return readFileSync(join(ROOT, 'README.md'), 'utf-8');
+  } catch {
+    return null;
+  }
+})();
 rmSync(ROOT, { recursive: true, force: true });
+mkdirSync(ROOT, { recursive: true });
+if (keptReadme !== null) writeFileSync(join(ROOT, 'README.md'), keptReadme);
 const dir = (name: string) => {
   const p = join(ROOT, name);
   mkdirSync(p, { recursive: true });
   return p;
 };
 const write = (p: string, data: string | Uint8Array) => writeFileSync(p, data);
-const font = new Uint8Array(readFileSync('public/fonts/NotoSansTC-Regular.ttf'));
+const font = new Uint8Array(readFileSync('public/fonts/NotoSansSC-Regular.ttf'));
 
-// 情境 1：核心流程 — 真實案例（合約書 / 報價單 Word+PDF 各 3–4 頁、客戶資料 Excel 60 筆、信件、會議紀錄、5 頁掃描文件）
+// 情境 1：核心流程 — 真实案例（合同书 / 报价单 Word+PDF 各 3–4 页、客户数据 Excel 60 笔、信件、会议记录、5 页扫描文件）
 const contractDoc = contract();
 const quotationDoc = quotation();
 const contractDocx = await renderDocx(contractDoc);
-// 圖片型（掃描）PDF：5 頁模擬掃描影像，無文字層（需本機 Chrome）；同時輸出對答案用的原稿（npm run eval:ocr）
+// 图片型（扫描）PDF：5 页模拟扫描影像，无文字层（需本机 Chrome）；同时输出对答案用的原稿（npm run eval:ocr）
 const ANSWER_NOTE =
-  '掃描樣本的原稿：與頁面影像同一份 HTML 產生，座標為 PDF 點（原點左下、轉正後的頁面）。text 為各頁實際文字；planted／handwritten 為應被偵測的印刷／手寫敏感值；manual 為內建規則範圍外、需手動新增的值；pictures 為不含文字、應保留的圖片；rules／fills／checkboxes 為表格線條、底色與勾選框。';
+  '扫描样本的原稿：与页面影像同一份 HTML 产生，座标为 PDF 点（原点左下、转正后的页面）。text 为各页实际文字；planted／handwritten 为应被检测的印刷／手写敏感值；manual 为内建规则范围外、需手动新增的值；pictures 为不含文字、应保留的图片；rules／fills／checkboxes 为表格线条、底色与勾选框。';
 const scanned = scanPages();
 const { pdf: scannedPdf, truth: scannedTruth } = await renderScanPdf(scanned);
 const answerKey = (source: string, pages: typeof scanned, truth: typeof scannedTruth) =>
   JSON.stringify({ source, note: ANSWER_NOTE, pages: pages.map((p, i) => ({ title: p.title, planted: p.planted, handwritten: p.handwritten, manual: p.manual, ...truth[i] })) }, null, 2) + '\n';
 write('tests/fixtures/scanned-sample.answer.json', answerKey('public/samples/scanned.pdf', scanned, scannedTruth));
-// 評分用的角度樣本（不放上網站）：信函與表單傾斜 3°／6°，信函轉向 90°／180°
+// 评分用的角度样本（不放上网站）：信函与表单倾斜 3°／6°，信函转向 90°／180°
 {
   const [letterPage, formPage] = scanned;
   const angled: typeof scanned = [
@@ -59,110 +69,110 @@ write('tests/fixtures/scanned-sample.answer.json', answerKey('public/samples/sca
 }
 {
   const d = dir('01-核心流程');
-  write(join(d, '委外服務契約書.docx'), contractDocx);
-  write(join(d, '委外服務契約書.pdf'), await renderPdf(contractDoc, font));
-  write(join(d, '報價單.docx'), await renderDocx(quotationDoc));
-  write(join(d, '報價單.pdf'), await renderPdf(quotationDoc, font));
-  write(join(d, '客戶資料.xlsx'), await buildXlsx(customers()));
-  write(join(d, '客服信件.txt'), supportEmail());
-  write(join(d, '專案會議紀錄.md'), meetingNotes());
-  write(join(d, '掃描文件.pdf'), scannedPdf);
+  write(join(d, '外包服务合同书.docx'), contractDocx);
+  write(join(d, '外包服务合同书.pdf'), await renderPdf(contractDoc, font));
+  write(join(d, '报价单.docx'), await renderDocx(quotationDoc));
+  write(join(d, '报价单.pdf'), await renderPdf(quotationDoc, font));
+  write(join(d, '客户数据.xlsx'), await buildXlsx(customers()));
+  write(join(d, '客服邮件.txt'), supportEmail());
+  write(join(d, '项目会议记录.md'), meetingNotes());
+  write(join(d, '扫描文件.pdf'), scannedPdf);
 }
 
-// 情境 2：人工調整 — 含誤判（高鐵站）與漏抓（罕見姓氏、病歷號）
+// 情境 2：人工调整 — 含误判（高铁站）与漏抓（罕见姓氏、病历号）
 {
-  const d = dir('02-人工調整');
+  const d = dir('02-人工调整');
   write(
-    join(d, '人工調整範例.txt'),
-    `訪視紀錄
+    join(d, '人工调整示例.txt'),
+    `访视记录
 
-案主禚小華（病歷號 MRN-2024-00123）於上午抵達高鐵站的服務台，由社工王小明接待。
-案主聯絡手機 0933-111-222，居住於高雄市苓雅區四維三路2號。
+案主禚小华（病历号 MRN-2024-00123）于上午抵达高铁站的服务台，由社工王小明接待。
+案主联络手机 0933-111-222，居住于高雄市苓雅区四维三路2号。
 
 【操作提示】
-1. 「高鐵站」會被姓名規則誤判 → 在右側清單按「取消」。
-2. 「禚小華」因姓氏罕見未被偵測 → 在預覽中圈選後選擇類別「姓名」新增。
-3. 「MRN-2024-00123」為病歷號 → 圈選後選擇類別「識別碼」新增（或到「偵測規則」新增自訂規則 MRN-\\d{4}-\\d{5}）。
+1. 「高铁站」会被姓名规则误判 → 在右侧清单按「取消」。
+2. 「禚小华」因姓氏罕见未被检测 → 在预览中框选后选择类别「姓名」新增。
+3. 「MRN-2024-00123」为病历号 → 框选后选择类别「标识符」新增（或到「检测规则」新增自定义规则 MRN-\\d{4}-\\d{5}）。
 `,
   );
 }
 
-// 情境 3：還原 — 由實際管線產出的成對檔案（Word 合約書 + 客服信件），外加缺列與格式錯誤的 CSV
+// 情境 3：还原 — 由实际管线产出的成对文件（Word 合同书 + 客服邮件），外加缺列与格式错误的 CSV
 {
-  const d = dir('03-還原');
-  const file = new File([contractDocx as BlobPart], '委外服務契約書.docx');
+  const d = dir('03-还原');
+  const file = new File([contractDocx as BlobPart], '外包服务合同书.docx');
   const doc = await parseDocx(file);
   const items = detect(doc.text, BUILTIN_PATTERNS);
   const { edits, mapping } = applyRedactions(doc.text, items);
   const blob = await generateDocx(doc, edits);
-  write(join(d, '委外服務契約書.deid.docx'), new Uint8Array(await blob.arrayBuffer()));
-  write(join(d, '委外服務契約書.mapping.csv'), serializeMapping(mapping));
-  write(join(d, '委外服務契約書.mapping.缺一列.csv'), serializeMapping(mapping.slice(1)));
-  write(join(d, '格式錯誤.mapping.csv'), '﻿code,original\r\n' + mapping.map((m) => `${m.code},${m.original}`).join('\r\n') + '\r\n');
-  write(join(d, '編碼重複.mapping.csv'), serializeMapping([...mapping, mapping[0]]));
+  write(join(d, '外包服务合同书.deid.docx'), new Uint8Array(await blob.arrayBuffer()));
+  write(join(d, '外包服务合同书.mapping.csv'), serializeMapping(mapping));
+  write(join(d, '外包服务合同书.mapping.缺一列.csv'), serializeMapping(mapping.slice(1)));
+  write(join(d, '格式错误.mapping.csv'), '﻿code,original\r\n' + mapping.map((m) => `${m.code},${m.original}`).join('\r\n') + '\r\n');
+  write(join(d, '编码重复.mapping.csv'), serializeMapping([...mapping, mapping[0]]));
 
   const mail = supportEmail();
   const mailItems = detect(mail, BUILTIN_PATTERNS);
   const mailRes = applyRedactions(mail, mailItems);
-  write(join(d, '客服信件.deid.txt'), mailRes.redactedText);
-  write(join(d, '客服信件.mapping.csv'), serializeMapping(mailRes.mapping));
+  write(join(d, '客服邮件.deid.txt'), mailRes.redactedText);
+  write(join(d, '客服邮件.mapping.csv'), serializeMapping(mailRes.mapping));
 }
 
-// 情境 4：偵測規則 — 自訂識別碼（客戶編號、統一編號、病歷號）與停用手機規則
+// 情境 4：检测规则 — 自定义标识符（客户编号、统一社会信用代码、病历号）与停用手机规则
 {
-  const d = dir('04-偵測規則');
+  const d = dir('04-检测规则');
   write(
-    join(d, '自訂規則範例.txt'),
-    `人事異動通知
+    join(d, '自定义规则示例.txt'),
+    `人事异动通知
 
-承辦人員 EMP-004521（陳大文）已於 2026-09-01 到職，聯絡手機 0912-345-678。
-備援人員 EMP-000132（林美玲），聯絡手機 0987-654-321。
-病歷號 MRN-2024-00123 與 MRN-2025-00456 之案件移交完成。
-客戶 CUST-10008（統一編號 04595257，嘉宏資訊股份有限公司）之合約已歸檔。
+承办人员 EMP-004521（陈大文）已于 2026-09-01 到职，联络手机 0912-345-678。
+备援人员 EMP-000132（林美玲），联络手机 0987-654-321。
+病历号 MRN-2024-00123 与 MRN-2025-00456 之案件移交完成。
+客户 CUST-10008（统一社会信用代码 04595257，嘉宏信息股份有限公司）之合约已归档。
 
 【操作提示】
-1. 先直接上傳：手機、統一編號、公司名稱會被內建規則偵測；EMP-/MRN-/CUST- 編號不會。
-2. 到「偵測規則」停用「手機號碼」，並新增自訂規則（類別皆為「識別碼」）：
-   - 員工編號　EMP-\\d{6}
-   - 病歷號　　MRN-\\d{4}-\\d{5}
-   - 客戶編號　CUST-\\d{5}
-3. 回到「去識別化」按「重新偵測」：編號被標記、手機不再被標記。
-4. 用同樣的規則處理 01-核心流程/客戶資料.xlsx，可看到「客戶編號」整欄被標記（「統一編號」與「公司」欄位本來就會被內建規則標記）。
-5. 重新整理頁面，規則設定仍保留。
+1. 先直接上传：手机、统一社会信用代码、公司名称会被内建规则检测；EMP-/MRN-/CUST- 编号不会。
+2. 到「检测规则」停用「手机号码」，并新增自定义规则（类别皆为「标识符」）：
+   - 员工编号　EMP-\\d{6}
+   - 病历号　　MRN-\\d{4}-\\d{5}
+   - 客户编号　CUST-\\d{5}
+3. 回到「去标识化」按「重新检测」：编号被标记、手机不再被标记。
+4. 用同样的规则处理 01-核心流程/客户数据.xlsx，可看到「客户编号」整栏被标记（「统一社会信用代码」与「公司」字段本来就会被内建规则标记）。
+5. 重新整理页面，规则设置仍保留。
 `,
   );
 }
 
-// 情境 6：格式與邊界
+// 情境 6：格式与边界
 {
-  const d = dir('06-格式與邊界');
+  const d = dir('06-格式与边界');
   const blank = await PDFDocument.create();
   blank.addPage([595, 842]);
-  write(join(d, '空白頁無文字.pdf'), await blank.save());
-  write(join(d, '不支援的格式.json'), '{ "name": "王小明", "id": "A123456789" }\n');
+  write(join(d, '空白页无文字.pdf'), await blank.save());
+  write(join(d, '不支持的格式.json'), '{ "name": "王小明", "id": "A123456789" }\n');
   write(
-    join(d, '原文含標記樣式.txt'),
-    `本契約第 3 條引用之範本編號為 [姓名:abcdef]，此為原文既有文字，非去識別化標記。
-簽署人：王小明（0912-345-678）
+    join(d, '原文含标记样式.txt'),
+    `本合同第 3 条引用之模板编号为 [姓名:abcdef]，此为原文既有文字，非去标识化标记。
+签署人：王小明（0912-345-678）
 `,
   );
   write(
-    join(d, '如何產生超大檔案.md'),
-    `# 超過 100 MB 上限的測試檔
+    join(d, '如何产生超大文件.md'),
+    `# 超过 100 MB 上限的测试档
 
-檔案太大不放進版本庫，請自行產生：
+文件太大不放进版本库，请自行产生：
 
 \`\`\`bash
-# macOS / Linux：產生 101 MB 的文字檔
-head -c 105906176 /dev/zero | tr '\\0' 'A' > 超過上限.txt
+# macOS / Linux：产生 101 MB 的文字档
+head -c 105906176 /dev/zero | tr '\\0' 'A' > 超过上限.txt
 \`\`\`
 
-上傳後預期出現「檔案超過 100 MB 上限」的警告視窗，需按「我知道了」關閉，該檔不會載入；同時選擇的其他檔案照常處理。
+上传后预期出现「文件超过 100 MB 上限」的警告视窗，需按「我知道了」关闭，该档不会加载；同时选择的其他文件照常处理。
 `,
   );
 }
 
-// 網頁與 README 的「體驗範例」：同一批檔案以 ASCII 檔名放進 public/samples/（隨站台部署）
+// 网页与 README 的「体验示例」：同一批文件以 ASCII 档名放进 public/samples/（随站台部署）
 {
   const d = 'public/samples';
   rmSync(d, { recursive: true, force: true });
@@ -175,7 +185,7 @@ head -c 105906176 /dev/zero | tr '\\0' 'A' > 超過上限.txt
   write(join(d, 'support-email.txt'), supportEmail());
   write(join(d, 'meeting-notes.md'), meetingNotes());
   write(join(d, 'scanned.pdf'), scannedPdf);
-  const file = new File([contractDocx as BlobPart], '委外服務契約書.docx');
+  const file = new File([contractDocx as BlobPart], '外包服务合同书.docx');
   const doc = await parseDocx(file);
   const items = detect(doc.text, BUILTIN_PATTERNS);
   const { edits, mapping } = applyRedactions(doc.text, items);

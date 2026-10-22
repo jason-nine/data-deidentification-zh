@@ -1,36 +1,36 @@
 <!doctype html>
-<html lang="zh-Hant-TW">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>免費文件去識別化工具｜PDF、Word、Excel、掃描檔個資遮罩與還原（資料不上傳）</title>
-    <meta name="description" content="免費、免安裝、資料不上傳的線上文件去識別化工具：自動偵測 PDF（含掃描檔）、Word、Excel、TXT 中的姓名、身分證、手機、地址、Email、公司、統編並遮罩，人工覆核後下載；可用 CSV 編碼表完整還原，也可只輸出 [姓名] 或 ○○○。全程在瀏覽器內處理。" />
-    <meta name="keywords" content="去識別化, 個資去識別化, 個資遮罩, 個資遮蔽, 文件去識別化, 個人資料保護, 個資法, 假名化, 匿名化, PDF 去識別化, 掃描檔 OCR, Word 去識別化, Excel 去識別化, 身分證遮罩, 資料脫敏, ChatGPT 個資, de-identification, PII redaction, 純前端" />
+    <title>免费文件去标识化工具｜PDF、Word、Excel、扫描件个人信息脱敏与还原（数据不上传）</title>
+    <meta name="description" content="免费、免安装、数据不上传的在线文件去标识化工具：自动检测 PDF（含扫描件）、Word、Excel、TXT 中的姓名、身份证、手机、地址、Email、公司、统一社会信用代码并脱敏，人工复核后下载；可用 CSV 编码表完整还原，也可只输出 [姓名] 或 ○○○。全程在浏览器内处理。" />
+    <meta name="keywords" content="去标识化, 个人信息去标识化, 个人信息脱敏, 个人信息遮蔽, 文件去标识化, 个人信息保护, 个人信息保护法, 假名化, 匿名化, PDF 去标识化, 扫描件 OCR, Word 去标识化, Excel 去标识化, 身份证脱敏, 数据脱敏, ChatGPT 个人信息, de-identification, PII redaction, 纯前端" />
     <meta name="author" content="Dean Lin" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
     <meta name="theme-color" content="#2f6fed" />
-    <link rel="canonical" href="https://deanlin.net/data-deidentification/" />
-    <link rel="alternate" type="text/markdown" href="https://deanlin.net/data-deidentification/llms-full.txt" title="完整說明（Markdown，供 AI 閱讀）" />
-    <link rel="icon" type="image/png" href="https://deanlin.net/images/favicon.png" />
-    <link rel="apple-touch-icon" href="https://deanlin.net/images/favicon.png" />
+    <link rel="canonical" href="__SITE_ROOT__" />
+    <link rel="alternate" type="text/markdown" href="__SITE_URL__llms-full.txt" title="完整说明（Markdown，供 AI 阅读）" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="apple-touch-icon" href="favicon.svg" />
 
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="文件去識別化工具" />
-    <meta property="og:locale" content="zh_TW" />
-    <meta property="og:url" content="https://deanlin.net/data-deidentification/" />
-    <meta property="og:title" content="免費文件去識別化工具｜PDF、Word、Excel、掃描檔個資遮罩與還原" />
-    <meta property="og:description" content="資料不上傳、全程在瀏覽器內處理。自動偵測姓名、身分證、手機、地址、Email、公司、統編，支援 PDF（含掃描檔 OCR）、Word、Excel，保留原格式輸出；可用 CSV 編碼表還原，也可只輸出 [姓名] 或 ○○○。" />
-    <meta property="og:image" content="https://deanlin.net/data-deidentification/og.png" />
+    <meta property="og:site_name" content="文件去标识化工具" />
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:url" content="__SITE_ROOT__" />
+    <meta property="og:title" content="免费文件去标识化工具｜PDF、Word、Excel、扫描件个人信息脱敏与还原" />
+    <meta property="og:description" content="数据不上传、全程在浏览器内处理。自动检测姓名、身份证、手机、地址、Email、公司、统一社会信用代码，支持 PDF（含扫描件 OCR）、Word、Excel，保留原格式输出；可用 CSV 编码表还原，也可只输出 [姓名] 或 ○○○。" />
+    <meta property="og:image" content="__SITE_URL__og.png" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="文件去識別化工具：契約書中的姓名、身分證、手機、地址、公司與統編以遮罩呈現" />
+    <meta property="og:image:alt" content="文件去标识化工具：合同书中的姓名、身份证、手机、地址、公司与统一社会信用代码以脱敏呈现" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="免費文件去識別化工具｜PDF、Word、Excel、掃描檔個資遮罩與還原" />
-    <meta name="twitter:description" content="資料不上傳、全程在瀏覽器內處理。自動偵測姓名、身分證、手機、地址、Email、公司、統編，支援 PDF（含掃描檔 OCR）、Word、Excel，保留原格式輸出；可用 CSV 編碼表還原，也可只輸出 [姓名] 或 ○○○。" />
-    <meta name="twitter:image" content="https://deanlin.net/data-deidentification/og.png" />
-    <meta name="twitter:image:alt" content="文件去識別化工具：契約書中的姓名、身分證、手機、地址、公司與統編以遮罩呈現" />
+    <meta name="twitter:title" content="免费文件去标识化工具｜PDF、Word、Excel、扫描件个人信息脱敏与还原" />
+    <meta name="twitter:description" content="数据不上传、全程在浏览器内处理。自动检测姓名、身份证、手机、地址、Email、公司、统一社会信用代码，支持 PDF（含扫描件 OCR）、Word、Excel，保留原格式输出；可用 CSV 编码表还原，也可只输出 [姓名] 或 ○○○。" />
+    <meta name="twitter:image" content="__SITE_URL__og.png" />
+    <meta name="twitter:image:alt" content="文件去标识化工具：合同书中的姓名、身份证、手机、地址、公司与统一社会信用代码以脱敏呈现" />
 
     <!-- FAQPage answers must stay word-for-word identical to the visible #faq content below. -->
     <script type="application/ld+json">
@@ -39,227 +39,222 @@
       "@graph": [
         {
           "@type": "WebSite",
-          "@id": "https://deanlin.net/data-deidentification/#website",
-          "url": "https://deanlin.net/data-deidentification/",
-          "name": "文件去識別化工具",
+          "@id": "__SITE_URL__#website",
+          "url": "__SITE_ROOT__",
+          "name": "文件去标识化工具",
           "alternateName": "Data De-identification Tool",
-          "inLanguage": "zh-Hant-TW",
-          "publisher": { "@id": "https://deanlin.net/#person" }
+          "inLanguage": "zh-CN",
+          "publisher": { "@id": "__SITE_URL__#person" }
         },
         {
           "@type": "WebPage",
-          "@id": "https://deanlin.net/data-deidentification/#webpage",
-          "url": "https://deanlin.net/data-deidentification/",
-          "name": "免費文件去識別化工具｜PDF、Word、Excel、掃描檔個資遮罩與還原",
-          "description": "免費、免安裝、資料不上傳的線上文件去識別化工具：自動偵測 PDF（含掃描檔）、Word、Excel、TXT 中的姓名、身分證、手機、地址、Email、公司、統編並遮罩，人工覆核後下載；可用 CSV 編碼表完整還原，也可只輸出 [姓名] 或 ○○○。全程在瀏覽器內處理。",
-          "inLanguage": "zh-Hant-TW",
+          "@id": "__SITE_URL__#webpage",
+          "url": "__SITE_ROOT__",
+          "name": "免费文件去标识化工具｜PDF、Word、Excel、扫描件个人信息脱敏与还原",
+          "description": "免费、免安装、数据不上传的在线文件去标识化工具：自动检测 PDF（含扫描件）、Word、Excel、TXT 中的姓名、身份证、手机、地址、Email、公司、统一社会信用代码并脱敏，人工复核后下载；可用 CSV 编码表完整还原，也可只输出 [姓名] 或 ○○○。全程在浏览器内处理。",
+          "inLanguage": "zh-CN",
           "datePublished": "2026-09-02",
           "dateModified": "__BUILD_DATE__",
-          "isPartOf": { "@id": "https://deanlin.net/data-deidentification/#website" },
-          "about": { "@id": "https://deanlin.net/data-deidentification/#app" },
-          "mainEntity": { "@id": "https://deanlin.net/data-deidentification/#app" },
+          "isPartOf": { "@id": "__SITE_URL__#website" },
+          "about": { "@id": "__SITE_URL__#app" },
+          "mainEntity": { "@id": "__SITE_URL__#app" },
           "primaryImageOfPage": {
             "@type": "ImageObject",
-            "url": "https://deanlin.net/data-deidentification/og.png",
+            "url": "__SITE_URL__og.png",
             "width": 1200,
             "height": 630
           },
-          "author": { "@id": "https://deanlin.net/#person" }
+          "author": { "@id": "__SITE_URL__#person" }
         },
         {
           "@type": "WebApplication",
-          "@id": "https://deanlin.net/data-deidentification/#app",
-          "name": "文件去識別化工具",
+          "@id": "__SITE_URL__#app",
+          "name": "文件去标识化工具",
           "alternateName": "Data De-identification Tool",
-          "url": "https://deanlin.net/data-deidentification/",
-          "image": "https://deanlin.net/data-deidentification/og.png",
-          "screenshot": "https://deanlin.net/data-deidentification/og.png",
-          "description": "純前端的文件去識別化工具：上傳 PDF、Word、Excel、TXT、Markdown 或貼上文字，自動偵測個人資料並遮罩，下載去識別化文件與 CSV 編碼表，可完整還原。所有處理在瀏覽器內完成，檔案不會上傳。",
+          "url": "__SITE_ROOT__",
+          "image": "__SITE_URL__og.png",
+          "screenshot": "__SITE_URL__og.png",
+          "description": "纯前端的文件去标识化工具：上传 PDF、Word、Excel、TXT、Markdown 或粘贴文字，自动检测个人信息并脱敏，下载去标识化文件与 CSV 编码表，可完整还原。所有处理在浏览器内完成，文件不会上传。",
           "applicationCategory": "UtilitiesApplication",
           "applicationSubCategory": "Data de-identification / PII redaction",
           "operatingSystem": "Any (Web browser)",
           "browserRequirements": "Requires JavaScript",
-          "inLanguage": "zh-Hant-TW",
+          "inLanguage": "zh-CN",
           "isAccessibleForFree": true,
-          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TWD" },
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CNY" },
           "license": "https://opensource.org/licenses/MIT",
           "datePublished": "2026-09-02",
-          "keywords": "去識別化, 個資遮罩, 資料脫敏, PII redaction, de-identification, PDF, Word, Excel",
+          "keywords": "去标识化, 个人信息脱敏, 数据脱敏, PII redaction, de-identification, PDF, Word, Excel",
           "featureList": [
-            "支援 PDF（含掃描檔，瀏覽器內 OCR）、Word (.docx)、Excel (.xlsx)、TXT、Markdown 與貼上文字，一次最多 10 個檔案",
-            "自動偵測姓名、身分證字號、手機、市話、地址、電子郵件、公司名稱、統一編號、自訂識別碼，以及國際電話、信用卡、美國 SSN、IBAN、IP、出生日期",
-            "格式感知預覽、遮罩顯示、人工覆核（取消誤判、整批取消、圈選新增）",
-            "保留原格式輸出，輸出檔不殘留原始敏感文字；PDF 以文字重建而非色塊覆蓋",
-            "掃描 PDF 重繪表格框線、底色與勾選框，傾斜或放反的頁面自動轉正",
-            "輸出方式：部分保留（方便統計）、全部隱藏、自訂",
-            "標記方式：可還原的編碼（附 CSV 編碼表），或不需還原的類別標記 [姓名]、○ 佔位",
-            "純前端處理，資料不離開瀏覽器，可離線與自行架設"
+            "支持 PDF（含扫描件，浏览器内 OCR）、Word (.docx)、Excel (.xlsx)、TXT、Markdown 与粘贴文字，一次最多 10 个文件",
+            "自动检测姓名、居民身份证号、手机、固定电话、地址、邮箱、单位名称、统一社会信用代码、银行卡号、车牌号、护照号与自定义标识符，以及国际电话、信用卡、美国 SSN、IBAN、IPv4／IPv6 地址、出生日期",
+            "格式感知预览、脱敏显示、人工复核（取消误判、整批取消、框选新增）",
+            "保留原格式输出，输出文件不残留原始敏感文字；PDF 以文字重建而非色块覆盖",
+            "扫描 PDF 重绘表格框线、底色与复选框，倾斜或放反的页面自动转正",
+            "输出方式：部分保留（方便统计）、全部隐藏、自定义",
+            "标记方式：可还原的编码（附 CSV 编码表），或不需还原的类别标记 [姓名]、○ 占位",
+            "纯前端处理，数据不离开浏览器，可离线与自行部署"
           ],
-          "softwareHelp": { "@type": "CreativeWork", "url": "https://github.com/dean9703111/data-deidentification#readme" },
-          "author": { "@id": "https://deanlin.net/#person" }
+          "softwareHelp": { "@type": "CreativeWork", "url": "https://github.com/jason-nine/data-deidentification-zh#readme" },
+          "author": { "@id": "__SITE_URL__#person" }
         },
         {
           "@type": "SoftwareSourceCode",
-          "@id": "https://github.com/dean9703111/data-deidentification#source",
-          "name": "data-deidentification",
-          "codeRepository": "https://github.com/dean9703111/data-deidentification",
+          "@id": "https://github.com/jason-nine/data-deidentification-zh#source",
+          "name": "data-deidentification-zh",
+          "codeRepository": "https://github.com/jason-nine/data-deidentification-zh",
           "programmingLanguage": "TypeScript",
           "runtimePlatform": "Web browser",
           "license": "https://opensource.org/licenses/MIT",
-          "targetProduct": { "@id": "https://deanlin.net/data-deidentification/#app" },
-          "author": { "@id": "https://deanlin.net/#person" }
+          "targetProduct": { "@id": "__SITE_URL__#app" },
+          "author": { "@id": "__SITE_URL__#person" },
+          "contributor": { "@type": "Person", "name": "Dean Lin", "url": "https://github.com/dean9703111" }
         },
         {
           "@type": "HowTo",
-          "@id": "https://deanlin.net/data-deidentification/#howto",
-          "name": "如何把 PDF、Word、Excel 文件去識別化（遮罩個資）",
-          "description": "使用免費的文件去識別化工具，在瀏覽器內自動偵測並遮罩文件中的個人資料，檔案不會上傳。",
-          "inLanguage": "zh-Hant-TW",
+          "@id": "__SITE_URL__#howto",
+          "name": "如何把 PDF、Word、Excel 文件去标识化（脱敏个人信息）",
+          "description": "使用免费的文件去标识化工具，在浏览器内自动检测并脱敏文件中的个人信息，文件不会上传。",
+          "inLanguage": "zh-CN",
           "totalTime": "PT3M",
           "tool": [
             {
               "@type": "HowToTool",
-              "name": "文件去識別化工具（網頁瀏覽器）"
+              "name": "文件去标识化工具（网页浏览器）"
             }
           ],
           "step": [
             {
               "@type": "HowToStep",
               "position": 1,
-              "name": "上傳文件",
-              "text": "在「去識別化」頁籤拖入 PDF、Word、Excel、TXT、Markdown 檔案或貼上文字，按「開始去識別化」。掃描的 PDF 會先在瀏覽器內以 OCR 辨識文字。",
-              "url": "https://deanlin.net/data-deidentification/#site-info"
+              "name": "上传文件",
+              "text": "在「去标识化」标签页拖入 PDF、Word、Excel、TXT、Markdown 文件或粘贴文字，按「开始去标识化」。扫描的 PDF 会先在浏览器内以 OCR 识别文字。",
+              "url": "__SITE_URL__#site-info"
             },
             {
               "@type": "HowToStep",
               "position": 2,
-              "name": "檢視自動偵測結果",
-              "text": "在依原格式排版的預覽中檢視自動標記的姓名、身分證字號、手機、地址、電子郵件等個資；滑鼠停留可看原文與實際輸出標記。",
-              "url": "https://deanlin.net/data-deidentification/#site-info"
+              "name": "查看自动检测结果",
+              "text": "在按原格式排版的预览中查看自动标记的姓名、身份证号、手机、地址、邮箱等个人信息；鼠标悬停可看原文与实际输出标记。",
+              "url": "__SITE_URL__#site-info"
             },
             {
               "@type": "HowToStep",
               "position": 3,
-              "name": "人工覆核",
-              "text": "點擊標記取消誤判、在「輸出設定」的「依類別調整」整類取消、圈選文字新增漏抓的項目。",
-              "url": "https://deanlin.net/data-deidentification/#site-info"
+              "name": "人工复核",
+              "text": "点击标记取消误判、在「输出设置」的「按类别调整」整类取消、框选文字新增漏抓的项目。",
+              "url": "__SITE_URL__#site-info"
             },
             {
               "@type": "HowToStep",
               "position": 4,
-              "name": "選擇輸出方式與標記方式",
-              "text": "輸出方式決定露出多少（部分保留、全部隱藏、自訂）；標記方式決定要不要還原（可還原的編碼，或不需還原的類別標記 [姓名]、○ 佔位）。",
-              "url": "https://deanlin.net/data-deidentification/#site-info"
+              "name": "选择输出方式与标记方式",
+              "text": "输出方式决定露出多少（部分保留、全部隐藏、自定义）；标记方式决定要不要还原（可还原的编码，或不需还原的类别标记 [姓名]、○ 占位）。",
+              "url": "__SITE_URL__#site-info"
             },
             {
               "@type": "HowToStep",
               "position": 5,
-              "name": "下載",
-              "text": "下載去識別化文件（與上傳相同格式）；使用編碼時一併下載 CSV 編碼表，多個檔案可打包成 ZIP。",
-              "url": "https://deanlin.net/data-deidentification/#site-info"
+              "name": "下载",
+              "text": "下载去标识化文件（与上传相同格式）；使用编码时一并下载 CSV 编码表，多个文件可打包成 ZIP。",
+              "url": "__SITE_URL__#site-info"
             },
             {
               "@type": "HowToStep",
               "position": 6,
-              "name": "需要時還原",
-              "text": "在「還原」頁籤上傳去識別化文件與編碼表，即可下載還原檔。",
-              "url": "https://deanlin.net/data-deidentification/#site-info"
+              "name": "需要时还原",
+              "text": "在「还原」标签页上传去标识化文件与编码表，即可下载还原文件。",
+              "url": "__SITE_URL__#site-info"
             }
           ]
         },
         {
           "@type": "FAQPage",
-          "@id": "https://deanlin.net/data-deidentification/#faq",
+          "@id": "__SITE_URL__#faq",
           "mainEntity": [
             {
               "@type": "Question",
-              "name": "什麼是文件去識別化？",
-              "acceptedAnswer": { "@type": "Answer", "text": "文件去識別化是把文件中可以直接或間接辨識特定個人的資訊（例如姓名、身分證字號、手機、地址、電子郵件），以遮罩或編碼取代，讓文件在交給第三方、AI 服務或研究單位時不會洩漏個資。本工具會把每筆敏感資訊換成唯一的隨機編碼，並產出 CSV 編碼表供日後還原。" }
+              "name": "什么是文件去标识化？",
+              "acceptedAnswer": { "@type": "Answer", "text": "文件去标识化是把文件中可以直接或间接识别特定个人的信息（例如姓名、身份证号、手机、地址、邮箱），以脱敏或编码取代，让文件在交给第三方、AI 服务或研究单位时不会泄漏个人信息。本工具会把每条敏感信息换成唯一的随机编码，并生成 CSV 编码表供以后还原。" }
             },
             {
               "@type": "Question",
-              "name": "我的檔案會被上傳到伺服器嗎？",
-              "acceptedAnswer": { "@type": "Answer", "text": "不會。文件解析、個資偵測、遮罩與輸出全部在你的瀏覽器內以 JavaScript 完成，沒有任何後端；載入頁面後即使離線也能使用。瀏覽器只會儲存你的偵測規則設定，文件內容與編碼表都不會落地。" }
+              "name": "我的文件会被上传到服务器吗？",
+              "acceptedAnswer": { "@type": "Answer", "text": "不会。文件解析、个人信息检测、脱敏与输出全部在你的浏览器内以 JavaScript 完成，没有任何后端；加载页面后即使离线也能使用。浏览器只会保存你的检测规则设置，文件内容与编码表都不会落地。" }
             },
             {
               "@type": "Question",
-              "name": "支援哪些檔案格式？",
-              "acceptedAnswer": { "@type": "Answer", "text": "支援 PDF（含掃描檔，會在瀏覽器內以 OCR 辨識文字）、Word（.docx）、Excel（.xlsx）、TXT、Markdown，也可以直接貼上文字。單檔上限 100 MB，一次最多 10 個檔案混合處理。不支援舊版 .doc、.xls。" }
+              "name": "支持哪些文件格式？",
+              "acceptedAnswer": { "@type": "Answer", "text": "支持 PDF（含扫描件，会在浏览器内以 OCR 识别文字）、Word（.docx）、Excel（.xlsx）、TXT、Markdown，也可以直接粘贴文字。单档上限 100 MB，一次最多 10 个文件混合处理。不支持旧版 .doc、.xls。" }
             },
             {
               "@type": "Question",
-              "name": "可以偵測哪些個人資料？",
-              "acceptedAnswer": { "@type": "Answer", "text": "內建十五種類別。台灣格式：中文姓名、身分證字號（含檢核碼驗證）、手機、市話、地址、電子郵件、公司／組織名稱、統一編號（含檢核碼驗證）與自訂識別碼；國際格式：國際電話（驗證號碼有效性）、信用卡號（Luhn 檢核）、美國社會安全碼（SSN）、IBAN 國際銀行帳號、IP 位址與出生日期（依「出生日期」「Date of Birth」等標籤判斷）。也可以用正規表達式新增自訂規則；英文姓名與地址目前需在預覽中圈選新增。" }
+              "name": "可以检测哪些个人信息？",
+              "acceptedAnswer": { "@type": "Answer", "text": "内置十七种类别。中国大陆格式：中文姓名、居民身份证号（校验位验证）、手机号码、固定电话、地址、单位名称、统一社会信用代码（校验位验证）、银行卡号（Luhn 校验）、车牌号、护照号与自定义标识符；国际与通用格式：邮箱、国际电话（验证号码有效性）、信用卡号（Luhn 校验）、美国社会安全码（SSN）、IBAN 国际银行账号、IPv4／IPv6 地址与出生日期（按「出生日期」「Date of Birth」等标签判断）。也可以用正则表达式新增自定义规则；英文姓名与地址目前需在预览中框选新增。" }
             },
             {
               "@type": "Question",
-              "name": "去識別化、假名化、匿名化有什麼不同？",
-              "acceptedAnswer": { "@type": "Answer", "text": "去識別化是泛稱，指處理後無法直接識別特定個人。假名化（pseudonymization）是以代號取代可識別的資料、另外保存對照表，必要時可以還原，本工具預設的「編碼」加上 CSV 編碼表就屬於這一類；匿名化（anonymization）則是處理到無法再回推個人、也無法還原。選「類別」或「空白佔位」不會產生編碼表，但是否達到匿名化，還要看保留的字元與文件中的其他資訊，交付前請自行判斷。" }
+              "name": "去标识化、假名化、匿名化有什么不同？",
+              "acceptedAnswer": { "@type": "Answer", "text": "去标识化是泛称，指处理后无法直接识别特定个人。假名化（pseudonymization）是以代号取代可识别的数据、另外保存对照表，必要时可以还原，本工具默认的「编码」加上 CSV 编码表就属于这一类；匿名化（anonymization）则是处理到无法再回推个人、也无法还原。选「类别」或「空白占位」不会生成编码表，但是否达到匿名化，还要看保留的字符与文件中的其他信息，交付前请自行判断。" }
             },
             {
               "@type": "Question",
-              "name": "把文件交給 ChatGPT 等 AI 之前，要怎麼移除個資？",
-              "acceptedAnswer": { "@type": "Answer", "text": "把文件拖進本工具或直接貼上文字，確認姓名、身分證、手機、地址、Email 等都已標記，再下載或複製去識別化後的內容交給 AI。AI 看到的是 [姓名]、[手機] 這類標記，仍能理解語意；整個過程在瀏覽器內完成，原始檔案不會上傳。預設的「編碼」會讓 AI 的回覆保留 [姓名:6e679d] 這類標記，之後可以用編碼表還原成真實資料；不需要還原時，把「標記方式」改為「類別」即可。" }
+              "name": "把文件交给 ChatGPT 等 AI 之前，要怎么移除个人信息？",
+              "acceptedAnswer": { "@type": "Answer", "text": "把文件拖进本工具或直接粘贴文字，确认姓名、身份证、手机、地址、Email 等都已标记，再下载或复制去标识化后的内容交给 AI。AI 看到的是 [姓名]、[手机] 这类标记，仍能理解语义；整个过程在浏览器内完成，原始文件不会上传。默认的「编码」会让 AI 的回复保留 [姓名:6e679d] 这类标记，之后可以用编码表还原成真实数据；不需要还原时，把「标记方式」改为「类别」即可。" }
             },
             {
               "@type": "Question",
-              "name": "掃描的 PDF 或紙本掃描檔可以去識別化嗎？",
-              "acceptedAnswer": { "@type": "Answer", "text": "可以。沒有文字層的 PDF 會在瀏覽器內以 OCR（繁體中文＋英文）辨識，再自動偵測與遮罩；表格框線、底色、勾選框與文字顏色依原位置重繪，傾斜或放反的頁面會先自動轉正。以內附的 5 頁掃描範例實測，字元召回率約 99%。辨識仍可能有誤，下載前請逐頁核對。" }
+              "name": "扫描的 PDF 或纸质扫描件可以去标识化吗？",
+              "acceptedAnswer": { "@type": "Answer", "text": "可以。没有文字层的 PDF 会在浏览器内以 OCR（简体中文＋英文）识别，再自动检测与脱敏；表格框线、底色、复选框与文字颜色按原位置重绘，倾斜或放反的页面会先自动转正。以内置的 5 页扫描示例实测，字符召回率约 98.6%。识别仍可能有误，下载前请逐页核对。" }
             },
             {
               "@type": "Question",
-              "name": "可以一次處理多個檔案嗎？",
-              "acceptedAnswer": { "@type": "Answer", "text": "可以。一次最多 10 個檔案，PDF、Word、Excel、TXT、Markdown 可以混合，每個檔案各自預覽與覆核，最後一鍵打包成 ZIP 下載；也可以讓整批檔案共用編碼，同一個人在不同檔案中是同一個編碼。" }
+              "name": "可以一次处理多个文件吗？",
+              "acceptedAnswer": { "@type": "Answer", "text": "可以。一次最多 10 个文件，PDF、Word、Excel、TXT、Markdown 可以混合，每个文件各自预览与复核，最后一键打包成 ZIP 下载；也可以让整批文件共用编码，同一个人在不同文件中是同一个编码。" }
             },
             {
               "@type": "Question",
-              "name": "去識別化後可以還原嗎？",
-              "acceptedAnswer": { "@type": "Answer", "text": "可以。每筆敏感資訊都換成 [類別:編碼] 形式的唯一標記，對應關係存在 CSV 編碼表中。在「還原」頁籤上傳去識別化文件與編碼表，即可取得原格式的還原檔。編碼表是還原的唯一憑證，請妥善保管。" }
+              "name": "去标识化后可以还原吗？",
+              "acceptedAnswer": { "@type": "Answer", "text": "可以。每条敏感信息都换成 [类别:编码] 形式的唯一标记，对应关系存在 CSV 编码表中。在「还原」标签页上传去标识化文件与编码表，即可获取原格式的还原文件。编码表是还原的唯一凭证，请妥善保管。" }
             },
             {
               "@type": "Question",
-              "name": "不需要還原，可以只遮蔽、不要編碼嗎？",
-              "acceptedAnswer": { "@type": "Answer", "text": "可以。在「輸出設定」的「標記」改選「類別」，輸出寫成 [姓名]、[手機]；或選「空白佔位」，像公文一樣以「○」取代每個字（分隔符號保留，例如 0912-○○○-○○○）。這兩種方式只下載去識別化文件、不產生編碼表，日後無法還原；「空白佔位」會保留原本的字數，需要更高的匿名性請選「類別」。預設的「編碼」仍可還原。" }
+              "name": "不需要还原，可以只遮蔽、不要编码吗？",
+              "acceptedAnswer": { "@type": "Answer", "text": "可以。在「输出设置」的「标记」改选「类别」，输出写成 [姓名]、[手机]；或选「空白占位」，像公文一样以「○」取代每个字（分隔符号保留，例如 138-○○○○-○○○○）。这两种方式只下载去标识化文件、不生成编码表，以后无法还原；「空白占位」会保留原本的字数，需要更高的匿名性请选「类别」。默认的「编码」仍可还原。" }
             },
             {
               "@type": "Question",
-              "name": "去識別化後的資料還能拿來統計嗎？",
-              "acceptedAnswer": { "@type": "Answer", "text": "可以。預覽上方「輸出設定」的「保留」預設為「部分保留」，只露出適合統計的字元，例如身分證前 2 碼（地區與性別）、Email 網域、地址的縣市區，輸出如 A1[身分證:a3f9c2]；改選「自訂」可以逐類別調整，在 Excel 用 LEFT／RIGHT 就能分組統計，仍可用編碼表完整還原。多個檔案可以選擇整批共用編碼，或匯入上次的編碼表沿用舊編碼，讓同一個人在不同檔案中是同一個編碼。保留的字元越多越容易辨識出個人，請視接收對象斟酌。" }
+              "name": "去标识化后的数据还能拿来统计吗？",
+              "acceptedAnswer": { "@type": "Answer", "text": "可以。预览上方「输出设置」的「保留」默认为「部分保留」，只露出适合统计的字符，例如身份证前 2 位（省级行政区）、Email 域名、地址的省市/区县，输出如 11[身份证:a3f9c2]；改选「自定义」可以逐类别调整，在 Excel 用 LEFT／RIGHT 就能分组统计，仍可用编码表完整还原。多个文件可以选择整批共用编码，或导入上次的编码表沿用旧编码，让同一个人在不同文件中是同一个编码。保留的字符越多越容易识别出个人，请根据接收对象斟酌。" }
             },
             {
               "@type": "Question",
-              "name": "輸出的文件會保留原本的格式嗎？",
-              "acceptedAnswer": { "@type": "Answer", "text": "Word 與 Excel 直接改寫文字節點，樣式、表格、頁首頁尾與工作表結構都保留；PDF 依原始座標重建文字版面並內嵌中文字型，但圖片、圖形與原字型不會保留。" }
+              "name": "输出的文件会保留原本的格式吗？",
+              "acceptedAnswer": { "@type": "Answer", "text": "Word 与 Excel 直接改写文字节点，样式、表格、页眉页脚与工作表结构都保留；PDF 依原始坐标重建文字版面并内嵌中文字体，但图片、图形与原字体不会保留。" }
             },
             {
               "@type": "Question",
-              "name": "PDF 為什麼不是用黑框蓋住敏感文字？",
-              "acceptedAnswer": { "@type": "Answer", "text": "用色塊覆蓋的 PDF，底層文字仍然可以被複製或擷取出來。本工具改以文字重建的方式輸出 PDF，敏感文字會真正從檔案中移除，不會殘留在輸出檔內。" }
+              "name": "PDF 为什么不是用黑框盖住敏感文字？",
+              "acceptedAnswer": { "@type": "Answer", "text": "用色块覆盖的 PDF，底层文字仍然可以被复制或提取出来。本工具改以文字重建的方式输出 PDF，敏感文字会真正从文件中移除，不会残留在输出文件内。" }
             },
             {
               "@type": "Question",
-              "name": "自動偵測會不會有誤判或漏抓？",
-              "acceptedAnswer": { "@type": "Answer", "text": "會。中文姓名與地址無法靠規則做到零誤判、零漏抓，所以自動偵測只是建議：預覽畫面可以點擊標記取消誤判、在「依類別調整」整類取消，或圈選文字手動新增漏抓的項目，確認後再下載。" }
+              "name": "自动检测会不会有误判或漏抓？",
+              "acceptedAnswer": { "@type": "Answer", "text": "会。中文姓名与地址无法靠规则做到零误判、零漏抓，所以自动检测只是建议：预览画面可以点击标记取消误判、在「按类别调整」整类取消，或框选文字手动新增漏抓的项目，确认后再下载。" }
             },
             {
               "@type": "Question",
-              "name": "這個工具要收費嗎？可以自行架設嗎？",
-              "acceptedAnswer": { "@type": "Answer", "text": "完全免費，並以 MIT 授權開源。執行 npm run build 產出的 dist/ 是純靜態網站，可以放到 GitHub Pages、內網檔案伺服器或任何靜態空間自行架設，也可以直接以檔案方式開啟。" }
+              "name": "这个工具要收费吗？可以自行部署吗？",
+              "acceptedAnswer": { "@type": "Answer", "text": "完全免费，并以 MIT 授权开源。执行 npm run build 生成的 dist/ 是纯静态网站，可以放到 GitHub Pages、内网文件服务器或任何静态空间自行部署，也可以直接以文件方式打开。" }
             }
           ]
         },
         {
           "@type": "Person",
-          "@id": "https://deanlin.net/#person",
-          "name": "Dean Lin",
-          "url": "https://deanlin.net/",
-          "sameAs": [
-            "https://medium.com/@dean-lin",
-            "https://www.facebook.com/deanlinbao",
-            "https://www.threads.com/@deanlin5288",
-            "https://www.youtube.com/@dlcorner",
-            "https://github.com/dean9703111"
-          ]
+          "@id": "__SITE_URL__#person",
+          "name": "jason-nine",
+          "url": "https://github.com/jason-nine",
+          "sameAs": ["https://github.com/jason-nine"]
         }
       ]
     }
@@ -269,130 +264,130 @@
     <div id="app">
       <!-- Static fallback for crawlers and no-JS clients; replaced by the app on load. -->
       <main class="seo-fallback">
-        <h1>文件去識別化工具</h1>
-        <p>純前端、資料不出電腦的文件去識別化工具。上傳 PDF、Word、Excel、TXT、Markdown 或貼上文字，自動偵測姓名、身分證字號、手機、市話、地址、電子郵件、公司名稱、統一編號與自訂識別碼；預覽、人工覆核後下載去識別化文件與 CSV 編碼表，之後可完整還原。</p>
-        <noscript><p>本工具需要啟用 JavaScript 才能運作。原始碼與說明：<a href="https://github.com/dean9703111/data-deidentification">github.com/dean9703111/data-deidentification</a></p></noscript>
+        <h1>文件去标识化工具</h1>
+        <p>纯前端、数据不出电脑的文件去标识化工具。上传 PDF、Word、Excel、TXT、Markdown 或粘贴文字，自动检测姓名、身份证号、手机、固定电话、地址、邮箱、公司名称、统一社会信用代码与自定义标识符；预览、人工复核后下载去标识化文件与 CSV 编码表，之后可完整还原。</p>
+        <noscript><p>本工具需要启用 JavaScript 才能运作。原始码与说明：<a href="https://github.com/jason-nine/data-deidentification-zh">github.com/jason-nine/data-deidentification-zh</a></p></noscript>
       </main>
       <!-- Static "about / how-to / FAQ" content: readable without JavaScript; the app keeps it below the panels after mount. -->
       <section id="site-info" class="site-info" aria-labelledby="site-info-title">
         <div class="site-info-inner">
-          <h2 id="site-info-title">關於文件去識別化工具</h2>
-          <p>文件去識別化工具是一個免費、開源、純前端的線上工具，用來把 PDF、Word、Excel、TXT、Markdown 文件或貼上的文字中的個人資料（姓名、身分證字號、手機、市話、地址、電子郵件、公司名稱、統一編號、自訂識別碼）自動偵測並以唯一編碼取代，同時產出 CSV 編碼表，日後可憑編碼表完整還原。所有處理都在瀏覽器內完成，檔案不會上傳到任何伺服器，離線也能使用。</p>
+          <h2 id="site-info-title">关于文件去标识化工具</h2>
+          <p>文件去标识化工具是一个免费、开源、纯前端的在线工具，用来把 PDF、Word、Excel、TXT、Markdown 文件或粘贴的文字中的个人信息（姓名、身份证号、手机、固定电话、地址、邮箱、公司名称、统一社会信用代码、自定义标识符）自动检测并以唯一编码取代，同时生成 CSV 编码表，以后可凭编码表完整还原。所有处理都在浏览器内完成，文件不会上传到任何服务器，离线也能使用。</p>
 
-          <h3>適用情境</h3>
+          <h3>适用情境</h3>
           <ul>
-            <li><strong>交給 AI 之前</strong>：把合約、會議紀錄、客服對話交給 ChatGPT、Claude、Gemini 摘要或翻譯前，先把姓名、電話、身分證換掉；AI 仍讀得懂 [姓名]、[手機] 的語意。</li>
-            <li><strong>委外與跨部門</strong>：客戶清單、報價單交給外包廠商或其他部門處理，回來後用編碼表還原。</li>
-            <li><strong>研究與統計</strong>：部分保留身分證前 2 碼、地址縣市區、Email 網域，在 Excel 分組統計而不暴露個人。</li>
-            <li><strong>紙本與掃描檔</strong>：申請表、名冊、名片等掃描 PDF 先在瀏覽器內辨識文字，再遮罩個資，表格框線與勾選框照原樣重繪。</li>
-            <li><strong>公開範例與教學</strong>：以「○」佔位，像公文一樣遮蔽個資後公開。</li>
+            <li><strong>交给 AI 之前</strong>：把合同、会议记录、客服对话交给 ChatGPT、Claude、Gemini 摘要或翻译前，先把姓名、电话、身份证换掉；AI 仍读得懂 [姓名]、[手机] 的语义。</li>
+            <li><strong>外包与跨部门</strong>：客户清单、报价单交给外包厂商或其他部门处理，回来后用编码表还原。</li>
+            <li><strong>研究与统计</strong>：部分保留身份证前 2 位、地址省市/区县、Email 域名，在 Excel 分组统计而不暴露个人。</li>
+            <li><strong>纸质与扫描件</strong>：申请表、名册、名片等扫描 PDF 先在浏览器内识别文字，再脱敏个人信息，表格框线与复选框照原样重绘。</li>
+            <li><strong>公开示例与教学</strong>：以「○」占位，像公文一样遮蔽个人信息后公开。</li>
           </ul>
 
-          <h3>與其他做法比較</h3>
+          <h3>与其他做法比较</h3>
           <table>
             <thead>
-              <tr><th>做法</th><th>檔案離開電腦嗎</th><th>能還原嗎</th><th>個資真的移除了嗎</th></tr>
+              <tr><th>做法</th><th>文件离开电脑吗</th><th>能还原吗</th><th>个人信息真的移除了吗</th></tr>
             </thead>
             <tbody>
-              <tr><td>本工具</td><td>不會，全程在瀏覽器內處理</td><td>可以（編碼表），也可選擇不還原</td><td>是，輸出檔不含原文</td></tr>
-              <tr><td>需上傳的線上工具</td><td>會，檔案送到第三方伺服器</td><td>視服務而定</td><td>視服務而定</td></tr>
-              <tr><td>PDF 黑框、色塊覆蓋</td><td>不會</td><td>不能</td><td>否，底層文字仍可複製出來</td></tr>
-              <tr><td>手動尋找取代</td><td>不會</td><td>除非自行記錄，否則不能</td><td>容易漏改</td></tr>
+              <tr><td>本工具</td><td>不会，全程在浏览器内处理</td><td>可以（编码表），也可选择不还原</td><td>是，输出文件不含原文</td></tr>
+              <tr><td>需上传的在线工具</td><td>会，文件送到第三方服务器</td><td>视服务而定</td><td>视服务而定</td></tr>
+              <tr><td>PDF 黑框、色块覆盖</td><td>不会</td><td>不能</td><td>否，底层文字仍可复制出来</td></tr>
+              <tr><td>手动寻找取代</td><td>不会</td><td>除非自行记录，否则不能</td><td>容易漏改</td></tr>
             </tbody>
           </table>
 
           <h3>使用方式</h3>
           <ol>
-            <li>在「去識別化」頁籤拖入檔案或貼上文字，按「開始去識別化」。</li>
-            <li>在依原格式排版的預覽中檢視自動偵測結果：預覽就是下載後的樣子，編碼以類別名稱表示（如 <code>王[姓名]</code>、<code>A1[身分證]</code>），滑鼠停留可看原文與實際輸出標記。</li>
-            <li>人工覆核：點擊標記取消誤判、在「輸出設定」的「依類別調整」整類取消、圈選文字新增漏抓的項目。</li>
-            <li>用預覽上方「輸出設定」的「保留」決定要露出多少：部分保留（預設，例如 <code>A1[身分證]</code>，只露出適合統計的字元）、全部隱藏，或自訂（逐類別保留前後幾碼、Email 網域、縣市區等，方便統計，可設為預設）；不需要還原時，「標記」可改選類別 <code>[姓名]</code> 或空白佔位「○○○」。</li>
-            <li>按「下載（文件＋編碼表）」一次取得去識別化文件（與上傳相同格式，檔名加 <code>.deid</code>）與 CSV 編碼表；多個檔案可一鍵打包成 ZIP，也可選擇整批共用編碼或匯入上次的編碼表沿用編碼。</li>
-            <li>需要復原時，到「還原」頁籤上傳去識別化文件與編碼表，即可下載還原檔。</li>
+            <li>在「去标识化」标签页拖入文件或粘贴文字，按「开始去标识化」。</li>
+            <li>在按原格式排版的预览中查看自动检测结果：预览就是下载后的样子，编码以类别名称表示（如 <code>王[姓名]</code>、<code>11[身份证]</code>），鼠标悬停可看原文与实际输出标记。</li>
+            <li>人工复核：点击标记取消误判、在「输出设置」的「按类别调整」整类取消、框选文字新增漏抓的项目。</li>
+            <li>用预览上方「输出设置」的「保留」决定要露出多少：部分保留（默认，例如 <code>11[身份证]</code>，只露出适合统计的字符）、全部隐藏，或自定义（逐类别保留前后几码、Email 域名、省市/区县等，方便统计，可设为默认）；不需要还原时，「标记」可改选类别 <code>[姓名]</code> 或空白占位「○○○」。</li>
+            <li>按「下载（文件＋编码表）」一次获取去标识化文件（与上传相同格式，文件名加 <code>.deid</code>）与 CSV 编码表；多个文件可一键打包成 ZIP，也可选择整批共用编码或导入上次的编码表沿用编码。</li>
+            <li>需要复原时，到「还原」标签页上传去标识化文件与编码表，即可下载还原文件。</li>
           </ol>
 
-          <h3>支援格式</h3>
+          <h3>支持格式</h3>
           <table>
             <thead>
-              <tr><th>格式</th><th>輸入</th><th>輸出與限制</th></tr>
+              <tr><th>格式</th><th>输入</th><th>输出与限制</th></tr>
             </thead>
             <tbody>
-              <tr><td>TXT／Markdown／貼上文字</td><td>.txt、.md 或直接貼上</td><td>同格式輸出；貼上的文字可一鍵複製結果</td></tr>
-              <tr><td>Word</td><td>.docx</td><td>保留樣式、表格、頁首頁尾；不支援舊版 .doc</td></tr>
-              <tr><td>Excel</td><td>.xlsx</td><td>保留儲存格樣式與工作表結構；僅處理文字型儲存格，數值型電話、公式結果不在範圍</td></tr>
-              <tr><td>PDF</td><td>含文字層</td><td>依原座標重建文字並內嵌中文字型，不保留圖片、圖形與原字型</td></tr>
-              <tr><td>掃描 PDF</td><td>整份沒有文字層</td><td>在瀏覽器內以 OCR 辨識繁中與英文，辨識出的文字依原位置、大小與顏色重建，表格框線、底色與勾選框（含勾選狀態）重繪，傾斜或放反的頁面自動轉正；照片、標誌等不含文字的圖片原樣保留（可逐張取消）；辨識可能有誤，請逐頁核對</td></tr>
+              <tr><td>TXT／Markdown／粘贴文字</td><td>.txt、.md 或直接粘贴</td><td>同格式输出；粘贴的文字可一键复制结果</td></tr>
+              <tr><td>Word</td><td>.docx</td><td>保留样式、表格、页眉页脚；不支持旧版 .doc</td></tr>
+              <tr><td>Excel</td><td>.xlsx</td><td>保留单元格样式与工作表结构；仅处理文字体单元格，数值型电话、公式结果不在范围</td></tr>
+              <tr><td>PDF</td><td>含文字层</td><td>按原坐标重建文字并内嵌中文字体，不保留图片、图形与原字体</td></tr>
+              <tr><td>扫描 PDF</td><td>整份没有文字层</td><td>在浏览器内以 OCR 识别简体中文与英文，识别出的文字按原位置、大小与颜色重建，表格框线、底色与复选框（含勾选状态）重绘，倾斜或放反的页面自动转正；照片、标志等不含文字的图片原样保留（可逐张取消）；识别可能有误，请逐页核对</td></tr>
             </tbody>
           </table>
-          <p class="muted small">單檔上限 100 MB，一次最多 10 個檔案；內建規則以台灣常見格式為主。</p>
+          <p class="muted small">单档上限 100 MB，一次最多 10 个文件；内置规则以中国大陆常见格式为主。</p>
 
-          <h3>常見問題</h3>
+          <h3>常见问题</h3>
           <div id="faq" class="faq">
             <details>
-              <summary>什麼是文件去識別化？</summary>
-              <p>文件去識別化是把文件中可以直接或間接辨識特定個人的資訊（例如姓名、身分證字號、手機、地址、電子郵件），以遮罩或編碼取代，讓文件在交給第三方、AI 服務或研究單位時不會洩漏個資。本工具會把每筆敏感資訊換成唯一的隨機編碼，並產出 CSV 編碼表供日後還原。</p>
+              <summary>什么是文件去标识化？</summary>
+              <p>文件去标识化是把文件中可以直接或间接识别特定个人的信息（例如姓名、身份证号、手机、地址、邮箱），以脱敏或编码取代，让文件在交给第三方、AI 服务或研究单位时不会泄漏个人信息。本工具会把每条敏感信息换成唯一的随机编码，并生成 CSV 编码表供以后还原。</p>
             </details>
             <details>
-              <summary>我的檔案會被上傳到伺服器嗎？</summary>
-              <p>不會。文件解析、個資偵測、遮罩與輸出全部在你的瀏覽器內以 JavaScript 完成，沒有任何後端；載入頁面後即使離線也能使用。瀏覽器只會儲存你的偵測規則設定，文件內容與編碼表都不會落地。</p>
+              <summary>我的文件会被上传到服务器吗？</summary>
+              <p>不会。文件解析、个人信息检测、脱敏与输出全部在你的浏览器内以 JavaScript 完成，没有任何后端；加载页面后即使离线也能使用。浏览器只会保存你的检测规则设置，文件内容与编码表都不会落地。</p>
             </details>
             <details>
-              <summary>支援哪些檔案格式？</summary>
-              <p>支援 PDF（含掃描檔，會在瀏覽器內以 OCR 辨識文字）、Word（.docx）、Excel（.xlsx）、TXT、Markdown，也可以直接貼上文字。單檔上限 100 MB，一次最多 10 個檔案混合處理。不支援舊版 .doc、.xls。</p>
+              <summary>支持哪些文件格式？</summary>
+              <p>支持 PDF（含扫描件，会在浏览器内以 OCR 识别文字）、Word（.docx）、Excel（.xlsx）、TXT、Markdown，也可以直接粘贴文字。单档上限 100 MB，一次最多 10 个文件混合处理。不支持旧版 .doc、.xls。</p>
             </details>
             <details>
-              <summary>可以偵測哪些個人資料？</summary>
-              <p>內建十五種類別。台灣格式：中文姓名、身分證字號（含檢核碼驗證）、手機、市話、地址、電子郵件、公司／組織名稱、統一編號（含檢核碼驗證）與自訂識別碼；國際格式：國際電話（驗證號碼有效性）、信用卡號（Luhn 檢核）、美國社會安全碼（SSN）、IBAN 國際銀行帳號、IP 位址與出生日期（依「出生日期」「Date of Birth」等標籤判斷）。也可以用正規表達式新增自訂規則；英文姓名與地址目前需在預覽中圈選新增。</p>
+              <summary>可以检测哪些个人信息？</summary>
+              <p>内置十七种类别。中国大陆格式：中文姓名、居民身份证号（校验位验证）、手机号码、固定电话、地址、单位名称、统一社会信用代码（校验位验证）、银行卡号（Luhn 校验）、车牌号、护照号与自定义标识符；国际与通用格式：邮箱、国际电话（验证号码有效性）、信用卡号（Luhn 校验）、美国社会安全码（SSN）、IBAN 国际银行账号、IPv4／IPv6 地址与出生日期（按「出生日期」「Date of Birth」等标签判断）。也可以用正则表达式新增自定义规则；英文姓名与地址目前需在预览中框选新增。</p>
             </details>
             <details>
-              <summary>去識別化、假名化、匿名化有什麼不同？</summary>
-              <p>去識別化是泛稱，指處理後無法直接識別特定個人。假名化（pseudonymization）是以代號取代可識別的資料、另外保存對照表，必要時可以還原，本工具預設的「編碼」加上 CSV 編碼表就屬於這一類；匿名化（anonymization）則是處理到無法再回推個人、也無法還原。選「類別」或「空白佔位」不會產生編碼表，但是否達到匿名化，還要看保留的字元與文件中的其他資訊，交付前請自行判斷。</p>
+              <summary>去标识化、假名化、匿名化有什么不同？</summary>
+              <p>去标识化是泛称，指处理后无法直接识别特定个人。假名化（pseudonymization）是以代号取代可识别的数据、另外保存对照表，必要时可以还原，本工具默认的「编码」加上 CSV 编码表就属于这一类；匿名化（anonymization）则是处理到无法再回推个人、也无法还原。选「类别」或「空白占位」不会生成编码表，但是否达到匿名化，还要看保留的字符与文件中的其他信息，交付前请自行判断。</p>
             </details>
             <details>
-              <summary>把文件交給 ChatGPT 等 AI 之前，要怎麼移除個資？</summary>
-              <p>把文件拖進本工具或直接貼上文字，確認姓名、身分證、手機、地址、Email 等都已標記，再下載或複製去識別化後的內容交給 AI。AI 看到的是 [姓名]、[手機] 這類標記，仍能理解語意；整個過程在瀏覽器內完成，原始檔案不會上傳。預設的「編碼」會讓 AI 的回覆保留 [姓名:6e679d] 這類標記，之後可以用編碼表還原成真實資料；不需要還原時，把「標記方式」改為「類別」即可。</p>
+              <summary>把文件交给 ChatGPT 等 AI 之前，要怎么移除个人信息？</summary>
+              <p>把文件拖进本工具或直接粘贴文字，确认姓名、身份证、手机、地址、Email 等都已标记，再下载或复制去标识化后的内容交给 AI。AI 看到的是 [姓名]、[手机] 这类标记，仍能理解语义；整个过程在浏览器内完成，原始文件不会上传。默认的「编码」会让 AI 的回复保留 [姓名:6e679d] 这类标记，之后可以用编码表还原成真实数据；不需要还原时，把「标记方式」改为「类别」即可。</p>
             </details>
             <details>
-              <summary>掃描的 PDF 或紙本掃描檔可以去識別化嗎？</summary>
-              <p>可以。沒有文字層的 PDF 會在瀏覽器內以 OCR（繁體中文＋英文）辨識，再自動偵測與遮罩；表格框線、底色、勾選框與文字顏色依原位置重繪，傾斜或放反的頁面會先自動轉正。以內附的 5 頁掃描範例實測，字元召回率約 99%。辨識仍可能有誤，下載前請逐頁核對。</p>
+              <summary>扫描的 PDF 或纸质扫描件可以去标识化吗？</summary>
+              <p>可以。没有文字层的 PDF 会在浏览器内以 OCR（简体中文＋英文）识别，再自动检测与脱敏；表格框线、底色、复选框与文字颜色按原位置重绘，倾斜或放反的页面会先自动转正。以内置的 5 页扫描示例实测，字符召回率约 98.6%。识别仍可能有误，下载前请逐页核对。</p>
             </details>
             <details>
-              <summary>可以一次處理多個檔案嗎？</summary>
-              <p>可以。一次最多 10 個檔案，PDF、Word、Excel、TXT、Markdown 可以混合，每個檔案各自預覽與覆核，最後一鍵打包成 ZIP 下載；也可以讓整批檔案共用編碼，同一個人在不同檔案中是同一個編碼。</p>
+              <summary>可以一次处理多个文件吗？</summary>
+              <p>可以。一次最多 10 个文件，PDF、Word、Excel、TXT、Markdown 可以混合，每个文件各自预览与复核，最后一键打包成 ZIP 下载；也可以让整批文件共用编码，同一个人在不同文件中是同一个编码。</p>
             </details>
             <details>
-              <summary>去識別化後可以還原嗎？</summary>
-              <p>可以。每筆敏感資訊都換成 [類別:編碼] 形式的唯一標記，對應關係存在 CSV 編碼表中。在「還原」頁籤上傳去識別化文件與編碼表，即可取得原格式的還原檔。編碼表是還原的唯一憑證，請妥善保管。</p>
+              <summary>去标识化后可以还原吗？</summary>
+              <p>可以。每条敏感信息都换成 [类别:编码] 形式的唯一标记，对应关系存在 CSV 编码表中。在「还原」标签页上传去标识化文件与编码表，即可获取原格式的还原文件。编码表是还原的唯一凭证，请妥善保管。</p>
             </details>
             <details>
-              <summary>不需要還原，可以只遮蔽、不要編碼嗎？</summary>
-              <p>可以。在「輸出設定」的「標記」改選「類別」，輸出寫成 [姓名]、[手機]；或選「空白佔位」，像公文一樣以「○」取代每個字（分隔符號保留，例如 0912-○○○-○○○）。這兩種方式只下載去識別化文件、不產生編碼表，日後無法還原；「空白佔位」會保留原本的字數，需要更高的匿名性請選「類別」。預設的「編碼」仍可還原。</p>
+              <summary>不需要还原，可以只遮蔽、不要编码吗？</summary>
+              <p>可以。在「输出设置」的「标记」改选「类别」，输出写成 [姓名]、[手机]；或选「空白占位」，像公文一样以「○」取代每个字（分隔符号保留，例如 138-○○○○-○○○○）。这两种方式只下载去标识化文件、不生成编码表，以后无法还原；「空白占位」会保留原本的字数，需要更高的匿名性请选「类别」。默认的「编码」仍可还原。</p>
             </details>
             <details>
-              <summary>去識別化後的資料還能拿來統計嗎？</summary>
-              <p>可以。預覽上方「輸出設定」的「保留」預設為「部分保留」，只露出適合統計的字元，例如身分證前 2 碼（地區與性別）、Email 網域、地址的縣市區，輸出如 A1[身分證:a3f9c2]；改選「自訂」可以逐類別調整，在 Excel 用 LEFT／RIGHT 就能分組統計，仍可用編碼表完整還原。多個檔案可以選擇整批共用編碼，或匯入上次的編碼表沿用舊編碼，讓同一個人在不同檔案中是同一個編碼。保留的字元越多越容易辨識出個人，請視接收對象斟酌。</p>
+              <summary>去标识化后的数据还能拿来统计吗？</summary>
+              <p>可以。预览上方「输出设置」的「保留」默认为「部分保留」，只露出适合统计的字符，例如身份证前 2 位（省级行政区）、Email 域名、地址的省市/区县，输出如 11[身份证:a3f9c2]；改选「自定义」可以逐类别调整，在 Excel 用 LEFT／RIGHT 就能分组统计，仍可用编码表完整还原。多个文件可以选择整批共用编码，或导入上次的编码表沿用旧编码，让同一个人在不同文件中是同一个编码。保留的字符越多越容易识别出个人，请根据接收对象斟酌。</p>
             </details>
             <details>
-              <summary>輸出的文件會保留原本的格式嗎？</summary>
-              <p>Word 與 Excel 直接改寫文字節點，樣式、表格、頁首頁尾與工作表結構都保留；PDF 依原始座標重建文字版面並內嵌中文字型，但圖片、圖形與原字型不會保留。</p>
+              <summary>输出的文件会保留原本的格式吗？</summary>
+              <p>Word 与 Excel 直接改写文字节点，样式、表格、页眉页脚与工作表结构都保留；PDF 依原始坐标重建文字版面并内嵌中文字体，但图片、图形与原字体不会保留。</p>
             </details>
             <details>
-              <summary>PDF 為什麼不是用黑框蓋住敏感文字？</summary>
-              <p>用色塊覆蓋的 PDF，底層文字仍然可以被複製或擷取出來。本工具改以文字重建的方式輸出 PDF，敏感文字會真正從檔案中移除，不會殘留在輸出檔內。</p>
+              <summary>PDF 为什么不是用黑框盖住敏感文字？</summary>
+              <p>用色块覆盖的 PDF，底层文字仍然可以被复制或提取出来。本工具改以文字重建的方式输出 PDF，敏感文字会真正从文件中移除，不会残留在输出文件内。</p>
             </details>
             <details>
-              <summary>自動偵測會不會有誤判或漏抓？</summary>
-              <p>會。中文姓名與地址無法靠規則做到零誤判、零漏抓，所以自動偵測只是建議：預覽畫面可以點擊標記取消誤判、在「依類別調整」整類取消，或圈選文字手動新增漏抓的項目，確認後再下載。</p>
+              <summary>自动检测会不会有误判或漏抓？</summary>
+              <p>会。中文姓名与地址无法靠规则做到零误判、零漏抓，所以自动检测只是建议：预览画面可以点击标记取消误判、在「按类别调整」整类取消，或框选文字手动新增漏抓的项目，确认后再下载。</p>
             </details>
             <details>
-              <summary>這個工具要收費嗎？可以自行架設嗎？</summary>
-              <p>完全免費，並以 MIT 授權開源。執行 npm run build 產出的 dist/ 是純靜態網站，可以放到 GitHub Pages、內網檔案伺服器或任何靜態空間自行架設，也可以直接以檔案方式開啟。</p>
+              <summary>这个工具要收费吗？可以自行部署吗？</summary>
+              <p>完全免费，并以 MIT 授权开源。执行 npm run build 生成的 dist/ 是纯静态网站，可以放到 GitHub Pages、内网文件服务器或任何静态空间自行部署，也可以直接以文件方式打开。</p>
             </details>
           </div>
           <h3 lang="en">In English</h3>
-          <p lang="en">Data De-identification Tool is a free, open-source, browser-only tool for redacting personal data (PII) in Traditional Chinese (Taiwan) documents. It detects names, national ID numbers, mobile and landline numbers, addresses, email addresses, company names and tax IDs in PDF (including scanned PDFs, read with in-browser OCR), Word, Excel, TXT and Markdown files, lets you review every match, and exports the redacted file in its original format. Each value becomes a reversible code with a CSV mapping table, or a plain category label or ○ placeholders when no restoring is needed. Files never leave your browser.</p>
+          <p lang="en">Data De-identification Tool is a free, open-source, browser-only tool for redacting personal data (PII) in Simplified Chinese (Mainland China) documents. It detects names, national ID numbers, mobile and landline numbers, addresses, email addresses, company names and tax IDs in PDF (including scanned PDFs, read with in-browser OCR), Word, Excel, TXT and Markdown files, lets you review every match, and exports the redacted file in its original format. Each value becomes a reversible code with a CSV mapping table, or a plain category label or ○ placeholders when no restoring is needed. Files never leave your browser.</p>
 
-          <p class="muted small">完整操作說明與截圖見 <a href="https://github.com/dean9703111/data-deidentification#readme" target="_blank" rel="noopener">GitHub 專案頁</a>；範例檔皆為程式產生的虛構資料。給 AI 的網站摘要：<a href="llms.txt">llms.txt</a>、<a href="llms-full.txt">llms-full.txt</a>。最後更新：<time datetime="__BUILD_DATE__">__BUILD_DATE__</time></p>
+          <p class="muted small">完整操作说明与截图见 <a href="https://github.com/jason-nine/data-deidentification-zh#readme" target="_blank" rel="noopener">GitHub 项目页</a>；示例档皆为程序生成的虚构数据。给 AI 的网站摘要：<a href="llms.txt">llms.txt</a>、<a href="llms-full.txt">llms-full.txt</a>。最后更新：<time datetime="__BUILD_DATE__">__BUILD_DATE__</time></p>
         </div>
       </section>
     </div>

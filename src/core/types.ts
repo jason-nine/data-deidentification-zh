@@ -1,6 +1,10 @@
 export type DocFormat = 'txt' | 'md' | 'docx' | 'xlsx' | 'pdf';
 
-export const CATEGORIES = ['姓名', '身分證', '手機', '市話', '地址', '電子郵件', '公司', '統編', '識別碼', '國際電話', '信用卡', 'SSN', 'IBAN', 'IP', '生日'] as const;
+export const CATEGORIES = [
+  '姓名', '身份证', '护照', '手机', '固定电话', '地址', '邮箱', '单位名称',
+  '统一社会信用代码', '银行卡', '车牌', '出生日期', '标识符',
+  '国际电话', '信用卡', 'SSN', 'IBAN', 'IP',
+] as const;
 export type Category = (typeof CATEGORIES)[number];
 
 /** How much of a detected value stays visible outside the marker (see core/retention.ts). */
@@ -11,7 +15,7 @@ export type Retention =
   | { mode: 'surname' }
   | { mode: 'city' }
   | { mode: 'district' }
-  /** The standard 部分保留 per category (see core/retention.ts standardSplit), e.g. A1[身分證], 0912-[手機]. */
+  /** The standard 部分保留 per category (see core/retention.ts standardSplit), e.g. 11[身份证], 138-[手机]. */
   | { mode: 'preview' };
 
 export interface Pattern {
@@ -23,8 +27,8 @@ export interface Pattern {
   example: string;
   enabled: boolean;
   retention?: Retention;
-  /** Builtin-only: the rules page group (台灣格式／國際與通用格式); custom rules form their own group. */
-  group?: 'tw' | 'intl';
+  /** Builtin-only: the rules page group (中国大陆格式／国际与通用格式); custom rules form their own group. */
+  group?: 'cn' | 'intl';
   /** Builtin-only: how matches are checked beyond the RegExp (checksum, valid ranges), shown with the rule. */
   note?: string;
   /**

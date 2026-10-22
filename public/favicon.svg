@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="文件去标识化工具">
+  <rect width="64" height="64" rx="14" fill="#2f6fed"/>
+  <path d="M20 12h17l9 9v31a4 4 0 0 1-4 4H20a4 4 0 0 1-4-4V16a4 4 0 0 1 4-4z" fill="#ffffff" opacity="0.96"/>
+  <path d="M37 12v9h9" fill="none" stroke="#2f6fed" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="22" y="30" width="20" height="4" rx="2" fill="#2f6fed" opacity="0.35"/>
+  <rect x="22" y="39" width="14" height="4" rx="2" fill="#2f6fed" opacity="0.35"/>
+  <circle cx="46" cy="46" r="11" fill="#2f6fed" stroke="#ffffff" stroke-width="3"/>
+  <path d="M41 46h10" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+</svg>

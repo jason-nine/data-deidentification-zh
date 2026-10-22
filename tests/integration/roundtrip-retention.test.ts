@@ -18,8 +18,8 @@ describe('round trip with partial retention', () => {
     expect(items.some((i) => i.head || i.tail)).toBe(true);
     const { edits, mapping } = applyRedactions(doc.text, items);
     const out = await parseDocx(toFile(new Uint8Array(await (await generateDocx(doc, edits)).arrayBuffer()), 'out.docx'));
-    expect(out.text).toMatch(/A1\[身分證:[0-9a-f]{6}\]/);
-    expect(out.text).not.toContain('A123456789');
+    expect(out.text).toMatch(/11\[身份证:[0-9a-f]{6}\]/);
+    expect(out.text).not.toContain('110101199003078515');
     expect(restore(out.text, mapping).restoredText).toBe(doc.text);
   });
 
@@ -28,8 +28,8 @@ describe('round trip with partial retention', () => {
     const items = detect(doc.text, SUGGESTED);
     const { edits, mapping } = applyRedactions(doc.text, items);
     const out = await parseXlsx(toXlsxFile(new Uint8Array(await (await generateXlsx(doc, edits)).arrayBuffer()), 'out.xlsx'));
-    expect(out.text).toMatch(/台北市信義區\[地址:[0-9a-f]{6}\]/);
-    expect(out.text).toMatch(/\[手機:[0-9a-f]{6}\]678/);
+    expect(out.text).toMatch(/北京市朝阳区\[地址:[0-9a-f]{6}\]/);
+    expect(out.text).toMatch(/\[手机:[0-9a-f]{6}\]678/);
     expect(restore(out.text, mapping).restoredText).toBe(doc.text);
   });
 });

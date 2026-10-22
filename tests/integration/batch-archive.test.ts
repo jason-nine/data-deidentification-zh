@@ -55,7 +55,7 @@ describe('manifestCsv', () => {
 
   it('has the expected header', () => {
     const csv = manifestCsv([]);
-    expect(csv.slice(1)).toContain('檔案,去識別化檔,編碼表,生效筆數');
+    expect(csv.slice(1)).toContain('文件,去标识化档,编码表,生效笔数');
   });
 
   it('uses CRLF line endings throughout', () => {
@@ -79,37 +79,37 @@ describe('manifestCsv', () => {
 describe('buildArchive', () => {
   it('writes the documents only, without any mapping table, when restoring is not needed', async () => {
     const entries = [
-      await entryFromText('a.txt', '客戶林美玲，電話 0933-222-111。'),
-      await entryFromText('b.txt', '聯絡信箱：mei.lin@example.com。'),
+      await entryFromText('a.txt', '客户林美玲，电话 13900001111。'),
+      await entryFromText('b.txt', '联系邮箱：mei.lin@example.com。'),
     ];
     const merged = [{ code: 'abcdef', category: '姓名', original: '林美玲' }];
     for (const style of ['label', 'blank'] as const) {
       const { blob, manifest } = await buildArchive(entries, merged, style);
       const zip = await JSZip.loadAsync(await blob.arrayBuffer());
-      expect(Object.keys(zip.files).sort()).toEqual(['a.deid.txt', 'b.deid.txt', '清單.csv']);
+      expect(Object.keys(zip.files).sort()).toEqual(['a.deid.txt', 'b.deid.txt', '清单.csv']);
       expect(manifest.every((r) => r.mapping === '')).toBe(true);
-      const list = await zip.file('清單.csv')!.async('string');
-      expect(list).toContain('檔案,去識別化檔,生效筆數');
-      expect(list).not.toContain('編碼表');
+      const list = await zip.file('清单.csv')!.async('string');
+      expect(list).toContain('文件,去标识化档,生效笔数');
+      expect(list).not.toContain('编码表');
       const out = await zip.file('a.deid.txt')!.async('string');
       expect(out).not.toMatch(/\[[^\]]+:[0-9a-f]{6}\]/);
-      expect(out).toContain(style === 'label' ? '[手機]' : '○○○');
+      expect(out).toContain(style === 'label' ? '[手机]' : '○○○');
     }
   });
 
   it('packs four entries (one with a colliding mapping name) into a 9-file archive with a correct manifest', async () => {
     const sampleTxt = readFileSync(SAMPLE_TXT_PATH, 'utf-8');
     const quoteTxt =
-      '報價單編號：Q-2026-001\n' +
-      '客戶：林美玲小姐，電話 0933-222-111，地址台北市大安區敦化南路一段100號。\n' +
-      '聯絡信箱：mei.lin@example.com。\n';
+      '报价单编号：Q-2026-001\n' +
+      '客户：林美玲女士，电话 13900001111，地址北京市朝阳区建国路88号。\n' +
+      '联络信箱：mei.lin@example.com。\n';
 
     const txtEntry = await entryFromText('sample.txt', sampleTxt);
-    const docxDoc = await parseDocx(toFile(await buildDocx(SAMPLE_DOCX_SPEC), '報價單.docx'));
+    const docxDoc = await parseDocx(toFile(await buildDocx(SAMPLE_DOCX_SPEC), '报价单.docx'));
     const docxEntry: BatchEntry = { doc: docxDoc, items: detect(docxDoc.text, BUILTIN_PATTERNS) };
-    const xlsxDoc = await parseXlsx(toXlsxFile(await buildXlsx(SAMPLE_XLSX_SPEC), '客戶資料.xlsx'));
+    const xlsxDoc = await parseXlsx(toXlsxFile(await buildXlsx(SAMPLE_XLSX_SPEC), '客户数据.xlsx'));
     const xlsxEntry: BatchEntry = { doc: xlsxDoc, items: detect(xlsxDoc.text, BUILTIN_PATTERNS) };
-    const quoteEntry = await entryFromText('報價單.txt', quoteTxt);
+    const quoteEntry = await entryFromText('报价单.txt', quoteTxt);
 
     const entries = [txtEntry, docxEntry, xlsxEntry, quoteEntry];
     for (const e of entries) expect(e.items.filter((i) => i.active).length).toBeGreaterThan(0);
@@ -124,34 +124,34 @@ describe('buildArchive', () => {
     // Expected manifest rows, in entry order.
     expect(manifest[0]).toMatchObject({ source: 'sample.txt', output: 'sample.deid.txt', mapping: 'sample.mapping.csv' });
     expect(manifest[1]).toMatchObject({
-      source: '報價單.docx',
-      output: '報價單.deid.docx',
-      mapping: '報價單.mapping.csv',
+      source: '报价单.docx',
+      output: '报价单.deid.docx',
+      mapping: '报价单.mapping.csv',
     });
     expect(manifest[2]).toMatchObject({
-      source: '客戶資料.xlsx',
-      output: '客戶資料.deid.xlsx',
-      mapping: '客戶資料.mapping.csv',
+      source: '客户数据.xlsx',
+      output: '客户数据.deid.xlsx',
+      mapping: '客户数据.mapping.csv',
     });
-    // '報價單.txt' gets a distinct output name from '報價單.docx' (different extension),
+    // '报价单.txt' gets a distinct output name from '报价单.docx' (different extension),
     // but its mapping name collides with the docx entry's and must be disambiguated.
     expect(manifest[3]).toMatchObject({
-      source: '報價單.txt',
-      output: '報價單.deid.txt',
-      mapping: '報價單.mapping (2).csv',
+      source: '报价单.txt',
+      output: '报价单.deid.txt',
+      mapping: '报价单.mapping (2).csv',
     });
 
     expect(names).toEqual(
       [
         'sample.deid.txt',
         'sample.mapping.csv',
-        '報價單.deid.docx',
-        '報價單.mapping.csv',
-        '客戶資料.deid.xlsx',
-        '客戶資料.mapping.csv',
-        '報價單.deid.txt',
-        '報價單.mapping (2).csv',
-        '清單.csv',
+        '报价单.deid.docx',
+        '报价单.mapping.csv',
+        '客户数据.deid.xlsx',
+        '客户数据.mapping.csv',
+        '报价单.deid.txt',
+        '报价单.mapping (2).csv',
+        '清单.csv',
       ].sort(),
     );
 
@@ -216,11 +216,11 @@ describe('buildArchive', () => {
     expect(mappingText).toBe('﻿code,category,original\r\n');
   });
 
-  it('writes 清單.csv equal to manifestCsv(manifest)', async () => {
-    const entry = await entryFromText('a.txt', '客戶 陳大文 的電話是 0912-345-678。');
+  it('writes 清单.csv equal to manifestCsv(manifest)', async () => {
+    const entry = await entryFromText('a.txt', '客户 陈大文 的电话是 138-1234-5678。');
     const { blob, manifest } = await buildArchive([entry]);
     const zip = await JSZip.loadAsync(await blob.arrayBuffer());
-    const listCsv = await zip.file('清單.csv')!.async('string');
+    const listCsv = await zip.file('清单.csv')!.async('string');
     expect(listCsv).toBe(manifestCsv(manifest));
   });
 });

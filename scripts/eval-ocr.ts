@@ -3,11 +3,11 @@
 // Prerequisite: the built site served at BASE_URL (default: `npm run build && npm run preview` → http://localhost:4173/).
 // Run: npm run eval:ocr   (options after `--`: --sample main|angles|all, --verbose, --json out.json)
 import { readFileSync, writeFileSync } from 'node:fs';
+import { chromePath } from './lib/chrome.ts';
 import { resolve } from 'node:path';
 import puppeteer, { type Browser } from 'puppeteer-core';
 
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:4173/';
-const CHROME = process.env.CHROME_PATH ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const args = process.argv.slice(2);
 const option = (name: string) => (args.includes(name) ? args[args.indexOf(name) + 1] : null);
 const verbose = args.includes('--verbose');
@@ -168,7 +168,7 @@ function score(truth: AnswerPage, got: Read, page: number) {
   const values = new Set([...printed, ...hand].map((k) => k.split('|')[1]).concat(truth.manual));
   const extra = [...found].filter((f) => !expected.has(f) && !values.has(f.split('|')[1]));
   const missedValues = [...printed, ...hand].filter((k) => !found.has(k));
-  // A value read with a character or two wrong (徐語妤 → 徐語即) is still masked where it stands.
+  // A value read with a character or two wrong (徐语妤 → 徐语即) is still masked where it stands.
   const close = (f: string, m: string) => {
     const [[fc, fv], [mc, mv]] = [f.split('|'), m.split('|')];
     // Spacing is not a misreading (OCR reads 80 年5月1日 for 80 年 5 月 1 日).
@@ -210,7 +210,7 @@ const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
 const ratio = (a: number, b: number) => (b ? `${a}/${b}` : '—');
 const boxes = (c: number[]) => (c[2] ? `${c[0]}／${c[1]}／${c[2]}${c[3] > c[0] ? `（多 ${c[3] - c[0]}）` : ''}` : c[3] ? `（多 ${c[3]}）` : '—');
 
-const browser = await puppeteer.launch({ executablePath: CHROME });
+const browser = await puppeteer.launch({ executablePath: chromePath() });
 const report: Record<string, unknown> = {};
 try {
   for (const [name, path] of Object.entries(SAMPLES)) {
@@ -219,32 +219,32 @@ try {
     const { seconds, pages } = await readSite(browser, answer.source);
     const rows = answer.pages.map((t, i) => score(t, pages[i], i + 1));
     const sum = (f: (r: (typeof rows)[number]) => number) => rows.reduce((n, r) => n + f(r), 0);
-    console.log(`\n${answer.source}（${rows.length} 頁，${seconds.toFixed(1)} 秒）\n`);
+    console.log(`\n${answer.source}（${rows.length} 页，${seconds.toFixed(1)} 秒）\n`);
     if (name === 'main') {
-      console.log('頁 | 內容 | 字元召回 | 字元精確 | 印刷值 | 手寫值 | 讀錯仍遮蔽 | 誤判 | 圖片 | 線段召回 | 線段精確 | 底色 | 勾選框（找到／狀態對／原稿） | 文字重疊');
+      console.log('页 | 内容 | 字符召回 | 字符精确 | 印刷值 | 手写值 | 读错仍遮蔽 | 误判 | 图片 | 线段召回 | 线段精确 | 底色 | 勾选框（找到／状态对／原稿） | 文字重叠');
       for (const r of rows) {
         console.log(
-          `${r.page} | ${r.title} | ${pct(r.charRecall)} | ${pct(r.charPrecision)} | ${ratio(r.printed[0], r.printed[1])} | ${ratio(r.handwritten[0], r.handwritten[1])} | ${r.misread.length} | ${r.falsePositives.length} | ${ratio(r.pictures[0], r.pictures[1])}${r.pictures[2] ? `（+${r.pictures[2]}）` : ''} | ${ratio(r.rules[0], r.rules[1])} | ${ratio(r.rules[2], r.rules[3])} | ${ratio(r.fills[0], r.fills[1])}${r.fills[2] > r.fills[0] ? `（畫了 ${r.fills[2]}）` : ''} | ${boxes(r.checkboxes)} | ${r.overlaps.length}`,
+          `${r.page} | ${r.title} | ${pct(r.charRecall)} | ${pct(r.charPrecision)} | ${ratio(r.printed[0], r.printed[1])} | ${ratio(r.handwritten[0], r.handwritten[1])} | ${r.misread.length} | ${r.falsePositives.length} | ${ratio(r.pictures[0], r.pictures[1])}${r.pictures[2] ? `（+${r.pictures[2]}）` : ''} | ${ratio(r.rules[0], r.rules[1])} | ${ratio(r.rules[2], r.rules[3])} | ${ratio(r.fills[0], r.fills[1])}${r.fills[2] > r.fills[0] ? `（画了 ${r.fills[2]}）` : ''} | ${boxes(r.checkboxes)} | ${r.overlaps.length}`,
         );
       }
       console.log(
-        `合計 | | ${pct(sum((r) => r.chars.same) / sum((r) => r.chars.truth))} | ${pct(sum((r) => r.chars.same) / sum((r) => r.chars.read))} | ${sum((r) => r.printed[0])}/${sum((r) => r.printed[1])} | ${sum((r) => r.handwritten[0])}/${sum((r) => r.handwritten[1])} | ${sum((r) => r.misread.length)} | ${sum((r) => r.falsePositives.length)} | ${sum((r) => r.pictures[0])}/${sum((r) => r.pictures[1])} | ${sum((r) => r.rules[0])}/${sum((r) => r.rules[1])} | ${sum((r) => r.rules[2])}/${sum((r) => r.rules[3])} | ${sum((r) => r.fills[0])}/${sum((r) => r.fills[1])} | ${sum((r) => r.checkboxes[0])}／${sum((r) => r.checkboxes[1])}／${sum((r) => r.checkboxes[2])} | ${sum((r) => r.overlaps.length)}`,
+        `合计 | | ${pct(sum((r) => r.chars.same) / sum((r) => r.chars.truth))} | ${pct(sum((r) => r.chars.same) / sum((r) => r.chars.read))} | ${sum((r) => r.printed[0])}/${sum((r) => r.printed[1])} | ${sum((r) => r.handwritten[0])}/${sum((r) => r.handwritten[1])} | ${sum((r) => r.misread.length)} | ${sum((r) => r.falsePositives.length)} | ${sum((r) => r.pictures[0])}/${sum((r) => r.pictures[1])} | ${sum((r) => r.rules[0])}/${sum((r) => r.rules[1])} | ${sum((r) => r.rules[2])}/${sum((r) => r.rules[3])} | ${sum((r) => r.fills[0])}/${sum((r) => r.fills[1])} | ${sum((r) => r.checkboxes[0])}／${sum((r) => r.checkboxes[1])}／${sum((r) => r.checkboxes[2])} | ${sum((r) => r.overlaps.length)}`,
       );
     } else {
-      console.log('頁 | 內容 | 角度 | 字元召回 | 印刷值 | 線段召回 | 勾選框（找到／狀態對／原稿）');
+      console.log('页 | 内容 | 角度 | 字符召回 | 印刷值 | 线段召回 | 勾选框（找到／状态对／原稿）');
       for (const r of rows) {
         console.log(`${r.page} | ${r.title} | ${r.rotation} | ${pct(r.charRecall)} | ${ratio(r.printed[0], r.printed[1])} | ${ratio(r.rules[0], r.rules[1])} | ${boxes(r.checkboxes)}`);
       }
     }
     if (verbose) {
       for (const r of rows) {
-        console.log(`\n第 ${r.page} 頁 ${r.title} ${r.rotation}`);
+        console.log(`\n第 ${r.page} 页 ${r.title} ${r.rotation}`);
         if (r.missedValues.length) console.log('  漏抓：', r.missedValues.join('；'));
-        if (r.misread.length) console.log('  讀錯仍遮蔽：', r.misread.join('；'));
-        if (r.falsePositives.length) console.log('  誤判：', r.falsePositives.join('；'));
-        if (r.overlaps.length) console.log('  重疊的文字：', r.overlaps.join('；'));
-        console.log('  少讀的字：', r.chars.missing.slice(0, 80) || '（無）');
-        console.log('  多出的字：', r.chars.extra.slice(0, 80) || '（無）');
+        if (r.misread.length) console.log('  读错仍遮蔽：', r.misread.join('；'));
+        if (r.falsePositives.length) console.log('  误判：', r.falsePositives.join('；'));
+        if (r.overlaps.length) console.log('  重叠的文字：', r.overlaps.join('；'));
+        console.log('  少读的字：', r.chars.missing.slice(0, 80) || '（无）');
+        console.log('  多出的字：', r.chars.extra.slice(0, 80) || '（无）');
       }
     }
     report[name] = { seconds, pages: rows.map(({ chars: _c, ...r }) => r) };

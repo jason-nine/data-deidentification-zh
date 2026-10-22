@@ -1,77 +1,77 @@
-# 文件去識別化工具（Data De-identification Tool）
+# 文件去标识化工具（Data De-identification Tool）
 
-> 免費、開源、純前端的線上文件去識別化工具：上傳 PDF、Word、Excel、TXT、Markdown 或貼上文字，自動偵測姓名、身分證字號、手機、市話、地址、電子郵件、公司名稱、統一編號與自訂識別碼，遮罩預覽、人工覆核後下載去識別化文件與 CSV 編碼表，日後可憑編碼表完整還原（不需還原時也可只輸出類別標記或「○」佔位）。所有處理在瀏覽器內完成，檔案不會上傳到任何伺服器。
+> 免费、开源、纯前端的在线文件去标识化工具：上传 PDF、Word、Excel、TXT、Markdown 或粘贴文字，自动检测姓名、居民身份证号、手机、固定电话、地址、邮箱、单位名称、统一社会信用代码、银行卡号、车牌号、护照号与自定义标识符，脱敏预览、人工复核后下载去标识化文件与 CSV 编码表，以后可凭编码表完整还原（不需还原时也可只输出类别标记或「○」占位）。所有处理在浏览器内完成，文件不会上传到任何服务器。
 
-- 網址：https://deanlin.net/data-deidentification/
-- 原始碼（MIT 授權）：https://github.com/dean9703111/data-deidentification
-- 作者：Dean Lin（https://deanlin.net/）
-- 語言：繁體中文（台灣）；內建偵測規則以台灣常見格式為主
-- 適用情境：把合約、報價單、客戶清單、客服信件、會議紀錄交給外包廠商、AI 服務（ChatGPT、Claude、Gemini）或研究單位之前先移除個資，事後仍可還原；也適用於紙本掃描檔（申請表、名冊、名片）與公開範例
-- 完整說明（README，Markdown）：https://deanlin.net/data-deidentification/llms-full.txt
+- 原始码（MIT 授权）：https://github.com/jason-nine/data-deidentification-zh
+- 原始项目：https://github.com/dean9703111/data-deidentification（繁体中文／台湾地区规则，Dean Lin）
+- 本版维护：jason-nine（https://github.com/jason-nine）；改造为简体中文与大陆规则
+- 语言：简体中文（中国大陆）；内置检测规则以中国大陆常见格式为主
+- 适用情境：把合同、报价单、客户清单、客服邮件、会议记录交给外包厂商、AI 服务（ChatGPT、Claude、Gemini）或研究单位之前先移除个人信息，事后仍可还原；也适用于纸质扫描件（申请表、名册、名片）与公开示例
+- 完整说明（README，Markdown）：llms-full.txt
 
-## 主要特點
+## 主要特点
 
-- 多格式輸入：.pdf（文字型或掃描影像）、.docx、.xlsx、.txt、.md，或直接貼上文字；一次最多 10 個檔案混合處理，單檔 100 MB 以內（超過時以警告視窗擋下）
-- 掃描檔 OCR：沒有文字層的 PDF 在瀏覽器內以 Tesseract（繁體中文＋英文）辨識，程式與模型由本站提供、不連 CDN；辨識前移除表格框線、加深彩色字，辨識後補辨識版面分析漏掉的文字行（字距加寬的大字讀不清時放大再讀）、連同行首重讀段落開頭的條列編號（一、二、）、校正證號／電話字形（須通過檢核碼），並以純中文模型重讀低信心字詞與中文行中被誤讀成英文的手寫字；照片、標誌等不含文字的圖片原樣保留在輸出中，可逐張取消；還原只還原文字
-- 掃描檔版面還原：表格框線（含虛線）、儲存格底色、文字顏色依原位置重繪；勾選框（打勾、打叉、塗滿）以方框＋勾號重繪並保留勾選狀態；整頁傾斜（±10°）與 90°／180° 轉向會先自動轉正再辨識；結構皆為重新繪製的純色圖形，不帶出原頁面影像；文字大小依中文字高推算，行距密的版面（名片）不重疊
-- 十五種內建偵測類別：台灣格式的中文姓名、身分證字號（檢核碼驗證）、手機、市話、地址、電子郵件、公司／組織名稱、統一編號（檢核碼驗證）、自訂識別碼；國際格式的國際電話（以 libphonenumber 驗證）、信用卡號（Luhn 與發卡號段）、美國 SSN、IBAN（mod-97）、IP 位址（IPv4／IPv6）、出生日期（依 DOB／Date of Birth／出生日期 等標籤）；可停用內建規則、以正規表達式新增自訂規則並即時測試；英文姓名與地址尚未支援
-- 格式感知預覽：Word 顯示段落／標題／表格／頁首頁尾，Excel 顯示工作表格線，PDF 逐頁依原座標排版；預覽就是下載後的樣子，編碼以類別名稱表示（如 王[姓名]、A1[身分證]）
-- 人工覆核：點擊標記取消誤判、在「依類別調整」整類取消、圈選文字手動新增、偵測清單定位
-- 保留原格式輸出：Word／Excel 直接改寫文字節點，樣式與表格不動；PDF 以文字重建（非色塊覆蓋）輸出，內嵌 Noto Sans TC 子集，輸出檔不殘留原始敏感文字
-- 可還原：每筆敏感資訊換成 [類別:編碼] 形式的唯一隨機編碼（同一類別下相同的值共用同一個編碼，手動新增亦同），CSV 編碼表是還原的唯一憑證
-- 隱私：純前端、無後端、可離線；瀏覽器只儲存偵測規則設定，文件內容與編碼表不落地
-- 批量輸出：多檔時一鍵打包 ZIP（每個檔案的去識別化檔＋編碼表＋對照清單）
-- 輸出方式可切換：部分保留（預設，只露出適合統計的字元，例如 A1[身分證:7b21e8]、0912-[手機:c882d1]、[電子郵件:5d0e17]@gmail.com）、全部隱藏、自訂（逐類別保留前／後幾碼、分隔字元前後、姓氏、縣市或縣市＋鄉鎮市區，可設為預設），保留的字元留在標記外，方便在 Excel 統計，仍可完整還原
-- 標記方式：預設「編碼」[姓名:6e679d]，附編碼表可還原；不需還原時可選「類別」[姓名] 或「空白佔位」（以「○」取代每個字，分隔符號保留，例如 0912-○○○-○○○），只輸出去識別化文件、不產生編碼表，介面標示無法還原；可與部分保留／全部隱藏／自訂並用
-- 跨檔案共用編碼：可讓整批檔案共用編碼，或匯入既有編碼表沿用舊編碼（例如每月資料串接），並下載合併編碼表
+- 多格式输入：.pdf（文字型或扫描影像）、.docx、.xlsx、.txt、.md，或直接粘贴文字；一次最多 10 个文件混合处理，单文件 100 MB 以内（超过时以警告弹窗拦截）
+- 纯文本编码兼容：.txt／.md 自动识别 UTF-8 与 GB18030（含 GBK／GB2312），大陆常见的 GBK 编码文本不会乱码
+- 扫描件 OCR：没有文字层的 PDF 在浏览器内以 Tesseract（简体中文＋英文）识别，程序与模型由本站提供、不连 CDN；识别前移除表格框线、加深彩色字，识别后补识别版面分析漏掉的文字行（字距加宽的大字读不清时放大再读）、连同行首重读段落开头的条列编号（一、二、）、校正证号／电话字形（须通过校验位），并以纯中文模型重读低信心字词与中文行中被误读成英文的手写字；照片、标志等不含文字的图片原样保留在输出中，可逐张取消；还原只还原文字
+- 扫描件版面还原：表格框线（含虚线）、单元格底色、文字颜色按原位置重绘；复选框（打勾、打叉、涂满）以方框＋勾号重绘并保留勾选状态；整页倾斜（±10°）与 90°／180° 转向会先自动转正再识别；结构皆为重新绘制的纯色图形，不带出原页面影像；文字大小按中文字高推算，行距密的版面（名片）不重叠
+- 十七种内置检测类别：中国大陆格式的中文姓名、居民身份证号（GB 11643 校验位验证）、手机号码、固定电话、地址、单位名称、统一社会信用代码（GB 32100 校验位验证）、银行卡号（Luhn 校验）、车牌号、护照号、自定义标识符；国际与通用格式的邮箱、国际电话（以 libphonenumber 验证）、信用卡号（Luhn 与发卡号段）、美国 SSN、IBAN（mod-97）、IPv4／IPv6 地址、出生日期（按 DOB／Date of Birth／出生日期 等标签）；可停用内置规则、以正则表达式新增自定义规则并即时测试；英文姓名与地址尚未支持
+- 格式感知预览：Word 显示段落／标题／表格／页眉页脚，Excel 显示工作表格线，PDF 逐页按原坐标排版；预览就是下载后的样子，编码以类别名称表示（如 王[姓名]、11[身份证]）
+- 人工复核：点击标记取消误判、在「按类别调整」整类取消、框选文字手动新增、检测清单定位
+- 保留原格式输出：Word／Excel 直接改写文字节点，样式与表格不动；PDF 以文字重建（非色块覆盖）输出，内嵌 Noto Sans SC 子集，输出文件不残留原始敏感文字
+- 可还原：每条敏感信息换成 [类别:编码] 形式的唯一随机编码（同一类别下相同的值共用同一个编码，手动新增亦同），CSV 编码表是还原的唯一凭证
+- 隐私：纯前端、无后端、可离线；浏览器只保存检测规则设置，文件内容与编码表不落地
+- 批量输出：多文件时一键打包 ZIP（每个文件的去标识化文件＋编码表＋对照清单）
+- 输出方式可切换：部分保留（默认，只露出适合统计的字符，例如 11[身份证:7b21e8]、138-[手机:c882d1]、[邮箱:5d0e17]@example.com）、全部隐藏、自定义（逐类别保留前／后几位、分隔字符前后、姓氏、省市或省市＋区县，可设为默认），保留的字符留在标记外，方便在 Excel 统计，仍可完整还原
+- 标记方式：默认「编码」[姓名:6e679d]，附编码表可还原；不需还原时可选「类别」[姓名] 或「空白占位」（以「○」取代每个字，分隔符号保留，例如 138-○○○○-○○○○），只输出去标识化文件、不生成编码表，界面标示无法还原；可与部分保留／全部隐藏／自定义并用
+- 跨文件共用编码：可让整批文件共用编码，或导入既有编码表沿用旧编码（例如每月数据串接），并下载合并编码表
 
 ## 使用流程
 
-1. 在「去識別化」頁籤拖入檔案或貼上文字，按「開始去識別化」
-2. 在預覽中檢視自動偵測結果，滑鼠停留可看原文與實際輸出標記
-3. 人工調整：取消誤判、整批取消某一種類、圈選新增漏抓
-4. 選擇輸出方式（部分保留（預設）／全部隱藏／自訂）與標記方式（編碼（預設，可還原）／類別／空白佔位），按「下載（文件＋編碼表）」一次取得去識別化文件（同格式，檔名加 .deid）與編碼表（*.mapping.csv）；不需還原的標記方式只下載文件
-5. 需要復原時，到「還原」頁籤上傳去識別化文件與編碼表，下載還原檔（檔名加 .restored）
+1. 在「去标识化」标签页拖入文件或粘贴文字，按「开始去标识化」
+2. 在预览中查看自动检测结果，鼠标悬停可看原文与实际输出标记
+3. 人工调整：取消误判、整批取消某一种类、框选新增漏抓
+4. 选择输出方式（部分保留（默认）／全部隐藏／自定义）与标记方式（编码（默认，可还原）／类别／空白占位），按「下载（文件＋编码表）」一次获取去标识化文件（同格式，文件名加 .deid）与编码表（*.mapping.csv）；不需还原的标记方式只下载文件
+5. 需要恢复时，到「还原」标签页上传去标识化文件与编码表，下载还原文件（文件名加 .restored）
 
-## 輸出格式
+## 输出格式
 
-- 文件中每筆敏感資訊以 `[類別:編碼]` 取代，例如 `[姓名:a3f9c2]`；編碼為 6 位小寫十六進位，由 crypto.getRandomValues 產生，與原文無數學關聯
-- 編碼表為 UTF-8（含 BOM）、RFC 4180 的 CSV，欄位為 code,category,original，Excel 可直接開啟；有部分保留時 original 只記錄被隱藏的片段，並在尾端加上 kept_prefix、kept_suffix 兩欄
-- 還原時以 code 查表；文件中查無的編碼會保留原標記並列出警告
+- 文件中每条敏感信息以 `[类别:编码]` 取代，例如 `[姓名:a3f9c2]`；编码为 6 位小写十六进制，由 crypto.getRandomValues 生成，与原文无数学关联
+- 编码表为 UTF-8（含 BOM）、RFC 4180 的 CSV，字段为 code,category,original，Excel 可直接打开；有部分保留时 original 只记录被隐藏的片段，并在末尾加上 kept_prefix、kept_suffix 两列
+- 还原时以 code 查表；文件中查无的编码会保留原标记并列出警告
 
 ## 限制
 
-- 不支援舊版 .doc、.xls；掃描 PDF 的辨識結果可能有誤認或遺漏（手寫、模糊時更明顯），請逐頁核對；部分頁面才有文字層的混合型 PDF 只處理文字層
-- 文字型 PDF 輸出不保留圖片、圖形與原字型；Excel 僅處理文字型儲存格，數值型電話／證號、公式結果、工作表名稱與註解不在範圍
-- 中文姓名與地址無法以規則做到零誤判／零漏抓，請務必在預覽中人工覆核
+- 不支持旧版 .doc、.xls；扫描 PDF 的识别结果可能有误认或遗漏（手写、模糊时更明显），请逐页核对；部分页面才有文字层的混合型 PDF 只处理文字层
+- 文字型 PDF 输出不保留图片、图形与原字体；Excel 仅处理文字型单元格，数值型电话／证号、公式结果、工作表名称与批注不在范围
+- 中文姓名与地址无法以规则做到零误判／零漏抓，请务必在预览中人工复核
 
-## 常見問題
+## 常见问题
 
-- 檔案會上傳嗎？不會，全部在瀏覽器內處理，沒有後端
-- 可以還原嗎？可以，用 CSV 編碼表在「還原」頁籤還原，缺漏的編碼會列出警告
-- 不需要還原，可以只遮蔽嗎？可以，標記方式選「類別」輸出 [姓名]，或選「空白佔位」以「○」取代每個字（分隔符號保留）；不產生編碼表、無法還原
-- 去識別化、假名化、匿名化有什麼不同？預設的編碼＋編碼表屬於假名化（可還原）；類別、空白佔位不產生編碼表，但是否達到匿名化要看保留的字元與其他資訊
-- 交給 ChatGPT 等 AI 之前怎麼移除個資？在本工具中偵測並確認後，下載或複製去識別化內容交給 AI；AI 回覆中的 [姓名:6e679d] 可用編碼表還原，不需還原時選「類別」
-- 掃描的 PDF 可以嗎？可以，瀏覽器內 OCR（繁中＋英文）辨識後遮罩，表格框線、底色與勾選框重繪，傾斜或放反自動轉正；內附 5 頁掃描範例字元召回率約 99%
-- 可以批次處理嗎？一次最多 10 個檔案混合格式，可打包 ZIP、可整批共用編碼
-- 去識別化後還能統計嗎？可以，輸出設定的「保留」選「自訂」逐類別保留部分字元（例如身分證前 2 碼），或整批共用編碼／匯入舊編碼表讓同一個人跨檔案同編碼
-- 要收費嗎？免費，MIT 開源；`npm run build` 產出的 dist/ 可放到任何靜態空間自行架設，或直接以檔案開啟
-- PDF 為什麼不用黑框覆蓋？覆蓋法底層文字仍可被複製；本工具以文字重建輸出，敏感文字真正從檔案移除
+- 文件会上传吗？不会，全部在浏览器内处理，没有后端
+- 可以还原吗？可以，用 CSV 编码表在「还原」标签页还原，缺漏的编码会列出警告
+- 不需要还原，可以只遮蔽吗？可以，标记方式选「类别」输出 [姓名]，或选「空白占位」以「○」取代每个字（分隔符号保留）；不生成编码表、无法还原
+- 去标识化、假名化、匿名化有什么不同？默认的编码＋编码表属于假名化（可还原）；类别、空白占位不生成编码表，但是否达到匿名化要看保留的字符与其他信息
+- 交给 ChatGPT 等 AI 之前怎么移除个人信息？在本工具中检测并确认后，下载或复制去标识化内容交给 AI；AI 回复中的 [姓名:6e679d] 可用编码表还原，不需还原时选「类别」
+- 扫描的 PDF 可以吗？可以，浏览器内 OCR（简体中文＋英文）识别后脱敏，表格框线、底色与复选框重绘，倾斜或放反自动转正；内置 5 页扫描示例字符召回率约 98.6%
+- 可以批量处理吗？一次最多 10 个文件混合格式，可打包 ZIP、可整批共用编码
+- 去标识化后还能统计吗？可以，输出设置的「保留」选「自定义」逐类别保留部分字符（例如身份证前 2 位），或整批共用编码／导入旧编码表让同一个人跨文件同编码
+- 要收费吗？免费，MIT 开源；`npm run build` 生成的 dist/ 可放到任何静态空间自行部署，或直接以文件打开
+- PDF 为什么不用黑框覆盖？覆盖法底层文字仍可被复制；本工具以文字重建输出，敏感文字真正从文件移除
 
 ## English summary
 
-Data De-identification Tool is a free, open-source, browser-only tool for redacting personal data (PII) in Traditional Chinese (Taiwan) documents: names, national ID numbers, phone numbers, addresses, email addresses, company names and tax IDs in PDF (including scanned PDFs via in-browser OCR), Word, Excel, TXT and Markdown. Every match can be reviewed before export; output keeps the original format. Values become reversible codes with a CSV mapping table, or category labels / ○ placeholders when no restoring is needed. Files never leave the browser.
+Data De-identification Tool is a free, open-source, browser-only tool for redacting personal data (PII) in Simplified Chinese (Mainland China) documents: names, resident ID numbers, phone numbers, addresses, email addresses, organization names, Unified Social Credit Codes, bank card numbers, license plates and passport numbers in PDF (including scanned PDFs via in-browser OCR), Word, Excel, TXT and Markdown. Every match can be reviewed before export; output keeps the original format. Values become reversible codes with a CSV mapping table, or category labels / ○ placeholders when no restoring is needed. Files never leave the browser.
 
-## 參考連結
+## 参考链接
 
-- [完整說明（Markdown，供 AI 閱讀）](https://deanlin.net/data-deidentification/llms-full.txt)
-
-- [完整操作說明與截圖（README）](https://github.com/dean9703111/data-deidentification#readme)
-- [偵測規則說明](https://github.com/dean9703111/data-deidentification#偵測規則)
-- [輸出格式：標記與編碼表](https://github.com/dean9703111/data-deidentification#輸出格式標記與編碼表)
-- [範例：委外服務契約書 (Word)](https://deanlin.net/data-deidentification/samples/contract.docx)
-- [範例：報價單 (PDF)](https://deanlin.net/data-deidentification/samples/quotation.pdf)
-- [範例：掃描文件 (掃描 PDF，5 頁：信函、手寫表單、名冊、英文 Invoice、名片)](https://deanlin.net/data-deidentification/samples/scanned.pdf)
-- [範例：客戶資料 (Excel)](https://deanlin.net/data-deidentification/samples/customers.xlsx)
-- [範例：客服信件 (TXT)](https://deanlin.net/data-deidentification/samples/support-email.txt)
-- [範例：已去識別化契約書＋編碼表（還原體驗）](https://deanlin.net/data-deidentification/samples/contract.deid.docx)
+- [完整说明（Markdown，供 AI 阅读）](llms-full.txt)
+- [完整操作说明与截图（README）](https://github.com/jason-nine/data-deidentification-zh#readme)
+- [检测规则说明](https://github.com/jason-nine/data-deidentification-zh#检测规则)
+- [输出格式：标记与编码表](https://github.com/jason-nine/data-deidentification-zh#输出格式标记与编码表)
+- [示例：外包服务合同书 (Word)](samples/contract.docx)
+- [示例：报价单 (PDF)](samples/quotation.pdf)
+- [示例：扫描文件 (扫描 PDF，5 页：信函、手写表单、名册、英文 Invoice、名片)](samples/scanned.pdf)
+- [示例：客户数据 (Excel)](samples/customers.xlsx)
+- [示例：客服邮件 (TXT)](samples/support-email.txt)
+- [示例：已去标识化合同书＋编码表（还原体验）](samples/contract.deid.docx)

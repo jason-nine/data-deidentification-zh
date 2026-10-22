@@ -47,7 +47,7 @@ function textOf(el: Element): string {
 
 function parseXml(xml: string, path: string): Document {
   const doc = new DOMParser().parseFromString(xml, 'application/xml');
-  if (doc.getElementsByTagName('parsererror').length > 0) throw new Error(`無法解析 ${path}`);
+  if (doc.getElementsByTagName('parsererror').length > 0) throw new Error(`无法解析 ${path}`);
   return doc;
 }
 
@@ -120,7 +120,7 @@ function rowOf(c: Element): string {
 export async function parseXlsx(file: File): Promise<LoadedDocument> {
   const zip = await JSZip.loadAsync(await file.arrayBuffer());
   const paths = await sheetPaths(zip);
-  if (paths.length === 0) throw new Error('不是有效的 Excel (.xlsx) 檔案');
+  if (paths.length === 0) throw new Error('不是有效的 Excel (.xlsx) 文件');
   const shared = await loadSharedStrings(zip);
 
   const sheets: SheetInfo[] = [];

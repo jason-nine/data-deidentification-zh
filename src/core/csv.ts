@@ -86,13 +86,13 @@ export interface ParseMappingResult {
 export function parseMapping(text: string): ParseMappingResult {
   const errors: string[] = [];
   const rows = parseCsvRows(text);
-  if (rows.length === 0) return { entries: [], errors: ['CSV 為空'] };
+  if (rows.length === 0) return { entries: [], errors: ['CSV 为空'] };
 
   const header = rows[0].map((h) => h.trim());
   const idx: Record<string, number> = {};
   header.forEach((h, i) => (idx[h] = i));
   for (const h of REQUIRED_HEADERS) {
-    if (!(h in idx)) errors.push(`缺少必要欄位：${h}`);
+    if (!(h in idx)) errors.push(`缺少必要字段：${h}`);
   }
   if (errors.length) return { entries: [], errors };
 
@@ -104,11 +104,11 @@ export function parseMapping(text: string): ParseMappingResult {
     const original = r[idx.original] ?? '';
     const lineNo = n + 2;
     if (!code) {
-      errors.push(`第 ${lineNo} 列：code 為空`);
+      errors.push(`第 ${lineNo} 列：code 为空`);
       return;
     }
     if (seen.has(code)) {
-      errors.push(`第 ${lineNo} 列：編碼 ${code} 重複`);
+      errors.push(`第 ${lineNo} 列：编码 ${code} 重复`);
       return;
     }
     seen.add(code);

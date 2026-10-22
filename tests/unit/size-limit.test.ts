@@ -31,12 +31,12 @@ describe('rejectOversized', () => {
 
   it('blocks with a dialog listing the oversized files until acknowledged, then keeps the rest', async () => {
     const small = fileOfSize('ok.docx', 1024);
-    const done = rejectOversized([fileOfSize('掃描檔.pdf', MAX_FILE_BYTES + 1), small]);
+    const done = rejectOversized([fileOfSize('扫描档.pdf', MAX_FILE_BYTES + 1), small]);
 
     const dialog = document.querySelector<HTMLDialogElement>('dialog.alert-dialog')!;
     expect(dialog.open).toBe(true);
-    expect(dialog.textContent).toContain('超過 100 MB 上限');
-    expect(dialog.textContent).toContain('掃描檔.pdf（100.0 MB）');
+    expect(dialog.textContent).toContain('超过 100 MB 上限');
+    expect(dialog.textContent).toContain('扫描档.pdf（100.0 MB）');
 
     let settled = false;
     void done.then(() => (settled = true));

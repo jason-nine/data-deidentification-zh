@@ -31,8 +31,8 @@ describe('ocrLinesToItems', () => {
   });
 
   it('puts no space between CJK and digits unless the gap is wide', () => {
-    expect(texts([line([['五', 0, 18], ['段', 20, 38], ['37', 44, 60], ['號', 64, 82], ['3', 86, 94], ['樓', 98, 116]])])).toEqual(['五段37號3樓']);
-    expect(texts([line([['電', 0, 18], ['話', 20, 38], ['(02)2700-1234', 60, 180]])])).toEqual(['電話 (02)2700-1234']);
+    expect(texts([line([['五', 0, 18], ['段', 20, 38], ['37', 44, 60], ['号', 64, 82], ['3', 86, 94], ['楼', 98, 116]])])).toEqual(['五段37号3楼']);
+    expect(texts([line([['电', 0, 18], ['话', 20, 38], ['(02)2700-1234', 60, 180]])])).toEqual(['电话 (02)2700-1234']);
   });
 
   it('starts a new run where words are far apart (table cells, form fields)', () => {
@@ -45,8 +45,8 @@ describe('ocrLinesToItems', () => {
   it('starts a new run at a checkbox or a table rule between words, however close', () => {
     const box = { x0: 24, y0: 82, x1: 42, y1: 100 }; // ☑男 ☐女: the box between 男 and 女
     const rule = { x0: 69, y0: 60, x1: 71, y1: 140 };
-    const items = ocrLinesToItems([line([['男', 0, 18], ['女', 46, 64], ['電', 74, 92], ['話', 94, 112]])], 1, 1000, { walls: [box, rule] });
-    expect(items.map((it) => it.text)).toEqual(['男', '女', '電話']);
+    const items = ocrLinesToItems([line([['男', 0, 18], ['女', 46, 64], ['电', 74, 92], ['话', 94, 112]])], 1, 1000, { walls: [box, rule] });
+    expect(items.map((it) => it.text)).toEqual(['男', '女', '电话']);
   });
 
   it('drops table borders read as characters', () => {
@@ -55,8 +55,8 @@ describe('ocrLinesToItems', () => {
   });
 
   it('drops low-confidence stray symbols but keeps real punctuation', () => {
-    expect(texts([line([['董', 0, 18], ['事', 20, 38], ['”', 42, 50, 48], ['長', 52, 70]])])).toEqual(['董事長']);
-    expect(texts([line([['「', 0, 8, 88], ['契', 10, 28], ['約', 30, 48], ['」', 50, 58, 93]])])).toEqual(['「契約」']);
+    expect(texts([line([['董', 0, 18], ['事', 20, 38], ['”', 42, 50, 48], ['长', 52, 70]])])).toEqual(['董事长']);
+    expect(texts([line([['「', 0, 8, 88], ['契', 10, 28], ['约', 30, 48], ['」', 50, 58, 93]])])).toEqual(['「契约」']);
   });
 
   it('strips border marks stuck to Latin or digit words', () => {
@@ -91,7 +91,7 @@ describe('ocrLinesToItems', () => {
   it('sizes a Chinese run by its characters, not by the row height', () => {
     // The row height includes the line spacing (≈1.24 em); Chinese characters fill about 0.95 em.
     const l: OcrLine = {
-      words: ['調', '整', '服', '務'].map((text, k) => ({ text, confidence: 95, bbox: { x0: k * 22, y0: 81, x1: k * 22 + 19, y1: 100 } })),
+      words: ['调', '整', '服', '务'].map((text, k) => ({ text, confidence: 95, bbox: { x0: k * 22, y0: 81, x1: k * 22 + 19, y1: 100 } })),
       bbox: { x0: 0, y0: 76, x1: 85, y1: 101 },
       baseline: { x0: 0, y0: 100, x1: 85, y1: 100 },
       rowAttributes: { rowHeight: 25 },

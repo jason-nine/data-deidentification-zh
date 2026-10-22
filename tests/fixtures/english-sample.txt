@@ -20,7 +20,7 @@ Billing
 - Amount due: $1,234.56 by Invoice Date 2026-10-16; tracking 1Z999AA10123456784
 - Rejected card (typo): 4242 4242 4242 4241
 
-Second contact: Daniel Kim, DOB 07/04/1990, phone 415-555-0123 (a fictional number, masked anyway), Taiwan mobile 0912-345-678.
+Second contact: Daniel Kim, DOB 07/04/1990, phone 415-555-0123 (a fictional number, masked anyway), mainland mobile 139-0000-1111.
 
 Access log
 - Login from 192.168.1.10 and 2001:db8::1 at 09:15:22

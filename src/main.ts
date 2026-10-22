@@ -18,9 +18,9 @@ const ICONS = {
 };
 
 const TABS: { id: TabId; label: string; create: () => HTMLElement }[] = [
-  { id: 'process', label: '去識別化', create: createProcessView },
-  { id: 'patterns', label: '偵測規則', create: createPatternsView },
-  { id: 'restore', label: '還原', create: createRestoreView },
+  { id: 'process', label: '去标识化', create: createProcessView },
+  { id: 'patterns', label: '检测规则', create: createPatternsView },
+  { id: 'restore', label: '还原', create: createRestoreView },
 ];
 
 function mount(): void {
@@ -28,10 +28,10 @@ function mount(): void {
   // Static about/FAQ content shipped in index.html for crawlers; after mount it lives in a dialog opened from the footer.
   const siteInfo = document.getElementById('site-info');
   app.replaceChildren(); // drop the static SEO fallback
-  const infoDialog = el('dialog', { class: 'site-info-dialog', 'aria-label': '常見問題' });
+  const infoDialog = el('dialog', { class: 'site-info-dialog', 'aria-label': '常见问题' });
   if (siteInfo) {
     infoDialog.append(
-      el('button', { class: 'dialog-close', type: 'button', 'aria-label': '關閉', onClick: () => infoDialog.close() }, '✕'),
+      el('button', { class: 'dialog-close', type: 'button', 'aria-label': '关闭', onClick: () => infoDialog.close() }, '✕'),
       siteInfo,
     );
     infoDialog.addEventListener('click', (e) => {
@@ -70,34 +70,30 @@ function mount(): void {
   }
   const help = el('a', {
     class: 'tab tab-link',
-    href: 'https://github.com/dean9703111/data-deidentification#操作流程',
+    href: 'https://github.com/jason-nine/data-deidentification-zh#操作流程',
     target: '_blank',
     rel: 'noopener',
-    title: '開啟 GitHub 專案頁的操作說明',
-  }, '使用說明 ↗');
+    title: '打开 GitHub 项目页的操作说明',
+  }, '使用说明 ↗');
   nav.append(help);
 
   const social: [string, string, string][] = [
-    ['Medium', 'https://medium.com/@dean-lin', ICONS.medium],
-    ['Facebook', 'https://www.facebook.com/deanlinbao', ICONS.facebook],
-    ['Threads', 'https://www.threads.com/@deanlin5288', ICONS.threads],
-    ['YouTube', 'https://www.youtube.com/@dlcorner', ICONS.youtube],
-    ['GitHub', 'https://github.com/dean9703111', ICONS.github],
+    ['GitHub', 'https://github.com/jason-nine', ICONS.github],
   ];
   app.append(
     el('header', { class: 'header' },
-      el('div', { class: 'brand' }, el('h1', {}, '文件去識別化工具'), el('span', { class: 'muted' }, '純前端處理・文件不離開你的電腦')),
+      el('div', { class: 'brand' }, el('h1', {}, '文件去标识化工具'), el('span', { class: 'muted' }, '纯前端处理・文件不离开你的电脑')),
       nav,
     ),
     panels,
     el('footer', { class: 'footer' },
       el('div', { class: 'footer-inner' },
         el('div', {},
-          el('strong', {}, '文件去識別化工具'),
-          el('span', { class: 'muted' }, '　開源專案（MIT）・'),
-          el('a', { href: 'https://github.com/dean9703111/data-deidentification', target: '_blank', rel: 'noopener' }, '原始碼'),
+          el('strong', {}, '文件去标识化工具'),
+          el('span', { class: 'muted' }, '　开源项目（MIT）・'),
+          el('a', { href: 'https://github.com/jason-nine/data-deidentification-zh', target: '_blank', rel: 'noopener' }, '源代码'),
           siteInfo ? el('span', { class: 'muted' }, '・') : null,
-          siteInfo ? el('button', { class: 'link-btn', type: 'button', onClick: () => infoDialog.showModal() }, '常見問題') : null,
+          siteInfo ? el('button', { class: 'link-btn', type: 'button', onClick: () => infoDialog.showModal() }, '常见问题') : null,
         ),
         el('div', { class: 'footer-social' },
           ...social.map(([name, url, icon]) => {

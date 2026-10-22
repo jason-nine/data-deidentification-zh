@@ -1,4 +1,4 @@
-// Every format written with the marker styles that need no restoring (類別, 空白佔位): the output
+// Every format written with the marker styles that need no restoring (类别, 空白占位): the output
 // carries no code and no hidden value, and reads back with exactly the expected markers.
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
@@ -15,7 +15,7 @@ import { renderDocx } from '../../scripts/lib/render-docx.ts';
 import { renderPdf } from '../../scripts/lib/render-pdf.ts';
 import { buildXlsx } from '../helpers/xlsx-builder.ts';
 
-const FONT = new Uint8Array(readFileSync('public/fonts/NotoSansTC-Regular.ttf'));
+const FONT = new Uint8Array(readFileSync('public/fonts/NotoSansSC-Regular.ttf'));
 
 beforeAll(async () => {
   vi.stubGlobal('fetch', async () => new Response(FONT));
@@ -36,7 +36,7 @@ async function sources(): Promise<LoadedDocument[]> {
     parseDocument(file(await renderDocx(contract()), 'contract.docx')),
     parseDocument(file(await buildXlsx(customers()), 'customers.xlsx')),
     parseDocument(file(await renderPdf(contract(), FONT), 'contract.pdf')),
-    parseDocument(file('客戶王小明，手機 0912-345-678，信箱 amy.chen@gmail.com。', 'note.txt')),
+    parseDocument(file('客户王小明，手机 138-1234-5678，信箱 amy.chen@gmail.com。', 'note.txt')),
   ]);
 }
 
@@ -55,7 +55,7 @@ describe('output that needs no restoring', () => {
         const hidden = it.original.slice(it.head ?? 0, it.original.length - (it.tail ?? 0));
         if (hidden.length >= 4) expect(out.text, `${doc.fileName}: ${it.original}`).not.toContain(hidden);
       }
-      if (style === 'label') expect(out.text).toMatch(/\[(姓名|手機|電子郵件)\]/);
+      if (style === 'label') expect(out.text).toMatch(/\[(姓名|手机|邮箱)\]/);
       else expect(out.text).toContain('○○');
     }
   });

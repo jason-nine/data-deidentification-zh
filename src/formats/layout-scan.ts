@@ -400,7 +400,7 @@ export function textColour(img: Raster, box: Box, paper = paperTone(img)): Rgb |
  * left and right sides between them; a box filled in solid is a dark square. `textHeight` bounds the
  * size (0.6–1.6×). A frame only counts when it stands apart: sharp corners (not the loop of an 8 or
  * 9), no stroke right across the inside (日、目、田) or hanging into it (四), and blank paper around
- * it except where a tick leaves at the top right (not the 口 inside 品 or 號). Ticked when the
+ * it except where a tick leaves at the top right (not the 口 inside 品 or 号). Ticked when the
  * inside holds ink (tick, cross or fill).
  */
 export function findCheckboxes(img: Raster, textHeight: number): PixelCheckbox[] {

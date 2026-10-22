@@ -86,14 +86,14 @@ export function toFile(bytes: Uint8Array, name: string): File {
 
 /** The sample used by the docx round-trip tests. */
 export const SAMPLE_DOCX_SPEC: DocxSpec = {
-  header: [['機密文件 - 承辦人 陳大文']],
+  header: [['机密文件 - 承办人 陈大文']],
   paragraphs: [
-    ['個案姓名：', '王小明', '先生（身分證字號 ', 'A1234', '56789', '），聯絡手機 0912-345-678。'],
-    ['通訊地址：台北市信義區市府路45號8樓；Email：xiaoming.wang@example.com'],
+    ['个案姓名：', '王小明', '先生（身份证号 ', '1101011990', '03078515', '），联系手机 138-1234-5678。'],
+    ['通信地址：北京市朝阳区建国路88号；Email：xiaoming.wang@example.com'],
     ['王小明表示其配偶林美玲女士亦同意。'],
   ],
   table: [
-    [['項目'], ['內容']],
-    [['緊急聯絡人'], ['歐陽志遠（', '0987654321', '）']],
+    [['项目'], ['内容']],
+    [['紧急联系人'], ['欧阳志远（', '13912345678', '）']],
   ],
 };

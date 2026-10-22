@@ -11,7 +11,7 @@ import type { OcrOptions } from './ocr';
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
 
-const FONT_URL = `${import.meta.env.BASE_URL}fonts/NotoSansTC-Regular.ttf`;
+const FONT_URL = `${import.meta.env.BASE_URL}fonts/NotoSansSC-Regular.ttf`;
 
 /** One run of text at its position (PDF points, origin bottom-left, y = baseline). */
 export interface PdfTextItem {
@@ -75,9 +75,9 @@ export async function parsePdf(file: File, opts: ParsePdfOptions = {}): Promise<
     const pages: PdfPage[] = [];
     for (let p = 1; p <= pdf.numPages; p++) pages.push(await textLayer(await pdf.getPage(p)));
     if (hasText(pages)) return assemblePdf(file.name, pages);
-    if (!opts.ocr) throw new Error('此 PDF 沒有可擷取的文字層（可能是掃描影像）；還原請使用本工具輸出的去識別化檔案');
+    if (!opts.ocr) throw new Error('此 PDF 没有可提取的文字层（可能是扫描影像）；还原请使用本工具输出的去标识化文件');
     const scanned = await (await import('./ocr')).recognizePdf(pdf, opts.ocr);
-    if (!hasText(scanned)) throw new Error('未在此 PDF 的頁面影像中辨識到任何文字');
+    if (!hasText(scanned)) throw new Error('未在此 PDF 的页面影像中识别到任何文字');
     return assemblePdf(file.name, scanned, true);
   } finally {
     await task.destroy();
@@ -144,7 +144,7 @@ let fontBytesPromise: Promise<ArrayBuffer> | null = null;
 function loadFontBytes(): Promise<ArrayBuffer> {
   if (!fontBytesPromise) {
     fontBytesPromise = fetch(FONT_URL).then((r) => {
-      if (!r.ok) throw new Error('無法載入中文字型，PDF 輸出失敗');
+      if (!r.ok) throw new Error('无法加载中文字型，PDF 输出失败');
       return r.arrayBuffer();
     });
   }

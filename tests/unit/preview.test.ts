@@ -199,7 +199,7 @@ describe('renderDocumentPreview — docx layout', () => {
 
     expect(children[0].classList.contains('doc-part')).toBe(true);
     expect(children[0].classList.contains('doc-part-header')).toBe(true);
-    expect(children[0].querySelector('.doc-part-label')?.textContent).toBe('頁首');
+    expect(children[0].querySelector('.doc-part-label')?.textContent).toBe('页首');
     expect(children[0].textContent).toContain('HEAD');
 
     expect(children[1].classList.contains('doc-p')).toBe(true);
@@ -207,7 +207,7 @@ describe('renderDocumentPreview — docx layout', () => {
 
     expect(children[2].classList.contains('doc-part')).toBe(true);
     expect(children[2].classList.contains('doc-part-footer')).toBe(true);
-    expect(children[2].querySelector('.doc-part-label')?.textContent).toBe('頁尾');
+    expect(children[2].querySelector('.doc-part-label')?.textContent).toBe('页尾');
     expect(children[2].textContent).toContain('FOOT');
   });
 
@@ -268,7 +268,7 @@ describe('renderDocumentPreview — xlsx layout', () => {
       kind: 'xlsx',
       sheets: [
         {
-          name: '客戶',
+          name: '客户',
           cells: [
             { start: 0, end: 2, row: 1, col: 1 },
             { start: 2, end: 4, row: 1, col: 2 },
@@ -276,7 +276,7 @@ describe('renderDocumentPreview — xlsx layout', () => {
           ],
         },
         {
-          name: '訂單',
+          name: '订单',
           cells: [
             { start: 6, end: 8, row: 1, col: 1 },
             { start: 8, end: 10, row: 1, col: 2 },
@@ -290,8 +290,8 @@ describe('renderDocumentPreview — xlsx layout', () => {
 
     const tabs = Array.from(container.querySelectorAll('.sheet-tabs button.sheet-tab')) as HTMLButtonElement[];
     expect(tabs).toHaveLength(2);
-    expect(tabs[0].textContent).toBe('客戶（3）');
-    expect(tabs[1].textContent).toBe('訂單（2）');
+    expect(tabs[0].textContent).toBe('客户（3）');
+    expect(tabs[1].textContent).toBe('订单（2）');
     expect(tabs[0].classList.contains('active')).toBe(true);
     expect(tabs[1].classList.contains('active')).toBe(false);
 
@@ -355,7 +355,7 @@ describe('renderDocumentPreview — pdf layout', () => {
     expect(host).not.toBeNull();
 
     const label = host.querySelector('.pdf-page-label') as HTMLElement;
-    expect(label.textContent).toBe('第 1 頁 / 共 1 頁');
+    expect(label.textContent).toBe('第 1 页 / 共 1 页');
 
     const pages = host.querySelectorAll('.pdf-page');
     expect(pages).toHaveLength(1);

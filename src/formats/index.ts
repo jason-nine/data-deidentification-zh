@@ -21,9 +21,9 @@ export function detectFormat(fileName: string): DocFormat | null {
 
 export function validateFile(file: File): DocFormat {
   const format = detectFormat(file.name);
-  if (!format) throw new Error('不支援的檔案格式，請上傳 PDF、Word (.docx)、Excel (.xlsx)、TXT 或 Markdown');
+  if (!format) throw new Error('不支持的文件格式，请上传 PDF、Word (.docx)、Excel (.xlsx)、TXT 或 Markdown');
   if (file.size > MAX_FILE_BYTES) {
-    throw new Error(`檔案超過 ${MAX_FILE_BYTES / 1024 / 1024} MB 上限`);
+    throw new Error(`文件超过 ${MAX_FILE_BYTES / 1024 / 1024} MB 上限`);
   }
   return format;
 }
@@ -72,16 +72,16 @@ export function mappingFileName(original: string): string {
 
 export function formatLimitations(format: DocFormat, ocr = false): string | null {
   if (format === 'pdf' && ocr) {
-    return '此檔為掃描影像，文字由瀏覽器內的文字辨識（OCR）取得，可能有誤認或遺漏，請逐頁核對預覽並手動補上漏抓的項目。輸出只含辨識出的文字（依原位置重繪）與不含文字的圖片（照片、標誌，可在預覽逐張取消保留），其餘頁面影像一律不保留；未辨識出的文字不會出現在輸出中。還原時只還原文字。';
+    return '此文件为扫描影像，文字由浏览器内的文字识别（OCR）取得，可能有误认或遗漏，请逐页核对预览并手动补上漏抓的项目。输出只含识别出的文字（依原位置重绘）与不含文字的图片（照片、标志，可在预览逐张取消保留），其余页面影像一律不保留；未识别出的文字不会出现在输出中。还原时只还原文字。';
   }
   if (format === 'pdf') {
-    return 'PDF 輸出為文字版面重建：文字依原座標繪回，但圖片、圖形與原字型不會保留。此做法確保輸出檔內不殘留任何原始敏感文字。';
+    return 'PDF 输出为文字版面重建：文字依原座标绘回，但图片、图形与原字型不会保留。此做法确保输出文件内不残留任何原始敏感文字。';
   }
   if (format === 'xlsx') {
-    return 'Excel 輸出保留儲存格樣式與工作表結構；僅處理文字型儲存格，以數值儲存的電話／證號、公式結果、工作表名稱與註解不在偵測範圍。';
+    return 'Excel 输出保留单元格样式与工作表结构；仅处理文字型单元格，以数值保存的电话／证号、公式结果、工作表名称与注解不在检测范围。';
   }
   if (format === 'docx') {
-    return 'Word 輸出保留原有樣式與表格；文字方塊、註解等特殊區域可能未涵蓋，請以預覽為準。';
+    return 'Word 输出保留原有样式与表格；文字方块、注解等特殊区域可能未涵盖，请以预览为准。';
   }
   return null;
 }

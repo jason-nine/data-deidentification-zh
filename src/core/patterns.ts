@@ -1,133 +1,331 @@
 import type { Pattern } from './types';
-import { isValidTaxId, isValidTwId } from './twid';
+import { isValidCnId, isValidUscc } from './cnid';
 import { ibanLength, isBirthDate, isCardNumber, isIpv6, isSsn, phoneLength } from './intl';
+import { CITIES, PROVINCES, regionStem } from './rules/zh-CN-regions';
 
 const CJK = '\\u4e00-\\u9fa5';
 
-export const CITIES =
-  '(?:[臺台]北市|新北市|桃園市|[臺台]中市|[臺台]南市|高雄市|基隆市|新竹[市縣]|嘉義[市縣]|苗栗縣|彰化縣|南投縣|雲林縣|屏東縣|宜蘭縣|花蓮縣|[臺台]東縣|澎湖縣|金門縣|連江縣)';
-const DISTRICT = `(?:[${CJK}]{1,4}[鄉鎮市區])?`;
-const ROAD = `(?:[${CJK}\\d]{1,8}(?:路|街|大道))`;
-const ADDRESS_TAIL =
-  `(?:[${CJK}]{1,4}[村里])?(?:\\d{1,3}鄰)?` +
-  `(?:[一二三四五六七八九十\\d]{1,3}段)?(?:\\d{1,4}巷)?(?:\\d{1,4}弄)?` +
-  `\\d{1,5}(?:之\\d{1,3})?號(?:[\\d一二三四五六七八九十]{1,3}樓)?(?:之\\d{1,3})?(?:[${CJK}\\d]{1,3}室)?`;
+/* ---------------------------------------------------------------- 行政区划锚点 */
 
+/** 「北京市」→「北京(?:市)?」；「内蒙古自治区」→「内蒙古(?:自治区)?」。 */
+function provinceForm(name: string): string {
+  if (name.endsWith('特别行政区')) return `${name.slice(0, -5)}(?:特别行政区)?`;
+  const autonomous = name.match(/^(.*?)(?:维吾尔|壮族|回族)?自治区$/u);
+  if (autonomous) return `${autonomous[1]}(?:(?:维吾尔|壮族|回族)?自治区)?`;
+  return `${name.slice(0, -1)}(?:省|市)?`;
+}
+
+/** 「延边朝鲜族自治州」→「延边」：去掉末尾层层叠加的民族名。 */
+function prefectureStem(name: string): string {
+  let s = name.replace(/自治州$/u, '');
+  while (/[\u4e00-\u9fa5]{1,4}族$/u.test(s)) s = s.replace(/[\u4e00-\u9fa5]{1,4}族$/u, '');
+  return s;
+}
+
+/** 「杭州市」→「杭州(?:市)?」；「延边朝鲜族自治州」→ 全称或「延边」。 */
+function cityForm(name: string): string {
+  if (name.endsWith('市')) return `${name.slice(0, -1)}(?:市)?`;
+  if (name.endsWith('地区')) return `${name.slice(0, -2)}(?:地区)?`;
+  if (name.endsWith('盟')) return `${name.slice(0, -1)}(?:盟)?`;
+  if (name.endsWith('自治州')) {
+    const stem = prefectureStem(name);
+    return stem && stem !== name ? `${name}|${stem}` : name;
+  }
+  return name;
+}
+
+/** 长名在前，避免「吉林」吃掉「吉林市」；空分支会让整条正则匹配空串，必须滤掉。 */
+const alternation = (forms: string[]): string =>
+  `(?:${[...new Set(forms)].filter((f) => f && f.replace(/\(\?:[^)]*\)\?/g, '')).sort((a, b) => b.length - a.length).map((f) => `(?:${f})`).join('|')})`;
+
+export const PROVINCE_ALT = alternation(PROVINCES.map(provinceForm));
+export const CITY_ALT = alternation(CITIES.map(cityForm));
+
+/** 区县 / 乡镇 / 村 / 路街 / 门牌 —— 地址由粗到细的各段。 */
+const DISTRICT = `[${CJK}]{2,6}(?:新区|区|县|旗|市)`;
+const TOWN = `[${CJK}]{2,8}(?:街道|镇|乡|苏木)`;
+const VILLAGE = `[${CJK}]{2,10}(?:社区|村|嘎查)`;
+const ROAD = `[${CJK}A-Za-z0-9]{2,15}(?:大街|大道|路|街|胡同|巷|弄|条)`;
+/** 门牌：88号 / 甲9号院 / 3号楼 / 现代城A座1801室。 */
+const NUMBER =
+  `(?:(?:[甲乙丙丁]?\\d{1,5}(?:号|院))|(?:[A-Za-z]?\\d{1,3}(?:号楼|栋|幢|座)))` +
+  `(?:[${CJK}A-Za-z0-9]{0,12}(?:号楼|楼|栋|幢|座|单元|层))?` +
+  `(?:\\d{1,3}层)?(?:\\d{1,4}(?:室|房|户))?`;
+
+/** 地址必须以「硬」成分（门牌或村名）收尾，否则正文里的地名会被当成地址。 */
+const TAIL_REST = `(?:(?:(?:${TOWN})?(?:${VILLAGE})?(?:${ROAD})?${NUMBER})|(?:(?:${TOWN})?${VILLAGE}))`;
+
+/**
+ * 三种起点：
+ * 1. 省（可带市）——最可靠；
+ * 2. 市——「杭州市西湖区…」，正文里最常见；
+ * 3. 区县——「朝阳区建国路88号」，没写省市的短地址，靠结构兜底。
+ */
 const ADDRESS_REGEX =
-  `(?:${CITIES}${DISTRICT}(?:[${CJK}]{1,4}[村里])?(?:\\d{1,3}鄰)?${ROAD}?` +
-  `|(?<![${CJK}])${DISTRICT}${ROAD})` +
-  ADDRESS_TAIL;
+  `(?:${PROVINCE_ALT})(?:${CITY_ALT})?(?:${DISTRICT})?${TAIL_REST}` +
+  `|(?:${CITY_ALT})(?:${DISTRICT})?${TAIL_REST}` +
+  `|(?<![${CJK}])(?:${DISTRICT})${TAIL_REST}`;
 
-/** +886 numbers: area code with or without its 0 or brackets (mobiles, +886-9, are 手機). */
-const TW_LANDLINE_INTL = '\\+886[-\\x20]?\\(?0?(?:826|836|82|89|37|49|[2-8])\\)?[-\\x20]?\\d{3,4}[-\\x20]?\\d{3,4}';
+/* ---------------------------------------------------------------- 单位名称 */
+
+/** 以组织形式结尾才算单位名；单独的「公司」「集团」「中心」太泛，不纳入。 */
+const COMPANY_SUFFIX =
+  '(?:股份有限公司|有限责任公司|有限公司|集团有限公司|集团公司|分公司|事务所|工作室|研究院|设计院|医院|诊所|学院|大学|学校|幼儿园|银行|支行|分行|合作社|营业部|门市部|商行|酒店|宾馆)';
+/** 常见于单位名之前、但绝不属于单位名的字（「本」「该」「贵」等）。 */
+const COMPANY_NOT_FIRST = '的与和及于在由向从为对将把让依据至到给经受同各该本贵我敝此其系即为者以并或如';
+/** 单位名的延续段：「…有限公司北京分公司」「…银行深圳分行」。 */
+const COMPANY_TAIL = `(?:[${CJK}A-Za-z0-9]{2,12}(?:分公司|分行|支行|营业部|门市部|办事处))?`;
+/** 排除字只作用于首字（「本公司」「贵公司」），不能逐字排除，否则「数据」「大同」这类名字会被切断。 */
+const COMPANY_REGEX =
+  `(?![${COMPANY_NOT_FIRST}])[${CJK}A-Za-z0-9&·（）()]` +
+  `(?:[${CJK}A-Za-z0-9&·（）()]){1,19}?${COMPANY_SUFFIX}${COMPANY_TAIL}`;
+
+/** 组织形式后缀，供 mask.ts 拆分单位名复用，避免两处各写一份。 */
+export const COMPANY_SUFFIX_SRC = COMPANY_SUFFIX;
+
+/* ---------------------------------------------------------------- 姓名 */
+
+/** 简体复姓。 */
+export const COMPOUND_SURNAMES = [
+  '欧阳', '司马', '诸葛', '上官', '皇甫', '东方', '独孤', '南宫', '慕容', '长孙',
+  '宇文', '尉迟', '公孙', '令狐', '夏侯', '端木', '司徒', '司空', '轩辕', '拓跋',
+  '呼延', '澹台', '公冶', '宗政', '濮阳', '淳于', '单于', '太叔', '申屠', '仲孙',
+  '钟离', '鲜于', '闾丘', '司寇', '巫马', '公西', '颛孙', '壤驷', '公良', '漆雕',
+  '乐正', '宰父', '谷梁', '夹谷', '百里', '东郭', '南门', '羊舌', '微生', '梁丘',
+  '左丘', '西门', '第五', '南荣', '东里', '即墨', '达奚',
+];
+
+const SINGLE_SURNAMES =
+  '王李张刘陈杨黄赵吴周徐孙马朱胡郭何高林罗郑梁谢宋唐许韩冯邓曹彭曾肖田董袁潘于蒋蔡余杜叶程苏魏吕丁任沈姚卢姜崔钟谭陆汪范金石廖贾夏韦付方白邹孟熊秦邱江尹薛闫段雷侯龙史陶黎贺顾毛郝龚邵万钱严覃武戴莫孔向汤常温康施文牛樊葛邢安齐易乔伍庞颜倪庄聂章鲁岳翟殷詹申欧耿关兰焦俞左柳甘祝包宁尚符舒阮柯纪梅童凌毕单季裴霍涂成苗谷盛曲翁冉骆蓝路游辛靳管柴蒙鲍华喻祁蒲房滕屈饶解牟艾尤阳时穆农卓古吉缪简车项连芦麦褚娄窦戚岑景党宫费卜冷晏席卫米柏宗瞿桂全佟应臧闵苟邬边卞姬师仇栾隋商刁沙荣巫寇桑郎甄丛仲虞敖巩明佘池查麻苑迟邝封谈匡鞠惠荆乐冀郁胥南班储原栗燕楚鄢劳谌奚皮粟冼蔺楼闻厉伊仝区郜海阚花权强帅屠豆朴盖练廉禹井祖漆巴丰支卿狄晋';
+
+/**
+ * 姓名结尾证据，分强弱两档。
+ *
+ * 强证据：文本边界（结尾／空白／标点／数字／ASCII），或两字以上的称谓与谓语。
+ * 弱证据：单个虚词（于／在／的／与／来……）。
+ *
+ * 弱证据只给三字名和复姓用。两字名 + 单个虚词是最典型的误判组合——
+ * 「房屋有」「项目在」「关于要」都是「两字常用词 + 虚词」，所以两字名必须走到强证据。
+ */
+const NAME_STRONG_TAIL =
+  '$|[\\s\\d\\p{P}A-Za-z]|先生|女士|小姐|同志|师傅|老师|医生|医师|护士|律师|经理|总经理|主任|' +
+  '董事长|董事|总监|科长|处长|局长|部长|院长|校长|教授|博士|同学|工程师|会计师|' +
+  '表示|指出|认为|声称|陈述|声明|申请|提交|提供|负责|签署|签字|签订|同意|确认|要求|主张|提出|' +
+  '介绍|说明|承认|承诺|保证|联系|通知|告知|回复|答辩|起诉|报案|报警|死亡|出生|' +
+  '身份证|电话|手机|住址|地址|邮箱';
+
+/** 名字后面可能紧跟的单个虚词／副词。 */
+const NAME_WEAK_CHARS =
+  '于在与和及为向由系并或等之已将因被从对就又还但而却才仍亦即则乃未不无非是有会能可要应须需曾来去至称说另也都均便更再正';
+
+const NAME_TAIL_STRONG = `(?=(?:${NAME_STRONG_TAIL}))`;
+const NAME_TAIL_ANY = `(?=(?:${NAME_STRONG_TAIL})|[${NAME_WEAK_CHARS}])`;
+
+/** 复姓；长名在前，避免「欧阳」被拆成「欧」。 */
+const COMPOUND_ALT = `(?:${COMPOUND_SURNAMES.join('|')})`;
+
+/**
+ * 三字名与复姓：姓 + 2 字，强弱证据都认（「陈大文于」「王小明来电」）。
+ * 两字名：姓 + 1 字，只认强证据。
+ * {1,2} 与 {2} 由正则回溯决定：「王小明先生」取「王小明」，「李娜女士」取「李娜」。
+ */
+const NAME_REGEX =
+  `(?:${COMPOUND_ALT}[${CJK}]{1,2}|[${SINGLE_SURNAMES}][${CJK}]{2})${NAME_TAIL_ANY}` +
+  '|' +
+  `[${SINGLE_SURNAMES}][${CJK}]${NAME_TAIL_STRONG}`;
+
+/**
+ * 以姓氏字开头、但其实是常用词的双字组合。简体语料里这类词和繁体完全不同，
+ * 是姓名误报的主要来源，只能靠词表压住。
+ */
+const NAME_STOPLIST = new Set([
+  // 地名 / 与姓氏同字的地名
+  '向阳', '高明', '康定', '江山', '黄山', '白银', '长治', '大同', '东方', '通化', '四平', '五常',
+  '吉林', '海南', '河南', '河北', '湖南', '湖北', '广东', '广西', '山东', '山西', '云南', '四川',
+  '贵州', '陕西', '甘肃', '青海', '辽宁', '安徽', '福建', '江西', '江苏', '浙江', '台湾', '香港',
+  '澳门', '北京', '天津', '上海', '重庆', '成都', '武汉', '南京', '杭州', '苏州', '西安', '长沙',
+  '沈阳', '长春', '哈尔滨', '石家庄', '太原', '济南', '郑州', '合肥', '南昌', '福州', '昆明',
+  '贵阳', '南宁', '兰州', '西宁', '银川', '乌鲁木齐', '拉萨', '呼和浩特', '张家口', '张家港',
+  // 常用词
+  '王国', '王牌', '李子', '张开', '张力', '张贴', '陈述', '陈列', '陈旧', '林地', '林区', '林场',
+  '高原', '高温', '高速', '高校', '高度', '高层', '高额', '高级', '黄金', '黄色', '黄昏', '黄河',
+  '何时', '何况', '何人', '何处', '何等', '何种', '何者', '何以', '何不', '何在', '何其', '何必',
+  '马上', '马路', '马匹', '周末', '周年', '周边', '周围', '周折', '方法', '方面', '方向', '方式',
+  '方案', '许多', '许可', '许可证', '江湖', '白色', '白天', '黑色', '金额', '金融', '金属',
+  '金钱', '金色', '长期', '长久', '长途', '文件', '文化', '文本', '文字', '文明', '石头', '石油',
+  '程序', '程度', '过程', '康复', '常见', '常规', '常年', '章节', '施工', '施行', '设施', '万一',
+  '万元', '万里', '罗列', '罗马', '夏天', '夏季', '田地', '田间', '余额', '毛病', '毛巾', '任何',
+  '任务', '任职', '古代', '古董', '古迹', '记录', '纪录', '纪念', '链接', '连续', '连接', '连日',
+  '温度', '温暖', '温馨', '唐朝', '蓝色', '蓝图', '汪洋', '童年', '陆地', '陆续', '柳树', '钱包',
+  '甘心', '官方', '官员', '官吏', '易于', '祝福', '乔木', '向来', '向上', '向下', '凌晨', '舒服',
+  '包含', '包括', '包装', '鲍鱼', '牛肉', '牛奶', '管理', '管道', '管线', '管控', '管辖', '管制',
+  '孙子', '孙女', '戴上', '范围', '范畴', '宋朝', '杜绝', '侯爵', '曹操', '丁点', '卓越', '马克',
+  '董事', '董事长', '石膏', '梁柱', '颜色', '简单', '简介', '简称', '简易', '朱红', '钟情', '游泳',
+  '游戏', '詹姆', '胡说', '胡椒', '沈默', '沉默', '卢比', '吕宋', '萧条', '潘朵', '庄园', '苏打',
+  '叶子', '徐徐', '赖床', '曾经', '曾任', '洪水', '郭台', '谢谢', '郑重', '许久', '许诺', '刘海',
+  '杨桃', '谢绝', '谢意', '邱比', '庄严', '牛市', '包子', '任一', '安全', '安装', '安排', '程师',
+  '短信', '付费', '付款', '支付', '收费', '收款', '提供', '提交', '申请', '申报', '办理', '处理',
+  '负责', '负担', '购买', '采购', '领取', '递交', '回复', '联系', '通知', '告知', '同意', '声明',
+  '出席', '参加', '签约', '签订', '盖章', '审核', '审批', '确认', '核对', '登记', '备案', '报送',
+  '移交', '项目', '合同', '协议', '条款', '价格', '费用', '服务', '外包', '税率', '发票', '账单', '报表', '数据',
+  '信息', '系统', '平台', '账号', '密码', '登录', '注册', '用户', '客户', '供应商',
+  '车牌', '车厢', '车间', '车站', '单元', '单词', '单位', '地址', '电话', '邮箱', '姓名', '编号',
+  '代码', '单据', '表格', '备注', '附件', '正文', '标题', '段落', '字体', '字号', '页面', '文档',
+  // 法律／物业／维修类文书高频词：两字词后面直接跟标点时仍会命中，必须靠词表兜住
+  '房屋', '房产', '房主', '管道', '管线', '管理费', '项目', '项下', '施工', '施工方', '权属', '权利',
+  '义务', '维修', '维护', '养护', '形成', '关于', '对于', '有权', '水渍', '渗漏', '漏水', '接口',
+  '吊顶', '金属', '构件', '锈蚀', '明线', '防水', '地面', '积水', '老化', '期限', '依据', '规定',
+  '办法', '条例', '物业', '业主', '资金', '竣工', '验收', '备案', '年限', '事实', '情况', '位置',
+  '状态', '反映', '人员', '工作', '责任', '范围', '主体', '行为', '结果', '原因', '后果', '损失',
+  '费用', '金额', '方式', '标准', '要求', '建议', '意见', '方案', '措施', '整改', '修复', '更换',
+  '承担', '赔偿', '协商', '调解', '诉讼', '仲裁', '材料', '设备', '设施', '部位', '空间', '现场',
+  '本人', '家属', '对方', '贵司', '贵方', '我司', '我方', '各方', '双方', '甲方', '乙方', '丙方',
+  '时间', '日期', '地点', '地址', '编号', '文件', '证件', '证明', '申请', '登记', '通知', '告知',
+  '安全', '安排', '安装', '完成', '实施', '执行', '开展', '进行', '存在', '发现', '出现', '产生',
+  '成果', '成效', '成员', '成本', '成立', '成交', '商祺', '此致', '敬礼',
+]);
+
+/** 省级 / 地级名称去掉行政后缀后的词干，避免「吉林」「海南」「大同」被当成人名。 */
+const REGION_STEMS = new Set([...PROVINCES, ...CITIES].map(regionStem).filter((s) => s.length >= 2));
+
+/** 「甲方」「乙方」「双方」里的「方」是当事方，不是姓方的人。 */
+const PARTY_PREFIX = /[甲乙丙丁双各买卖我他贵对本该多官军院校厂资劳前后男女一二三四五六七八九十任另每]$/u;
+
+/** 职务／称谓：跟在「姓 + 1 字」后面多半是「王经理」这种称呼，不是完整姓名。 */
+const TITLES = new Set([
+  '经理', '主任', '董事', '总监', '科长', '处长', '局长', '部长', '院长', '校长',
+  '先生', '女士', '小姐', '老师', '医生', '医师', '律师', '教授', '博士', '同学', '师傅', '同志',
+]);
+
+/**
+ * 几乎不会出现在名字里的字：名词／量词后缀与结构性用字。
+ * 只要「名」的部分含这些字，就判定不是人名——「所有权人」的「人」、「实施改造」的「改」、
+ * 「房地产」的「产」、「项目部」的「部」都靠这一条挡掉。
+ * 这里刻意避开平／安／明／华／建／国／军／民／强／伟／杰／利／义／群 等真实名字用字。
+ */
+const NAME_BAD_GIVEN = new Set([
+  '人', '者', '员', '物', '事', '件', '品', '性', '化', '度', '量', '数', '费', '款', '价', '额',
+  '税', '率', '单', '表', '证', '号', '期', '屋', '目', '属', '道', '产', '项', '部', '场', '线',
+  '管', '板', '池', '沟', '井', '窗', '顶', '底', '类', '型', '状', '态', '置', '情', '况', '题',
+  '因', '意', '见', '法', '式', '序', '程', '阶', '段', '届', '次', '务', '责', '任', '制', '条',
+  '标', '准', '则', '例', '案', '据', '材', '设', '备', '统', '息', '服', '商', '户', '会', '职',
+  '干', '众', '市', '村', '居', '团', '构', '门', '业', '域', '面', '角', '层', '围', '界', '限',
+  '效', '收', '险', '造', '改', '施', '工', '漏', '渍', '蚀', '缝',
+  // 列举助词与限定词：「经营性用房等专有部分」里的「等专」
+  '等', '专', '各', '该', '此', '其', '每', '另', '某', '诸', '凡',
+  // 方位／范围字：「两小时内提出」的「内」（「中」是真实名字用字，不列入）
+  '内', '外', '上', '下', '前', '后', '左', '右', '间',
+  // 动词／助词／名词后缀：这些字几乎只出现在词里，不进名字
+  '依', '附', '技', '术', '按', '送', '银', '行', '八', '遵', '守', '所', '起', '终', '止',
+  '违', '约', '报', '酬', '应', '本', '合', '您', '身', '份', '烦', '协', '体', '把', '既',
+  '函', '照', '片', '接', '待', '铁', '站', '细', '持', '询', '要', '区', '闭', '检', '测',
+  '阵', '列', '至', '将', '三', '据', '条', '款', '额',
+  // 虚词与文稿用字：「生成的」「应被视为」「原稿」
+  '的', '被', '稿', '地', '得', '着', '了', '过', '呢', '吗', '吧', '啊',
+  // 「沿下方蔓延」的「蔓」（「延」是真实名字用字，不列入）
+  '蔓',
+]);
+
+function isPlausibleName(m: string, before = ''): boolean {
+  // 单字不可能是姓名（只有姓没有名）。
+  if (m.length < 2) return false;
+  if (NAME_STOPLIST.has(m) || NAME_STOPLIST.has(m.slice(0, 2))) return false;
+  // 三字名 = 单姓 + 双字名；若双字名本身是常用词（「包服务」「高温度」），不是人名。
+  if (m.length === 3 && NAME_STOPLIST.has(m.slice(1))) return false;
+  if (REGION_STEMS.has(m) || REGION_STEMS.has(m.slice(0, 2))) return false;
+  // 「位于海南」「来自上海」：姓 + 地名不是人名。
+  const surnameLen = COMPOUND_SURNAMES.some((s) => m.startsWith(s)) ? 2 : 1;
+  if (REGION_STEMS.has(m.slice(surnameLen))) return false;
+  // 「名」的部分出现名词后缀字，说明这是词而不是人名。
+  for (const ch of m.slice(surnameLen)) if (NAME_BAD_GIVEN.has(ch)) return false;
+  if (m.length <= 3 && TITLES.has(m.slice(-2))) return false;
+  if (/(.)\1/.test(m) && m.length === 2) return false;
+  if (m.startsWith('方') && PARTY_PREFIX.test(before)) return false;
+  if (m.startsWith('何') && /[任如为几若奈无]$/u.test(before)) return false;
+  return true;
+}
+
+/* ---------------------------------------------------------------- 号码 */
+
+/** 手机：1[3-9] 开头 11 位，可带 +86 与分隔符。 */
+const MOBILE_REGEX = '(?<![\\d+])(?:\\+?86[-\\x20]?)?1[3-9]\\d(?:[-\\x20]?\\d{4}){2}(?!\\d)';
+
+/**
+ * 固定电话：区号 010 / 02x 为 3 位，其余 0[3-9]xx 为 4 位；本地号 7–8 位。
+ * 带国际冠码时区号省掉前导 0（+86 10 8888 6666），因此两条分支分开写。
+ */
+const AREA_CODE = '(?:10|2\\d|[3-9]\\d{2})';
+const LANDLINE_REGEX =
+  `(?<![\\d(])(?:\\+86[-\\x20]?${AREA_CODE}|\\(?0${AREA_CODE}\\)?)[-\\x20]?\\d{3,4}[-\\x20]?\\d{4}(?!\\d)`;
+
+/** 银联卡（62 开头）与境外卡分开，便于按类别做不同的部分保留。 */
+function isUnionPay(match: string): boolean {
+  const digits = match.replace(/\D/g, '');
+  if (!/^62/.test(digits) || digits.length < 16 || digits.length > 19) return false;
+  return isCardNumber(match);
+}
+
+function isIntlCard(match: string): boolean {
+  return !/^62/.test(match.replace(/\D/g, '')) && isCardNumber(match);
+}
+
+/** 车牌：省简称 + 发牌机关字母 + 5 位（新能源 6 位）。 */
+const PLATE_REGEX =
+  '(?<![A-Za-z0-9\\u4e00-\\u9fa5])(?:[京津冀晋蒙辽吉黑沪苏浙皖闽赣鲁豫鄂湘粤桂琼渝川贵云藏陕甘青宁新])' +
+  '(?:[A-HJ-NP-Z])[·\\-\\x20]?[A-HJ-NP-Z0-9]{5,6}(?![A-Za-z0-9])';
+
+function isPlate(match: string): boolean {
+  const body = match.slice(1).replace(/[·\-\s]/g, '');
+  return /^[A-HJ-NP-Z][A-HJ-NP-Z0-9]{5,6}$/.test(body) && /[0-9]/.test(body);
+}
+
+/* ---------------------------------------------------------------- 日期 */
 
 const MONTH = '(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)';
-/**
- * A date of birth only counts right after a label saying so, on the same line (a table's next cell
- * counts, a column header above a list of dates does not); other dates are not personal data.
- */
-const BIRTH_LABEL = '(?:DOB|D\\.O\\.B\\.?|[Dd]ate [Oo]f [Bb]irth|[Bb]irth ?[Dd]ate|[Bb]irthday|[Bb]orn(?: [Oo]n)?|出生日期|出生年月日|生日)';
+/** 出生日期只认标签之后的日期；正文里没有标签的日期不算个人信息。 */
+const BIRTH_LABEL =
+  '(?:DOB|D\\.O\\.B\\.?|[Dd]ate [Oo]f [Bb]irth|[Bb]irth ?[Dd]ate|[Bb]irthday|[Bb]orn(?: [Oo]n)?|出生日期|出生年月日|出生年月|生日|生于)';
 const BIRTH_DATE =
   `(?<=${BIRTH_LABEL}[\\x20\\t]*[:：]?[\\x20\\t]*)(?:` +
-  '(?:民國\\s*)?\\d{2,4}\\s*年\\s*\\d{1,2}\\s*月\\s*\\d{1,2}\\s*日?' +
+  '\\d{4}\\s*年\\s*\\d{1,2}\\s*月\\s*\\d{1,2}\\s*日?' +
   '|\\d{4}[-/.]\\d{1,2}[-/.]\\d{1,2}' +
   '|\\d{1,2}[-/.]\\d{1,2}[-/.]\\d{4}' +
   `|${MONTH}\\.?\\x20+\\d{1,2}(?:st|nd|rd|th)?,?\\x20+\\d{4}` +
   `|\\d{1,2}(?:st|nd|rd|th)?\\x20+${MONTH}\\.?,?\\x20+\\d{4})`;
 
-/** Organisation suffixes that reliably end a company name; bare 公司 is too ambiguous (本公司, 公司電話). */
-const COMPANY_SUFFIX = '(?:股份有限公司|有限公司|無限公司|兩合公司|企業社|工作室|事務所|商行|診所|基金會|協會|合作社|工程行|企業行|實業社|文化事業)';
-/** Characters that never start a company name but often precede one in prose. */
-const COMPANY_NOT_FIRST = '的與和及於在由向從為對將把讓依據至到給經受同各該本貴我敝此其係即為者以並或如';
-const COMPANY_REGEX = `(?:(?![${COMPANY_NOT_FIRST}])[${CJK}A-Za-z0-9&·]){2,14}?${COMPANY_SUFFIX}`;
-
-const COMPOUND_SURNAMES = '歐陽|司馬|諸葛|上官|張簡|范姜|司徒|東方|令狐|南宮|端木|皇甫|尉遲|夏侯';
-const SINGLE_SURNAMES =
-  '陳林黃張李王吳劉蔡楊許鄭謝郭洪邱曾廖賴徐周葉蘇莊呂江何蕭羅高潘簡朱鍾游彭詹胡施沈余盧梁趙顏柯翁魏孫戴范方宋鄧杜傅侯曹薛丁卓阮馬董溫唐藍蔣石古紀姚連馮歐程湯田康姜白汪鄒尤巫鐘黎塗龔嚴韓袁金童陸夏柳邵錢伍倪甘秦官辛戚易祝樊喬向殷凌闕舒包鮑冉牛管毛涂';
-
-/** Contexts that commonly follow a person's name; keeps 2-vs-3 char names from over-capturing. */
-const NAME_FOLLOW =
-  '(?=$|[\\s\\d\\p{P}A-Za-z]|先生|小姐|女士|同學|醫師|醫生|護理師|老師|律師|經理|主任|董事|總監|組長|課長|科長|處長|局長|部長|教授|博士|君|兄|姐|哥|等|表示|說|指出|認為|於|在|與|和|及|為|所|之|的|已|將|曾|因|向|由|係|即|亦|並|或' +
-  '|另|也|則|更|未|不|有|無|是|非|對|從|自|以|被|經|卻|還|又|再|但|而|才|都|皆|均|便|就|會|能|可|應|須|要|想|願|正|到|來|去|至|提|收|付|持|稱|同意|聲明|陳述|申請|提供|前往|出席|簽|辦理|負責|擔任|購買|支付|領取|遞交|回覆|聯絡|通知|告知)';
-
-/** Characters that essentially never appear inside a given name; used by the fallback branch below. */
-const NAME_STOP_CHARS =
-  '的了是在有和與及於為等所之已將因向由係即亦並或另也則未不無非對從自以被經卻還又再但而才都皆均便就會能可應須要想願到來去至收付持稱接提說表指認出簽辦負擔購支領遞回聯通告這那該此其每各們呢嗎吧啊麼什怎很太最曾先女士請讓使給把被令將於當若如則個';
-
-/**
- * Branch 1: 1–2 name chars followed by a known context word (precise for 2-vs-3 char names).
- * Branch 2: exactly 2 name chars that are not function words (recall when the next word is unknown).
- */
-const NAME_REGEX =
-  `(?:${COMPOUND_SURNAMES}|[${SINGLE_SURNAMES}])` +
-  `(?:[${CJK}]{1,2}${NAME_FOLLOW}|(?:(?![${NAME_STOP_CHARS}])[${CJK}]){2})`;
-
-/** Common words that start with a surname character but are not names. */
-const NAME_STOPLIST = new Set([
-  '王國', '王子', '王牌', '李子', '張開', '張貼', '張力', '陳述', '陳列', '陳舊', '林口', '林業', '林地',
-  '高雄', '高速', '高中', '高級', '高度', '高溫', '高血', '黃金', '黃色', '黃昏', '吳郭', '何時', '何況',
-  '何人', '何處', '何等', '何種', '何者', '何以', '何不', '何在', '何其', '何去',
-  '何謂', '馬上', '馬路', '周年', '周末', '周邊', '周圍', '方法', '方面', '方向', '方式', '方案', '許多',
-  '許可', '江山', '江湖', '白色', '白天', '白血', '黑色', '金門', '金額', '金融', '金屬', '金錢', '長期',
-  '文件', '文化', '石頭', '程式', '程度', '康復', '常見', '章節', '施工', '施行', '萬一', '羅列', '夏天',
-  '夏季', '史上', '田地', '余額', '毛病', '任何', '任務', '古代', '古蹟', '紀錄', '紀念', '連結', '連續',
-  '連接', '連線', '溫度', '溫暖', '唐朝', '藍色', '石油', '康健', '姜母', '白天', '汪洋', '童年', '陸地',
-  '柳樹', '錢包', '甘心', '秦朝', '官方', '官員', '易於', '祝福', '喬木', '向來', '凌晨', '舒服', '包含',
-  '包括', '包裝', '鮑魚', '牛肉', '牛奶', '管理', '毛巾', '柯南', '翁婿', '魏晉', '孫子', '戴上', '范圍',
-  '宋朝', '杜絕', '侯爵', '曹操', '丁點', '卓越', '馬克', '董事', '藍圖', '蔣公', '石膏', '鄧小', '傅立',
-  '梁柱', '趙錢', '顏色', '簡單', '簡介', '簡稱', '朱紅', '鍾情', '游泳', '游戲', '詹姆', '胡說', '胡椒',
-  '沈默', '盧比', '呂宋', '江西', '何必', '蕭條', '羅馬', '羅列', '高雄', '潘朵', '莊園', '蘇打', '葉子',
-  '徐徐', '廖化', '賴床', '曾經', '洪水', '郭台', '謝謝', '鄭重', '許願', '蔡英', '劉海', '吳哥', '楊桃',
-  '張三', '李四', '王五', '謝絕', '謝意', '許久', '賴以', '曾任', '洪流', '邱比', '徐步', '廖若', '莊嚴',
-  '管轄', '管制', '管線', '管道', '管控', '溫濕', '溫馨', '溫室', '何疑', '易雙', '謝您', '謝函', '謝禮', '高層', '高額',
-  '方為', '牛市', '包商', '向下', '向上', '任一', '安全', '安裝', '安排',
-  '程師', // 工程師
-  '簡訊', '向本', // 手機簡訊、向本會／本公司申請
-]);
-
-/** "X方" in contracts/legal text (甲方、乙方、雙方、他方…) is a party, not a person surnamed 方. */
-const PARTY_PREFIX = /[甲乙丙丁雙各買賣我他貴對本該多官軍校院廠資勞前後男女一二三四五六七八九十任另每]$/u;
-
-function isPlausibleName(m: string, before = ''): boolean {
-  if (NAME_STOPLIST.has(m.slice(0, 2))) return false;
-  if (/(.)\1/.test(m) && m.length === 2) return false;
-  if (m.startsWith('方') && PARTY_PREFIX.test(before)) return false;
-  if (m.startsWith('何') && /[任如為幾若奈無]$/u.test(before)) return false; // 任何、如何、幾何…
-  return true;
-}
+/* ---------------------------------------------------------------- 规则表 */
 
 export const BUILTIN_PATTERNS: Pattern[] = [
   {
     id: 'zh-name',
     name: '中文姓名',
-    group: 'tw',
-    note: '常見姓氏（含複姓）加 1–2 字名，以前後文判斷名字長度；排除常見詞（高雄、方法…）與「甲方／雙方」',
+    group: 'cn',
+    note: '常见姓氏（含复姓）加 1–2 字名；名字必须落在文本边界或「先生／女士／表示／负责」这类两字以上称谓、谓语之前，单个虚词（于／在／有／的）不算证据；排除常用词、地名与「甲方／双方」',
     category: '姓名',
     source: 'builtin',
     regex: NAME_REGEX,
-    example: '王小明、歐陽志遠',
+    example: '张伟、欧阳志远',
     enabled: true,
     validate: isPlausibleName,
   },
   {
-    id: 'tw-id',
-    name: '台灣身分證字號',
-    group: 'tw',
-    note: '身分證檢核碼驗證，錯誤的號碼不命中',
-    category: '身分證',
+    id: 'cn-id',
+    name: '居民身份证号',
+    group: 'cn',
+    note: '18 位含校验位验证、15 位旧证验证出生日期段；校验不过的号码不命中',
+    category: '身份证',
     source: 'builtin',
-    regex: '(?<![A-Za-z0-9])[A-Z][12]\\d{8}(?!\\d)',
-    example: 'A123456789',
+    regex: '(?<![0-9A-Za-z])(?:\\d{17}[\\dXx]|\\d{15})(?![0-9A-Za-z])',
+    example: '110101199003078515',
     enabled: true,
-    validate: isValidTwId,
+    validate: isValidCnId,
   },
-  // Before 市話: a labelled SSN of 9 bare digits starting with 0 also reads as a Kaohsiung number.
-  // Unlabelled it needs 3-2-4 separators, which no Taiwanese format uses.
+  // SSN 放在固定电话之前：9 位纯数字且以 0 开头时，也会被读成带区号的固定电话。
   {
     id: 'us-ssn',
-    name: '美國社會安全碼（SSN）',
+    name: '美国社会安全码（SSN）',
     group: 'intl',
-    note: '排除 000、666、9xx 區碼與 00 組碼、0000 序號；「SSN:」標籤後的 9 位數也算',
+    note: '排除 000、666、9xx 区码与 00 组码、0000 序号；「SSN:」标签后的 9 位数字也算',
     category: 'SSN',
     source: 'builtin',
     regex:
@@ -138,109 +336,138 @@ export const BUILTIN_PATTERNS: Pattern[] = [
     validate: isSsn,
   },
   {
-    id: 'tw-mobile',
-    name: '手機號碼',
-    group: 'tw',
-    note: '09 開頭或 +886 9 開頭，前後不得緊鄰數字',
-    category: '手機',
+    id: 'cn-mobile',
+    name: '手机号码',
+    group: 'cn',
+    note: '1[3-9] 开头 11 位，可带 +86 与空格／连字符分隔；前后不得紧邻数字',
+    category: '手机',
     source: 'builtin',
-    regex: '(?<![\\d+])(?:\\+886[-\\x20]?9|09)\\d{2}[-\\x20]?\\d{3}[-\\x20]?\\d{3}(?!\\d)',
-    example: '0912-345-678、0912345678、+886-912-345-678',
+    regex: MOBILE_REGEX,
+    example: '13812345678、138-1234-5678、+86 138 1234 5678',
     enabled: true,
   },
   {
-    id: 'tw-landline',
-    name: '市話號碼',
-    group: 'tw',
-    note: '依區碼要求位數，8 位數統編不會被當成市話；含 +886 寫法',
-    category: '市話',
+    id: 'cn-landline',
+    name: '固定电话',
+    group: 'cn',
+    note: '按区号校验位数：010／02x 为 3 位区号，其余 0[3-9]xx 为 4 位区号，本地号 7–8 位',
+    category: '固定电话',
     source: 'builtin',
-    // Separated/parenthesised forms, or unseparated forms with the exact digit count per area
-    // code (02/04: 10 digits, 03–08: 9, 082/089: 9, 0826/0836: 9) so an 8-digit 統編 is never a 市話.
-    regex:
-      '(?<![\\d(])(?:\\(0(?:826|836|82|89|37|49|[2-8])\\)[-\\x20]?\\d{3,4}[-\\x20]?\\d{3,4}' +
-      '|0(?:826|836|82|89|37|49|[2-8])[-\\x20]\\d{3,4}[-\\x20]?\\d{3,4}' +
-      '|0[24]\\d{8}|0[3-8]\\d{7}|08[29]\\d{6}|08[23]6\\d{5}|' + TW_LANDLINE_INTL + ')(?!\\d)',
-    example: '(02)2712-3456、02-27123456、0227123456、037-123456、+886-2-2712-3456',
+    regex: LANDLINE_REGEX,
+    example: '(010)88886666、0571-88886666',
     enabled: true,
   },
   {
-    id: 'tw-address',
-    name: '台灣地址',
-    group: 'tw',
-    note: '以縣市名為錨點，含鄉鎮市區、路街段巷弄號樓',
+    id: 'cn-address',
+    name: '地址',
+    group: 'cn',
+    note: '以省／市／区县为锚点，末尾必须是门牌号或村名；没写省市的短地址靠「区县＋路街＋门牌」兜底',
     category: '地址',
     source: 'builtin',
     regex: ADDRESS_REGEX,
-    example: '台北市信義區市府路45號8樓',
+    example: '北京市朝阳区建国路88号SOHO现代城A座1801室、杭州市西湖区文一西路969号',
     enabled: true,
   },
   {
-    id: 'tw-company',
-    name: '公司／組織名稱',
-    group: 'tw',
-    note: '以股份有限公司、有限公司、事務所、診所、基金會等結尾；排除「本／該／貴公司」',
-    category: '公司',
+    id: 'cn-company',
+    name: '单位名称',
+    group: 'cn',
+    note: '以有限公司、有限责任公司、事务所、银行支行等组织形式结尾；排除「本／该／贵公司」',
+    category: '单位名称',
     source: 'builtin',
     regex: COMPANY_REGEX,
-    example: '築夢實業股份有限公司、大安聯合診所',
+    example: '北京筑梦科技有限公司、大安联合诊所',
     enabled: true,
   },
   {
-    id: 'tw-tax-id',
-    name: '統一編號',
-    group: 'tw',
-    note: '統一編號檢核碼驗證（含 2023 年新制）',
-    category: '統編',
+    id: 'cn-uscc',
+    name: '统一社会信用代码',
+    group: 'cn',
+    note: '18 位，字符集不含 I O S V Z，按 GB 32100 模 31 校验；校验不过不命中',
+    category: '统一社会信用代码',
     source: 'builtin',
-    regex: '(?<![\\d-])\\d{8}(?![\\d-])',
-    example: '統一編號 04595257',
+    regex: '(?<![0-9A-Za-z])[0-9A-HJ-NPQRTUWXY]{18}(?![0-9A-Za-z])',
+    example: '91110108MA01ABCD2X',
     enabled: true,
-    validate: isValidTaxId,
+    validate: isValidUscc,
   },
   {
     id: 'email',
-    name: '電子郵件',
+    name: '邮箱',
     group: 'intl',
-    category: '電子郵件',
+    category: '邮箱',
     source: 'builtin',
     regex: '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}',
     example: 'someone@example.com',
     enabled: true,
   },
-  // International formats (specs/007-intl-pii-patterns). After the Taiwanese rules, so a +886 number
-  // they both match stays 手機 or 市話.
+  // 国际格式（specs/007）。放在大陆规则之后，重叠时先命中手机／固定电话。
   {
     id: 'intl-phone',
-    name: '國際電話',
+    name: '国际电话',
     group: 'intl',
-    note: '含國碼的各國號碼或北美格式，以 libphonenumber 驗證號碼有效性；+886 號碼歸手機／市話',
-    category: '國際電話',
+    note: '含国码的各国号码或北美格式，以 libphonenumber 校验有效性；+86 号码归手机／固定电话',
+    category: '国际电话',
     source: 'builtin',
     regex:
       '(?<![\\w+])(?:\\+[1-9]\\d{0,2}(?:[\\x20.-]?(?:\\(\\d{1,4}\\)|\\d{1,5})){1,6}' +
       '|(?:\\(\\d{3}\\)\\x20?|\\d{3}[-.\\x20])\\d{3}[-.\\x20]\\d{4})(?!\\w)',
-    example: '+1 (415) 867-5309、+44 20 7946 0958、(416) 967-1111',
+    example: '+1 (415) 867-5309、+44 20 7946 0958',
     enabled: true,
     validate: phoneLength,
   },
   {
+    id: 'cn-bank-card',
+    name: '银行卡号',
+    group: 'cn',
+    note: '银联卡 62 开头，16–19 位，Luhn 校验；支持空格／连字符分组',
+    category: '银行卡',
+    source: 'builtin',
+    regex: '(?<![\\d-])\\d(?:[\\x20-]?\\d){15,18}(?![\\d-])',
+    example: '6222 0212 3456 7890 123',
+    enabled: true,
+    validate: isUnionPay,
+  },
+  {
     id: 'credit-card',
-    name: '信用卡號',
+    name: '信用卡号（境外）',
     group: 'intl',
-    note: 'Luhn 檢核＋發卡機構號段（Visa、Mastercard、AmEx、Discover、JCB、UnionPay、Diners）＋常見分組格式',
+    note: 'Luhn 校验＋发卡机构号段（Visa、Mastercard、AmEx、JCB、Diners），银联归银行卡',
     category: '信用卡',
     source: 'builtin',
     regex: '(?<![\\d-])\\d(?:[\\x20-]?\\d){12,18}(?![\\d-])',
     example: '4242 4242 4242 4242、3782 822463 10005',
     enabled: true,
-    validate: isCardNumber,
+    validate: isIntlCard,
+  },
+  {
+    id: 'cn-plate',
+    name: '车牌号',
+    group: 'cn',
+    note: '省简称＋发牌机关字母＋5 位（新能源 6 位），字母不含 I、O',
+    category: '车牌',
+    source: 'builtin',
+    regex: PLATE_REGEX,
+    example: '京A12345、粤B12345D',
+    enabled: true,
+    validate: isPlate,
+  },
+  {
+    id: 'cn-passport',
+    name: '护照号',
+    group: 'cn',
+    note: '仅认「护照号／Passport No」等标签之后的 E/G/D/S/P 加 8 位，避免与普通编号混淆',
+    category: '护照',
+    source: 'builtin',
+    regex: '(?<=(?:护照号码|护照号|护照|Passport(?:\\s*(?:No\\.?|Number))?)[\\s:：]*)[EGDSP]\\d{8}(?![0-9A-Za-z])',
+    example: '护照号：E12345678',
+    enabled: true,
   },
   {
     id: 'iban',
-    name: 'IBAN 國際銀行帳號',
+    name: 'IBAN 国际银行账号',
     group: 'intl',
-    note: 'mod-97 檢核碼＋各國固定長度',
+    note: 'mod-97 校验＋各国固定长度',
     category: 'IBAN',
     source: 'builtin',
     regex: '(?<![A-Za-z0-9])[A-Z]{2}\\d{2}(?:\\x20?[A-Z0-9]{4}){2,7}(?:\\x20?[A-Z0-9]{1,3})?(?![A-Za-z0-9])',
@@ -250,9 +477,9 @@ export const BUILTIN_PATTERNS: Pattern[] = [
   },
   {
     id: 'ipv4',
-    name: 'IPv4 位址',
+    name: 'IPv4 地址',
     group: 'intl',
-    note: '各段 0–255，排除版本號',
+    note: '各段 0–255，排除版本号',
     category: 'IP',
     source: 'builtin',
     regex: '(?<![\\d.])(?:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\.){3}(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(?!\\.?\\d)',
@@ -261,9 +488,9 @@ export const BUILTIN_PATTERNS: Pattern[] = [
   },
   {
     id: 'ipv6',
-    name: 'IPv6 位址',
+    name: 'IPv6 地址',
     group: 'intl',
-    note: '以瀏覽器內建的網址解析驗證，排除時間與 MAC 位址',
+    note: '以浏览器内置的网址解析验证，排除时间与 MAC 地址',
     category: 'IP',
     source: 'builtin',
     regex: '(?<![\\w:.])(?:[0-9A-Fa-f]{0,4}:){2,7}[0-9A-Fa-f]{1,4}(?![\\w:])',
@@ -275,11 +502,11 @@ export const BUILTIN_PATTERNS: Pattern[] = [
     id: 'dob',
     name: '出生日期',
     group: 'intl',
-    note: '只偵測「DOB／Date of Birth／Birthday／Born／出生日期／生日」等標籤後、同一行的日期；驗證月日',
-    category: '生日',
+    note: '只检测「DOB／Date of Birth／Birthday／出生日期／生日」等标签后、同一行的日期；验证月日',
+    category: '出生日期',
     source: 'builtin',
     regex: BIRTH_DATE,
-    example: 'DOB: 1985-03-14、Date of Birth: March 14, 1985、出生日期：民國 80 年 5 月 1 日',
+    example: 'DOB: 1985-03-14、出生日期：1990年3月14日',
     enabled: true,
     validate: isBirthDate,
   },

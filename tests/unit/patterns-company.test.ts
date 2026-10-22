@@ -13,90 +13,64 @@ function matches(id: string, text: string): string[] {
   return detect(text, [getPattern(id)]).map((i) => i.original);
 }
 
-describe('tw-company pattern', () => {
-  it('matches a full 股份有限公司 name', () => {
-    expect(matches('tw-company', '築夢實業股份有限公司')).toEqual(['築夢實業股份有限公司']);
+describe('cn-company 单位名称', () => {
+  it('命中股份有限公司与有限责任公司', () => {
+    expect(matches('cn-company', '筑梦实业股份有限公司')).toEqual(['筑梦实业股份有限公司']);
+    expect(matches('cn-company', '云图网络科技有限责任公司')).toEqual(['云图网络科技有限责任公司']);
   });
 
-  it('matches a clinic name ending in 診所', () => {
-    expect(matches('tw-company', '大安聯合診所')).toEqual(['大安聯合診所']);
+  it('命中诊所、事务所、学校、银行支行', () => {
+    expect(matches('cn-company', '大安联合诊所')).toEqual(['大安联合诊所']);
+    expect(matches('cn-company', '金诚律师事务所')).toEqual(['金诚律师事务所']);
+    expect(matches('cn-company', '浙江树人学院')).toEqual(['浙江树人学院']);
+    expect(matches('cn-company', '中国工商银行北京中关村支行')).toEqual(['中国工商银行北京中关村支行']);
   });
 
-  it('matches a 有限公司 name', () => {
-    expect(matches('tw-company', '永豐企業有限公司')).toEqual(['永豐企業有限公司']);
+  it('「小学」「中学」不在内建后缀里（否则「他上小学」会被误判），需自定义规则', () => {
+    expect(matches('cn-company', '他上小学了')).toEqual([]);
+    expect(matches('cn-company', '杭州市文一街小学')).toEqual([]);
   });
 
-  it('matches a law-firm name ending in 事務所', () => {
-    expect(matches('tw-company', '陳律師事務所')).toEqual(['陳律師事務所']);
-  });
-
-  it('matches only the company name in prose, excluding the "甲方：" label', () => {
-    expect(matches('tw-company', '甲方：築夢實業股份有限公司（統一編號 04595257）')).toEqual([
-      '築夢實業股份有限公司',
+  it('命中带分公司的完整名称', () => {
+    expect(matches('cn-company', '深圳前海数据服务有限公司北京分公司')).toEqual([
+      '深圳前海数据服务有限公司北京分公司',
     ]);
   });
 
-  it('excludes a leading 由 ("provided by") from the match', () => {
-    expect(matches('tw-company', '由嘉宏資訊股份有限公司提供')).toEqual(['嘉宏資訊股份有限公司']);
+  it('在正文里只取单位名，不含「甲方：」这类标签', () => {
+    expect(matches('cn-company', '甲方：筑梦实业股份有限公司（统一社会信用代码 91110108MA01ABCD2H）')).toEqual([
+      '筑梦实业股份有限公司',
+    ]);
   });
 
-  it('does not match bare 公司 mentions (not a real suffix on its own)', () => {
-    expect(matches('tw-company', '本公司')).toEqual([]);
-    expect(matches('tw-company', '公司電話')).toEqual([]);
-    expect(matches('tw-company', '該公司')).toEqual([]);
+  it('不含前置虚词「由」', () => {
+    expect(matches('cn-company', '由嘉宏信息股份有限公司提供')).toEqual(['嘉宏信息股份有限公司']);
   });
 
-  it('does not match the suffix alone with no name before it', () => {
-    expect(matches('tw-company', '有限公司')).toEqual([]);
-  });
-});
-
-describe('tw-tax-id pattern', () => {
-  it('matches a valid tax id after the 統一編號 label', () => {
-    expect(matches('tw-tax-id', '統一編號 04595257')).toEqual(['04595257']);
+  it('名字里带「同」「据」等排除字也能完整命中', () => {
+    // 回归：排除字曾经逐字生效，导致「大同」「数据」把名字切断。
+    expect(matches('cn-company', '大同科技有限公司')).toEqual(['大同科技有限公司']);
+    expect(matches('cn-company', '北京数据服务有限公司')).toEqual(['北京数据服务有限公司']);
   });
 
-  it('matches a valid tax id after the 統編 label', () => {
-    expect(matches('tw-tax-id', '統編：04595257')).toEqual(['04595257']);
+  it('「本公司」「该公司」「公司电话」不算单位名', () => {
+    expect(matches('cn-company', '本公司')).toEqual([]);
+    expect(matches('cn-company', '该公司')).toEqual([]);
+    expect(matches('cn-company', '公司电话')).toEqual([]);
   });
 
-  it('does not match an 8-digit number with an invalid checksum', () => {
-    expect(matches('tw-tax-id', '12345678')).toEqual([]);
-  });
-
-  it('does not match an 8-digit substring embedded in a 9-digit run', () => {
-    // '104595257' contains the valid '04595257' as a substring, but it is
-    // preceded by an extra digit, so the (?<![\d-]) / (?![\d-]) boundaries
-    // must reject it entirely.
-    expect(matches('tw-tax-id', '104595257')).toEqual([]);
-  });
-
-  it('does not match 8 digits that immediately follow a hyphen (phone-fragment shape)', () => {
-    expect(matches('tw-tax-id', '02-27123456')).toEqual([]);
+  it('只有组织形式、前面没有名字时不命中', () => {
+    expect(matches('cn-company', '有限公司')).toEqual([]);
   });
 });
 
-describe('overlap between tw-landline and tw-tax-id', () => {
-  // KNOWN SRC BUG (src/core/patterns.ts / src/core/detector.ts): the
-  // tw-landline regex `\(?0(?:826|836|82|89|37|49|[2-8])\)?[-\x20]?\d{3,4}[-\x20]?\d{3,4}`
-  // happens to also match a bare 8-digit tax id whose leading digit is
-  // followed by a digit in [2-8] and whose remaining 6 digits split into two
-  // groups of 3-4 (e.g. '04595257' parses as area code '04' + '595' + '257').
-  // Both tw-landline and tw-tax-id then produce a candidate over the exact
-  // same span; detector.ts's resolveOverlaps breaks length ties by array
-  // order, and tw-landline is listed before tw-tax-id in BUILTIN_PATTERNS, so
-  // the tax id is misclassified as a landline number ('市話') and the
-  // '統編' candidate is discarded entirely — even though isValidTaxId would
-  // have validated it and the text is explicitly labeled '統一編號'.
-  // This test encodes the intended behavior (landline and tax id as two
-  // separate items) and is intentionally left failing against current src;
-  // see the final report for evidence (actual detect() output).
-  it('keeps the landline and tax id as separate, non-overlapping items', () => {
-    const text = '電話 (02)2712-3456，統一編號 04595257';
+describe('cn-uscc 与 cn-id 不互相抢', () => {
+  it('同一段文字里身份证与统一社会信用代码各归各类', () => {
+    const text = '身份证 110101199003078515，统一社会信用代码 91110108MA01ABCD2H';
     const items = detect(text, BUILTIN_PATTERNS);
-    const landline = items.filter((i) => i.category === '市話');
-    const taxId = items.filter((i) => i.category === '統編');
-    expect(landline.map((i) => i.original)).toEqual(['(02)2712-3456']);
-    expect(taxId.map((i) => i.original)).toEqual(['04595257']);
+    expect(items.filter((i) => i.category === '身份证').map((i) => i.original)).toEqual(['110101199003078515']);
+    expect(items.filter((i) => i.category === '统一社会信用代码').map((i) => i.original)).toEqual([
+      '91110108MA01ABCD2H',
+    ]);
   });
 });

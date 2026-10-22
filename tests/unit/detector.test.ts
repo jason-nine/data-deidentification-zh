@@ -15,7 +15,7 @@ function mkPattern(opts: {
   return {
     id: opts.id,
     name: opts.id,
-    category: opts.category ?? '識別碼',
+    category: opts.category ?? '标识符',
     source: 'custom',
     regex: opts.regex,
     example: 'x',
@@ -142,17 +142,17 @@ describe('detect', () => {
 
 describe('addManualItem', () => {
   it('adds an item with origin manual, unique code, active true, mutates array in place, stays sorted', () => {
-    const text = '0123456789';
+    const text = '0123456789012';
     const items: RedactionItem[] = [];
     const book = new CodeBook();
-    const returned = addManualItem(items, text, 5, 8, '手機', book);
+    const returned = addManualItem(items, text, 5, 8, '手机', book);
 
     expect(returned.origin).toBe('manual');
     expect(returned.active).toBe(true);
-    expect(returned.category).toBe('手機');
+    expect(returned.category).toBe('手机');
     expect(returned.original).toBe('567');
     expect(returned.code).toMatch(/^[0-9a-f]{6}$/);
-    expect(book.codeFor('手機', '567')).toBe(returned.code);
+    expect(book.codeFor('手机', '567')).toBe(returned.code);
 
     // same array instance mutated in place
     expect(items).toHaveLength(1);
@@ -167,7 +167,7 @@ describe('addManualItem', () => {
   });
 
   it('reuses the code of an existing item with the same category and text', () => {
-    const text = '王小明 與 王小明';
+    const text = '王小明 与 王小明';
     const patterns = [mkPattern({ id: 'name', regex: '王小明', category: '姓名' })];
     const book = new CodeBook();
     const items = detect(text, patterns, book);
@@ -183,29 +183,29 @@ describe('addManualItem', () => {
     const items: RedactionItem[] = [];
     const book = new CodeBook();
     const a = addManualItem(items, text, 0, 3, '姓名', book);
-    const b = addManualItem(items, text, 4, 7, '公司', book);
+    const b = addManualItem(items, text, 4, 7, '单位名称', book);
     expect(a.code).not.toBe(b.code);
   });
   it('throws OverlapError when overlapping an existing active item', () => {
-    const text = '0123456789';
+    const text = '0123456789012';
     const items: RedactionItem[] = [];
     const book = new CodeBook();
-    addManualItem(items, text, 2, 6, '手機', book);
+    addManualItem(items, text, 2, 6, '手机', book);
     expect(() => addManualItem(items, text, 4, 8, '姓名', book)).toThrow(OverlapError);
   });
 
   it('allows overlap with an inactive (cancelled) item', () => {
-    const text = '0123456789';
+    const text = '0123456789012';
     const items: RedactionItem[] = [];
     const book = new CodeBook();
-    const first = addManualItem(items, text, 2, 6, '手機', book);
+    const first = addManualItem(items, text, 2, 6, '手机', book);
     toggleItem(items, first.id); // deactivate
     expect(() => addManualItem(items, text, 4, 8, '姓名', book)).not.toThrow();
     expect(items).toHaveLength(2);
   });
 
   it('throws on invalid range: start >= end', () => {
-    const text = '0123456789';
+    const text = '0123456789012';
     const items: RedactionItem[] = [];
     const book = new CodeBook();
     expect(() => addManualItem(items, text, 5, 5, '姓名', book)).toThrow();
@@ -213,14 +213,14 @@ describe('addManualItem', () => {
   });
 
   it('throws on invalid range: end beyond text length', () => {
-    const text = '0123456789';
+    const text = '0123456789012';
     const items: RedactionItem[] = [];
     const book = new CodeBook();
     expect(() => addManualItem(items, text, 5, text.length + 1, '姓名', book)).toThrow();
   });
 
   it('throws on invalid range: negative start', () => {
-    const text = '0123456789';
+    const text = '0123456789012';
     const items: RedactionItem[] = [];
     const book = new CodeBook();
     expect(() => addManualItem(items, text, -1, 3, '姓名', book)).toThrow();
@@ -229,7 +229,7 @@ describe('addManualItem', () => {
 
 describe('toggleItem', () => {
   it('flips active and returns the item; unknown id returns undefined', () => {
-    const text = '0123456789';
+    const text = '0123456789012';
     const items: RedactionItem[] = [];
     const book = new CodeBook();
     const item = addManualItem(items, text, 0, 3, '姓名', book);
@@ -246,12 +246,12 @@ describe('toggleItem', () => {
   });
 
   it('throws OverlapError when re-activating an item that would now overlap an active one', () => {
-    const text = '0123456789';
+    const text = '0123456789012';
     const items: RedactionItem[] = [];
     const book = new CodeBook();
     const itemA = addManualItem(items, text, 0, 5, '姓名', book);
     toggleItem(items, itemA.id); // deactivate A
-    const itemB = addManualItem(items, text, 2, 7, '手機', book); // overlaps A's range, allowed since A inactive
+    const itemB = addManualItem(items, text, 2, 7, '手机', book); // overlaps A's range, allowed since A inactive
 
     expect(() => toggleItem(items, itemA.id)).toThrow(OverlapError);
     // A should remain inactive since the toggle threw before mutating (per current impl the check
@@ -276,18 +276,18 @@ describe('integration with applyRedactions', () => {
   });
 
   it('replaces active items with markers, excludes inactive items from mapping, and keeps mapping ordered by start', () => {
-    const text = '甲乙丙丁A123456789戊己庚辛someone@example.com';
+    const text = '甲乙丙丁110101199003078515戊己庚辛someone@example.com';
     const items: RedactionItem[] = [];
     const book = new CodeBook();
 
-    const idItem = addManualItem(items, text, 4, 14, '身分證', book); // A123456789
+    const idItem = addManualItem(items, text, 4, 22, '身份证', book); // 110101199003078515
     const emailStart = text.indexOf('someone@example.com');
     const emailItem = addManualItem(
       items,
       text,
       emailStart,
       emailStart + 'someone@example.com'.length,
-      '電子郵件',
+      '邮箱',
       book,
     );
 
@@ -297,10 +297,10 @@ describe('integration with applyRedactions', () => {
     const result = applyRedactions(text, items);
 
     // redactedText still contains the original text of the toggled-off item
-    expect(result.redactedText).toContain('A123456789');
+    expect(result.redactedText).toContain('110101199003078515');
     // and does not contain the raw email anymore, replaced by a marker instead
     expect(result.redactedText).not.toContain('someone@example.com');
-    expect(result.redactedText).toContain(`[電子郵件:${emailItem.code}]`);
+    expect(result.redactedText).toContain(`[邮箱:${emailItem.code}]`);
 
     // mapping excludes the inactive item's code
     const mappingCodes = result.mapping.map((m) => m.code);

@@ -10,22 +10,24 @@
   --warn-bg: #fff7e6;
   --warn-border: #f5c56b;
   --mark-姓名: #ffe0b2;
-  --mark-身分證: #ffcdd2;
-  --mark-手機: #c8e6c9;
-  --mark-市話: #dcedc8;
+  --mark-身份证: #ffcdd2;
+  --mark-护照: #f7c8b0;
+  --mark-手机: #c8e6c9;
+  --mark-固定电话: #dcedc8;
   --mark-地址: #bbdefb;
-  --mark-電子郵件: #e1bee7;
-  --mark-公司: #d7ccc8;
-  --mark-統編: #b2ebf2;
-  --mark-識別碼: #ffe082;
-  --mark-國際電話: #a5d6a7;
+  --mark-邮箱: #e1bee7;
+  --mark-单位名称: #d7ccc8;
+  --mark-统一社会信用代码: #b2ebf2;
+  --mark-银行卡: #f48fb1;
+  --mark-车牌: #ffe082;
+  --mark-出生日期: #ffccbc;
+  --mark-标识符: #ffe599;
+  --mark-国际电话: #a5d6a7;
   --mark-信用卡: #f8bbd0;
   --mark-SSN: #ef9a9a;
   --mark-IBAN: #b39ddb;
   --mark-IP: #b0bec5;
-  --mark-生日: #ffccbc;
-  --mark-restored: #d0f0dd;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   font-size: 15px;
   color: var(--text);
   background: var(--bg);
@@ -105,21 +107,23 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fo
 .mark { padding: 0 0.25em; border-radius: 4px; background: #eee; }
 .mark.mark-code { font-family: ui-monospace, Menlo, monospace; font-size: 0.9em; }
 .mark-姓名 { background: var(--mark-姓名); }
-.mark-身分證 { background: var(--mark-身分證); }
-.mark-手機 { background: var(--mark-手機); }
-.mark-市話 { background: var(--mark-市話); }
+.mark-身份证 { background: var(--mark-身份证); }
+.mark-护照 { background: var(--mark-护照); }
+.mark-手机 { background: var(--mark-手机); }
+.mark-固定电话 { background: var(--mark-固定电话); }
 .mark-地址 { background: var(--mark-地址); }
-.mark-電子郵件 { background: var(--mark-電子郵件); }
-.mark-公司 { background: var(--mark-公司); }
-.mark-統編 { background: var(--mark-統編); }
-.mark-識別碼 { background: var(--mark-識別碼); }
-.mark-國際電話 { background: var(--mark-國際電話); }
+.mark-邮箱 { background: var(--mark-邮箱); }
+.mark-单位名称 { background: var(--mark-单位名称); }
+.mark-统一社会信用代码 { background: var(--mark-统一社会信用代码); }
+.mark-银行卡 { background: var(--mark-银行卡); }
+.mark-车牌 { background: var(--mark-车牌); }
+.mark-出生日期 { background: var(--mark-出生日期); }
+.mark-标识符 { background: var(--mark-标识符); }
+.mark-国际电话 { background: var(--mark-国际电话); }
 .mark-信用卡 { background: var(--mark-信用卡); }
 .mark-SSN { background: var(--mark-SSN); }
 .mark-IBAN { background: var(--mark-IBAN); }
 .mark-IP { background: var(--mark-IP); }
-.mark-生日 { background: var(--mark-生日); }
-.mark-restored { background: var(--mark-restored); }
 .cancelled { text-decoration: underline dotted var(--danger); text-decoration-thickness: 2px; }
 .flash { outline: 3px solid var(--primary); outline-offset: 2px; transition: outline 0.3s; }
 
@@ -128,20 +132,23 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fo
   padding: 0.05rem 0.5rem; border-radius: 999px; font-size: 0.75rem; background: #e8ebf0; color: #384152;
 }
 .badge-姓名 { background: var(--mark-姓名); }
-.badge-身分證 { background: var(--mark-身分證); }
-.badge-手機 { background: var(--mark-手機); }
-.badge-市話 { background: var(--mark-市話); }
+.badge-身份证 { background: var(--mark-身份证); }
+.badge-护照 { background: var(--mark-护照); }
+.badge-手机 { background: var(--mark-手机); }
+.badge-固定电话 { background: var(--mark-固定电话); }
 .badge-地址 { background: var(--mark-地址); }
-.badge-電子郵件 { background: var(--mark-電子郵件); }
-.badge-公司 { background: var(--mark-公司); }
-.badge-統編 { background: var(--mark-統編); }
-.badge-識別碼 { background: var(--mark-識別碼); }
-.badge-國際電話 { background: var(--mark-國際電話); }
+.badge-邮箱 { background: var(--mark-邮箱); }
+.badge-单位名称 { background: var(--mark-单位名称); }
+.badge-统一社会信用代码 { background: var(--mark-统一社会信用代码); }
+.badge-银行卡 { background: var(--mark-银行卡); }
+.badge-车牌 { background: var(--mark-车牌); }
+.badge-出生日期 { background: var(--mark-出生日期); }
+.badge-标识符 { background: var(--mark-标识符); }
+.badge-国际电话 { background: var(--mark-国际电话); }
 .badge-信用卡 { background: var(--mark-信用卡); }
 .badge-SSN { background: var(--mark-SSN); }
 .badge-IBAN { background: var(--mark-IBAN); }
 .badge-IP { background: var(--mark-IP); }
-.badge-生日 { background: var(--mark-生日); }
 .tag {
   display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; line-height: 1.5;
   font-size: 0.72rem; color: var(--muted); border: 1px solid var(--border); border-radius: 4px; padding: 0 0.35rem;
@@ -250,7 +257,7 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fo
 .pdf-pages { display: flex; flex-direction: column; gap: 0.5rem; }
 .pdf-page-label { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 0.5rem; }
 .pdf-page { position: relative; width: 100%; background: #fff; border: 1px solid var(--border); box-shadow: 0 2px 10px rgba(0,0,0,0.06); overflow: hidden; }
-.pdf-item { position: absolute; white-space: pre; line-height: 1; transform-origin: 0 0; font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
+.pdf-item { position: absolute; white-space: pre; line-height: 1; transform-origin: 0 0; font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
 .pdf-item .mark { padding: 0 0.15em; }
 .mark-cont { padding: 0; }
 
@@ -540,7 +547,7 @@ body:has(.site-info-dialog[open]) { overflow: hidden; }
 .rule-actions { grid-column: 2; display: flex; gap: 0.5rem; }
 .rule-empty { padding: 0.6rem 0.9rem; margin: 0; }
 @media (max-width: 700px) {
-  /* Each rule its own small grid: toggle, name and 查看規則 on top, the example below. */
+  /* Each rule its own small grid: toggle, name and 查看规则 on top, the example below. */
   .rule-list { display: block; }
   .rule-row { grid-template-columns: auto 1fr auto; grid-template-areas: 'toggle name more' 'toggle example example'; }
   .rule-row > :is(.switch, .rule-name, .rule-example) { padding: 0.25rem 0.5rem; }

@@ -72,7 +72,7 @@ function renderDocx(container: HTMLElement, doc: LoadedDocument, decos: Decorati
   for (const part of parts) {
     const list = paragraphs.filter((p) => p.part === part);
     if (list.length === 0) continue;
-    const host = part === 'body' ? page : el('div', { class: `doc-part doc-part-${part}` }, el('div', { class: 'doc-part-label' }, part === 'header' ? '頁首' : '頁尾'));
+    const host = part === 'body' ? page : el('div', { class: `doc-part doc-part-${part}` }, el('div', { class: 'doc-part-label' }, part === 'header' ? '页首' : '页尾'));
     let i = 0;
     while (i < list.length) {
       const p = list[i];
@@ -172,7 +172,7 @@ function renderXlsx(container: HTMLElement, doc: LoadedDocument, decos: Decorati
       table.append(tr);
     }
     host.append(el('div', { class: 'sheet-scroll', 'data-sheet': String(state.active) }, table));
-    if (maxRow > MAX_ROWS) host.append(el('p', { class: 'muted small' }, `僅顯示前 ${MAX_ROWS} 列（共 ${maxRow} 列）；未顯示的列仍會被處理。`));
+    if (maxRow > MAX_ROWS) host.append(el('p', { class: 'muted small' }, `仅显示前 ${MAX_ROWS} 列（共 ${maxRow} 列）；未显示的列仍会被处理。`));
   };
   sheets.forEach((s, i) => {
     tabs.append(el('button', { class: 'sheet-tab', type: 'button', onClick: () => { state.active = i; draw(); } }, `${s.name}（${s.cells.length}）`));
@@ -243,9 +243,9 @@ function renderPdf(container: HTMLElement, doc: LoadedDocument, decos: Decoratio
     const structure = structureLayer(pg);
     if (structure) page.append(structure);
     for (const pic of pg.pictures ?? []) {
-      const tip = pic.keep ? '不含文字的圖片，會以原影像保留在輸出中；點擊可取消保留' : '已取消保留，輸出不含這張圖片；點擊可改回保留';
+      const tip = pic.keep ? '不含文字的图片，会以原影像保留在输出中；点击可取消保留' : '已取消保留，输出不含这张图片；点击可改回保留';
       const fig = el('figure', { class: `pdf-picture${pic.keep ? '' : ' is-dropped'}` },
-        el('img', { src: pictureUrl(pic), alt: pic.keep ? '保留的圖片' : '已取消保留的圖片' }),
+        el('img', { src: pictureUrl(pic), alt: pic.keep ? '保留的图片' : '已取消保留的图片' }),
         onToggle
           ? el('button', { type: 'button', class: 'pdf-picture-toggle', 'data-tip': tip, 'aria-pressed': String(pic.keep), onClick: () => onToggle(pic) }, pic.keep ? '✓ 保留' : '✕ 不保留')
           : null,
@@ -265,7 +265,7 @@ function renderPdf(container: HTMLElement, doc: LoadedDocument, decos: Decoratio
       renderRange(span, doc.text, it.start, it.end, decos);
       page.append(span);
     }
-    host.append(el('div', { class: 'pdf-page-label' }, `第 ${i + 1} 頁 / 共 ${pages.length} 頁`), page);
+    host.append(el('div', { class: 'pdf-page-label' }, `第 ${i + 1} 页 / 共 ${pages.length} 页`), page);
   });
   container.append(host);
   const fit = () => {

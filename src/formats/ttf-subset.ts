@@ -99,7 +99,7 @@ export function sparseSubsetTtf(font: Uint8Array, text: string): Uint8Array {
   const head = byTag.get('head');
   const maxp = byTag.get('maxp');
   const cmap = byTag.get('cmap');
-  if (!glyf || !loca || !head || !maxp || !cmap) throw new Error('僅支援 TrueType (glyf) 字型');
+  if (!glyf || !loca || !head || !maxp || !cmap) throw new Error('仅支持 TrueType (glyf) 字型');
 
   const longLoca = buf.getInt16(head.offset + 50) === 1;
   const numGlyphs = buf.getUint16(maxp.offset + 4);

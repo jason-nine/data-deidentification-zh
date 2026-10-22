@@ -13,17 +13,18 @@ const grey = (img: Raster, x: number, y: number) => img.data[(y * img.width + x)
 const word = (text: string, confidence: number, x0: number, y0: number, x1: number, y1: number): OcrWord => ({ text, confidence, bbox: { x0, y0, x1, y1 } });
 
 describe('fixConfusables', () => {
-  it('reads look-alike letters as digits when the result is a valid ID, phone or tax number', () => {
-    expect(fixConfusables('身分證 DI32062529')).toBe('身分證 D132062529');
-    expect(fixConfusables('Ji76514076')).toBe('J176514076');
-    expect(fixConfusables('手機 0g78-762-594')).toBe('手機 0978-762-594');
-    expect(fixConfusables('O912-345-678')).toBe('0912-345-678');
-    expect(fixConfusables('統編 3O419191')).toBe('統編 30419191');
+  it('reads look-alike letters as digits when the result is a valid ID, phone or credit code', () => {
+    expect(fixConfusables('身份证 11O101199003078515')).toBe('身份证 110101199003078515');
+    expect(fixConfusables('手机 l3812345678')).toBe('手机 13812345678');
+    expect(fixConfusables('电话 O1O-88886666')).toBe('电话 010-88886666');
+    expect(fixConfusables('I38-I234-5678')).toBe('138-1234-5678');
+    expect(fixConfusables('统编 9111O1O812345678MN')).toBe('统编 9111010812345678MN');
   });
 
   it('leaves alone what would not validate, and ordinary words and codes', () => {
-    expect(fixConfusables('DI32062528')).toBe('DI32062528'); // checksum fails
-    for (const s of ['INV-2026-10-0457', 'PO-115-0398', 'SC-2026-0917', 'A123456789', 'Big Solid State', 'lu.cheng.chi37@example.com']) {
+    expect(fixConfusables('11O101199003078516')).toBe('11O101199003078516'); // 校验位不符
+    expect(fixConfusables('统编 9111O1O812345678MQ')).toBe('统编 9111O1O812345678MQ'); // 校验位不符
+    for (const s of ['INV-2026-10-0457', 'PO-115-0398', 'SC-2026-0917', '110101199003078515', 'Big Solid State', 'lu.cheng.chi37@example.com']) {
       expect(fixConfusables(s)).toBe(s);
     }
   });

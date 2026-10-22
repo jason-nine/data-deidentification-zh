@@ -20,9 +20,9 @@ describe('docx round trip', () => {
     const doc = await parseDocx(file);
 
     expect(doc.text).toContain('王小明');
-    expect(doc.text).toContain('A123456789');
-    expect(doc.text).toContain('歐陽志遠（0987654321）');
-    expect(doc.text).toContain('陳大文');
+    expect(doc.text).toContain('110101199003078515');
+    expect(doc.text).toContain('欧阳志远（13912345678）');
+    expect(doc.text).toContain('陈大文');
   });
 
   it('redacts every active item, regenerates the docx, and leaves no trace of the split ID', async () => {
@@ -43,17 +43,17 @@ describe('docx round trip', () => {
     for (const item of items.filter((i) => i.active)) {
       expect(newDoc.text.includes(item.original)).toBe(false);
     }
-    expect(newDoc.text).not.toContain('A123456789');
+    expect(newDoc.text).not.toContain('110101199003078515');
 
     // Confirm at the raw XML level that the split ID run is fully gone: the first run
-    // now holds the marker and the second run (formerly "56789") is empty.
+    // now holds the marker and the second run (formerly "03078515") is empty.
     const zip = await JSZip.loadAsync(await blob.arrayBuffer());
     const docXml = await zip.file('word/document.xml')!.async('string');
-    expect(docXml).not.toContain('A1234');
-    expect(docXml).not.toContain('56789');
-    expect(docXml).not.toContain('A123456789');
+    expect(docXml).not.toContain('1101011990');
+    expect(docXml).not.toContain('03078515');
+    expect(docXml).not.toContain('110101199003078515');
     expect(docXml).toMatch(
-      /<w:t[^>]*>\[身分證:[0-9a-f]{6}\]<\/w:t>\s*<\/w:r>\s*<w:r>[^<]*<w:rPr>[\s\S]*?<\/w:rPr>\s*<w:t[^>]*\/>/,
+      /<w:t[^>]*>\[身份证:[0-9a-f]{6}\]<\/w:t>\s*<\/w:r>\s*<w:r>[^<]*<w:rPr>[\s\S]*?<\/w:rPr>\s*<w:t[^>]*\/>/,
     );
   });
 
@@ -82,7 +82,7 @@ describe('docx round trip', () => {
     expect(countTag(newDocXml, 'w:b/')).toBe(countTag(originalDocXml, 'w:b/'));
 
     const newHeaderXml = await newZip.file('word/header1.xml')!.async('string');
-    expect(newHeaderXml).not.toContain('陳大文');
+    expect(newHeaderXml).not.toContain('陈大文');
     expect(newHeaderXml).toMatch(/\[姓名:[0-9a-f]{6}\]/);
   });
 
@@ -131,23 +131,23 @@ describe('docx round trip', () => {
 
   it('detects and replaces a phone number split across three runs with exactly one marker', async () => {
     const bytes = await buildDocx({
-      paragraphs: [['聯絡電話：', '09', '1234', '5678', '。']],
+      paragraphs: [['联系电话：', '138', '1234', '5678', '。']],
     });
     const file = toFile(bytes, 'split-phone.docx');
     const originalDoc = await parseDocx(file);
-    expect(originalDoc.text).toContain('0912345678');
+    expect(originalDoc.text).toContain('13812345678');
 
     const items = detect(originalDoc.text, BUILTIN_PATTERNS);
-    const phoneItems = items.filter((i) => i.category === '手機' && i.original === '0912345678');
+    const phoneItems = items.filter((i) => i.category === '手机' && i.original === '13812345678');
     expect(phoneItems.length).toBe(1);
 
     const { edits, mapping } = applyRedactions(originalDoc.text, items);
     const blob = await generateDocx(originalDoc, edits);
     const newDoc = await parseDocx(toFile(new Uint8Array(await blob.arrayBuffer()), 'out.docx'));
 
-    expect(newDoc.text).not.toContain('0912345678');
-    const markers = parseMarkers(newDoc.text).filter((m) => m.category === '手機');
+    expect(newDoc.text).not.toContain('13812345678');
+    const markers = parseMarkers(newDoc.text).filter((m) => m.category === '手机');
     expect(markers.length).toBe(1);
-    expect(markers[0].code).toBe(mapping.find((m) => m.original === '0912345678')!.code);
+    expect(markers[0].code).toBe(mapping.find((m) => m.original === '13812345678')!.code);
   });
 });

@@ -1,7 +1,7 @@
 import type { PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist';
 import type Tesseract from 'tesseract.js';
 import type { PdfCheckbox, PdfFill, PdfPicture, PdfRule, Rgb } from '../core/types';
-import { isValidTaxId, isValidTwId } from '../core/twid';
+import { isValidCnId, isValidUscc } from '../core/cnid';
 import type { PdfPage, PdfTextItem } from './pdf';
 import { eraseRules, estimateSkew, findCheckboxes, findFills, findRules, lineOrientation, paperTone, textColour } from './layout-scan';
 
@@ -77,27 +77,27 @@ const EDGE_NOISE = /^[|｜]+|[|｜]+$|^[「“"]+(?=[A-Za-z0-9])|(?<=[A-Za-z0-9.
 // Pattern-guided correction: letters read in place of digits in ID / phone / tax numbers.
 // ---------------------------------------------------------------------------------------
 const AS_DIGIT: Record<string, string> = { O: '0', o: '0', D: '0', Q: '0', I: '1', l: '1', i: '1', '|': '1', Z: '2', z: '2', S: '5', s: '5', G: '6', B: '8', g: '9', q: '9' };
-const NUMBER_LIKE = /(?<![0-9A-Za-z|])[0-9A-Za-z|][0-9A-Za-z|-]{7,13}(?![0-9A-Za-z|])/g;
-const PHONE = /^(?:09\d{2}-?\d{3}-?\d{3}|0\d{1,3}-?\d{3,4}-?\d{3,4})$/;
+const NUMBER_LIKE = /(?<![0-9A-Za-z|])[0-9A-Za-z|][0-9A-Za-z|-]{7,17}(?![0-9A-Za-z|])/g;
 const toDigits = (s: string) => s.replace(/./g, (c) => AS_DIGIT[c] ?? c);
 
 /**
  * Reads look-alike letters as digits (I→1, O→0, g→9, …) inside tokens that then become a valid
- * national ID (checksum), phone number or tax ID (checksum). Anything that does not validate is left
- * as recognised, so ordinary words are never touched. Lengths never change.
+ * 身份证号 (checksum), 手机/固定电话 or 统一社会信用代码 (checksum). Anything that does not validate is
+ * left as recognised, so ordinary words are never touched. Lengths never change.
  */
 export function fixConfusables(text: string): string {
   return text.replace(NUMBER_LIKE, (t) => {
     const bare = t.replace(/-/g, '');
     if (!/[A-Za-z|]/.test(bare) || (bare.match(/\d/g)?.length ?? 0) < bare.length * 0.6) return t;
-    if (/^[A-Za-z]/.test(t) && bare.length === 10 && !t.includes('-')) {
-      const id = t[0].toUpperCase() + toDigits(t.slice(1));
-      return isValidTwId(id) ? id : t;
-    }
     const digits = toDigits(t);
-    if (!/^[\d-]+$/.test(digits)) return t;
-    if (PHONE.test(digits) || (/^\d{8}$/.test(digits) && isValidTaxId(digits))) return digits;
-    return t;
+    if (/^[\d-]+$/.test(digits)) {
+      const d = digits.replace(/-/g, '');
+      if (/^1[3-9]\d{9}$/.test(d) || /^0\d{9,11}$/.test(d) || isValidCnId(d)) return digits;
+      return t;
+    }
+    // 统一社会信用代码不含 I、O、S、V、Z，出现的只可能是识别错误，纠回数字后重新校验。
+    const uscc = t.toUpperCase().replace(/[IOSZ]/g, (c) => ({ I: '1', O: '0', S: '5', Z: '2' })[c] ?? c);
+    return isValidUscc(uscc) ? uscc : t;
   });
 }
 
@@ -562,7 +562,7 @@ const RECHECK_CONFIDENCE = 70;
 /** …and so do 1–3 letter Latin fragments in a Chinese line below this (丁承 read as「TR」at 74). */
 const SHORT_LATIN_CONFIDENCE = 90;
 /**
- * Single Chinese characters below this (函 read as「闊」at 0) get one too, at most CJK_RECHECK_MAX a
+ * Single Chinese characters below this (函 read as「阔」at 0) get one too, at most CJK_RECHECK_MAX a
  * page, and take it only when it is clearly better: an unsure name character (婷 at 20) is often right.
  */
 const CJK_RECHECK_CONFIDENCE = 10;
@@ -585,7 +585,7 @@ const RECHECK_MARGIN = 10;
  * aborts; the recognisers are always shut down.
  */
 export async function recognizePdf(pdf: PDFDocumentProxy, { signal, onProgress }: OcrOptions = {}): Promise<PdfPage[]> {
-  const abortError = () => new DOMException('已取消辨識', 'AbortError');
+  const abortError = () => new DOMException('已取消识别', 'AbortError');
   if (signal?.aborted) throw abortError();
   // Neither recognize() nor createWorker() can be interrupted: race them against the signal and
   // terminate the workers afterwards.
@@ -610,7 +610,7 @@ export async function recognizePdf(pdf: PDFDocumentProxy, { signal, onProgress }
     // Only pattern settings may live in browser storage (constitution); rely on the HTTP cache.
     cacheMethod: 'none',
   };
-  const starting = createWorker(['chi_tra', 'eng'], OEM.LSTM_ONLY, {
+  const starting = createWorker(['chi_sim', 'eng'], OEM.LSTM_ONLY, {
     ...options,
     logger: (m) => {
       if (page > 0 && m.status === 'recognizing text') {
@@ -622,7 +622,7 @@ export async function recognizePdf(pdf: PDFDocumentProxy, { signal, onProgress }
   // read as Latin (a narrow column of names, say). Started on first use.
   const second: { worker?: Promise<Tesseract.Worker> } = {};
   const chineseWorker = () =>
-    (second.worker ??= createWorker('chi_tra', OEM.LSTM_ONLY, options).then(async (w) => {
+    (second.worker ??= createWorker('chi_sim', OEM.LSTM_ONLY, options).then(async (w) => {
       await w.setParameters({ tessedit_pageseg_mode: PSM.SINGLE_LINE });
       return w;
     }));
@@ -698,7 +698,7 @@ export async function recognizePdf(pdf: PDFDocumentProxy, { signal, onProgress }
         await race(worker.setParameters({ tessedit_pageseg_mode: PSM.SINGLE_BLOCK }));
         for (const gap of gaps) {
           const region = pad(gap, 8, text.width, text.height);
-          // Letter-spaced large type (董　事　長) that the page pass did not see at all often reads only
+          // Letter-spaced large type (董　事　长) that the page pass did not see at all often reads only
           // enlarged. Under a faint misreading (游文瑜 as「WESC」) the second opinion below does better.
           let found = await readAt(worker, region);
           if (!clear(found) && lines.every((l) => l.words.every((w) => !overlaps(w.bbox, region)))) found = await readAt(worker, region, 2);
@@ -717,7 +717,7 @@ export async function recognizePdf(pdf: PDFDocumentProxy, { signal, onProgress }
       }
 
       // A line's start read again with the ink just before it, which alone was too slight to read:
-      // 一、 is a bare stroke, but「一、依據」reads. New words before the first one are added; unclear
+      // 一、 is a bare stroke, but「一、依据」reads. New words before the first one are added; unclear
       // words they cover (六 read as「人 大」) go.
       const coveredBy = () => lines.flatMap((l) => l.words.filter((w) => w.confidence >= GAP_COVER_CONFIDENCE).map((w) => w.bbox));
       const leading = lines
@@ -749,7 +749,7 @@ export async function recognizePdf(pdf: PDFDocumentProxy, { signal, onProgress }
       }
 
       // Second opinions, Chinese only: unsure Latin words; short Latin fragments in a Chinese line
-      // (handwritten 丁承 read as「TR」); single Chinese characters read almost blindly (函 as「闊」).
+      // (handwritten 丁承 read as「TR」); single Chinese characters read almost blindly (函 as「阔」).
       let cjkRechecks = 0;
       for (const line of lines) {
         const chinese = line.words.some((w) => WIDE.test(w.text));
@@ -815,7 +815,7 @@ export async function recognizePdf(pdf: PDFDocumentProxy, { signal, onProgress }
         return { ...b, x0: mx - hw, y0: my - hh, x1: mx + hw, y1: my + hh };
       };
       // Checkboxes: square frames standing apart from the text around them (findCheckboxes); a framed
-      // character the recogniser reads confidently as itself (國、回) is not one. Whatever it made of
+      // character the recogniser reads confidently as itself (国、回) is not one. Whatever it made of
       // a checkbox (口, O, [, 了) is dropped.
       const textHeight = median(lines.map((l) => l.rowAttributes?.rowHeight || l.bbox.y1 - l.bbox.y0)) || 30;
       const boxes = findCheckboxes(straight, textHeight)

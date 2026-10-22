@@ -14,7 +14,7 @@ export function generateCode(used: Set<string>): string {
       return code;
     }
   }
-  throw new Error('無法產生不重複的編碼');
+  throw new Error('无法产生不重复的编码');
 }
 
 /**
@@ -50,7 +50,7 @@ export class CodeBook {
       const key = CodeBook.key(e.category, prefix + e.original + suffix, prefix.length, suffix.length);
       const existing = this.byValue.get(key);
       if (existing === undefined) this.byValue.set(key, e.code);
-      else if (existing !== e.code) warnings.push(`「${e.category}」的同一個值同時對應 ${existing} 與 ${e.code}，沿用 ${existing}`);
+      else if (existing !== e.code) warnings.push(`「${e.category}」的同一个值同时对应 ${existing} 与 ${e.code}，沿用 ${existing}`);
     }
     return warnings;
   }

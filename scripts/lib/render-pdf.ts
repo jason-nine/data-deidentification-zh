@@ -140,7 +140,7 @@ export async function renderPdf(doc: DocModel, fontBytes: Uint8Array): Promise<U
   const pdf = await PDFDocument.create();
   pdf.registerFontkit(fontkit);
   pdf.setTitle(doc.title);
-  const allText = doc.header + doc.footer + '第頁，共0123456789?' + doc.blocks.map((b) => JSON.stringify(b)).join('');
+  const allText = doc.header + doc.footer + '第页，共0123456789?' + doc.blocks.map((b) => JSON.stringify(b)).join('');
   const font = await pdf.embedFont(sparseSubsetTtf(fontBytes, allText), { subset: false });
   const layout = new Layout(pdf, font);
   for (const b of doc.blocks) renderBlock(layout, b);
@@ -149,7 +149,7 @@ export async function renderPdf(doc: DocModel, fontBytes: Uint8Array): Promise<U
   layout.pages.forEach((page, i) => {
     page.drawText(doc.header, { x: PAGE.width - MARGIN.right - font.widthOfTextAtSize(doc.header, 8), y: PAGE.height - 40, size: 8, font, color: GRAY });
     page.drawLine({ start: { x: MARGIN.left, y: PAGE.height - 46 }, end: { x: PAGE.width - MARGIN.right, y: PAGE.height - 46 }, thickness: 0.5, color: LINE });
-    const footer = `${doc.footer}　第 ${i + 1} 頁，共 ${n} 頁`;
+    const footer = `${doc.footer}　第 ${i + 1} 页，共 ${n} 页`;
     page.drawText(footer, { x: (PAGE.width - font.widthOfTextAtSize(footer, 8)) / 2, y: 36, size: 8, font, color: GRAY });
   });
   return pdf.save();

@@ -17,11 +17,11 @@ import type { LoadedDocument, Rgb } from '../../src/core/types';
 import { ocrLinesToItems } from '../../src/formats/ocr';
 import { assemblePdf, generatePdf, parsePdf, type PdfHandle, type PdfPage } from '../../src/formats/pdf';
 
-const FONT = new Uint8Array(readFileSync('public/fonts/NotoSansTC-Regular.ttf'));
+const FONT = new Uint8Array(readFileSync('public/fonts/NotoSansSC-Regular.ttf'));
 const SAMPLE = new Uint8Array(readFileSync('public/samples/scanned.pdf'));
 /** The sample's answer key, written with it by `npm run examples` (also used by `npm run eval:ocr`). */
 const ANSWER: { pages: { text: string; planted: [string, string][] }[] } = JSON.parse(readFileSync('tests/fixtures/scanned-sample.answer.json', 'utf8'));
-const LANGS = ['chi_tra', 'eng'];
+const LANGS = ['chi_sim', 'eng'];
 
 /** tesseract.js reads every language from one directory, as the site's ocr/lang/ provides them. */
 function langDir(): string {
@@ -65,7 +65,7 @@ beforeAll(async () => {
 
 describe('scanned PDF (OCR) round trip', () => {
   it('the sample has no text layer, so it needs recognition', async () => {
-    await expect(parsePdf(new File([SAMPLE as BlobPart], 'scanned.pdf'))).rejects.toThrow(/文字層/);
+    await expect(parsePdf(new File([SAMPLE as BlobPart], 'scanned.pdf'))).rejects.toThrow(/文字层/);
   });
 
   it('reads at least 95% of the characters on the pages, in any order', () => {
@@ -126,7 +126,7 @@ describe('scanned PDF (OCR) round trip', () => {
       height: 842,
       items: [
         { text: '姓名 王小明', x: 60, y: 700, fontSize: 12, width: 70, color: blue },
-        { text: '手機 0912-345-678', x: 60, y: 670, fontSize: 12, width: 110 },
+        { text: '手机 138-1234-5678', x: 60, y: 670, fontSize: 12, width: 110 },
         { text: '同意', x: 76, y: 640, fontSize: 12, width: 24 },
       ],
       rules: [
@@ -162,7 +162,7 @@ describe('scanned PDF (OCR) round trip', () => {
   it('keeps the text-free pictures the user kept, and only those (FR-022, FR-023)', async () => {
     const jpeg = new Uint8Array(readFileSync('scripts/assets/scan/ssd-product.jpg'));
     const picture = { x: 60, y: 300, width: 200, height: 150, jpeg, keep: true };
-    const doc = assemblePdf('scan.pdf', [{ width: 595, height: 842, items: [{ text: '聯絡人 王小明', x: 60, y: 700, fontSize: 12, width: 90 }], pictures: [picture] }], true);
+    const doc = assemblePdf('scan.pdf', [{ width: 595, height: 842, items: [{ text: '联络人 王小明', x: 60, y: 700, fontSize: 12, width: 90 }], pictures: [picture] }], true);
     const images = async () => (Buffer.from(await (await generatePdf(doc, [])).arrayBuffer()).toString('latin1').match(/\/Subtype \/Image/g) ?? []).length;
 
     expect(await images()).toBe(1);

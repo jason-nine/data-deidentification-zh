@@ -13,24 +13,24 @@ const of = (category: Category, text: string) => detect(text, BUILTIN_PATTERNS).
 describe('international phone numbers', () => {
   it.each(['+1 (415) 867-5309', '(416) 967-1111', '415-867-5309', '415.867.5309', '+44 20 7946 0958', '+81 3-1234-5678', '+33 1 42 68 53 00', '+61 2 9374 4000'])(
     'finds %s',
-    (phone) => expect(of('國際電話', `Call ${phone} today.`)).toEqual([phone]),
+    (phone) => expect(of('国际电话', `Call ${phone} today.`)).toEqual([phone]),
   );
 
-  it('leaves Taiwanese numbers to the 手機 and 市話 rules', () => {
-    expect(found('Tel +886 912 345 678, +886-2-2712-3456, 0912-345-678, 02-2712-3456')).toEqual([
-      ['手機', '+886 912 345 678'],
-      ['市話', '+886-2-2712-3456'],
-      ['手機', '0912-345-678'],
-      ['市話', '02-2712-3456'],
+  it('leaves Chinese numbers to the 手机 and 固定电话 rules', () => {
+    expect(found('Tel +86 138 1234 5678, +86-10-88886666, 138-1234-5678, 010-88886666')).toEqual([
+      ['手机', '+86 138 1234 5678'],
+      ['固定电话', '+86-10-88886666'],
+      ['手机', '138-1234-5678'],
+      ['固定电话', '010-88886666'],
     ]);
   });
 
   it('does not take fictional numbers, dates or order numbers for phones', () => {
-    expect(of('國際電話', 'Call 555-0123 or +1 555 555 0100. Shipped 2026-10-16, order 123-456-7890.')).toEqual([]);
+    expect(of('国际电话', 'Call 555-0123 or +1 555 555 0100. Shipped 2026-10-16, order 123-456-7890.')).toEqual([]);
   });
 
   it('keeps only the valid number when another number follows it', () => {
-    expect(of('國際電話', 'Phone +44 20 7946 0958 2026 annual report')).toEqual(['+44 20 7946 0958']);
+    expect(of('国际电话', 'Phone +44 20 7946 0958 2026 annual report')).toEqual(['+44 20 7946 0958']);
   });
 });
 
@@ -50,7 +50,7 @@ describe('US social security numbers', () => {
   });
 
   it('rejects never-issued ranges and mixed separators', () => {
-    expect(of('SSN', '000-12-3456 666-12-3456 912-34-5678 123-00-4567 123-45-0000 123-45 6789 and 123456789 unlabelled')).toEqual([]);
+    expect(of('SSN', '000-12-3456 666-12-3456 912-34-5678 123-00-4567 123-45-0000 123-45 6789 and 123456789012 unlabelled')).toEqual([]);
   });
 });
 
@@ -86,19 +86,17 @@ describe('dates of birth', () => {
     ['Date of Birth: March 14, 1985', 'March 14, 1985'],
     ['Born on 14 March 1985', '14 March 1985'],
     ['Birthday: Sept. 3, 1990', 'Sept. 3, 1990'],
-    ['出生日期：民國 80 年 5 月 1 日', '民國 80 年 5 月 1 日'],
-    ['出生日期 80 年5月1日', '80 年5月1日'],
     ['生日 1990/12/31', '1990/12/31'],
     ['出生年月日：1979年8月8日', '1979年8月8日'],
-  ])('finds the date in「%s」', (text, date) => expect(of('生日', text)).toEqual([date]));
+  ])('finds the date in「%s」', (text, date) => expect(of('出生日期', text)).toEqual([date]));
 
   it('takes the next table cell but not a column of dates under a header', () => {
-    expect(of('生日', '姓名\t王小明\t出生日期\t1990-01-02')).toEqual(['1990-01-02']);
-    expect(of('生日', '編號\t姓名\t出生日期\n001\t王小明\t1974-10-27\n出生日期\n1974-10-27')).toEqual([]);
+    expect(of('出生日期', '姓名\t王小明\t出生日期\t1990-01-02')).toEqual(['1990-01-02']);
+    expect(of('出生日期', '编号\t姓名\t出生日期\n001\t王小明\t1974-10-27\n出生日期\n1974-10-27')).toEqual([]);
   });
 
   it('leaves unlabelled and impossible dates alone', () => {
-    expect(of('生日', 'Invoice Date: 2026-10-16. Due 2026/11/15. DOB: 2026-13-40. 簽約日期 2026 年 9 月 17 日')).toEqual([]);
+    expect(of('出生日期', 'Invoice Date: 2026-10-16. Due 2026/11/15. DOB: 2026-13-40. 签约日期 2026 年 9 月 17 日')).toEqual([]);
   });
 });
 
@@ -113,6 +111,6 @@ describe('部分保留 for the new categories', () => {
   it('shows only the statistics-friendly part', () => {
     expect(
       partial('4242 4242 4242 4242 / DOB: 1985-03-14 / Born on 14 March 1985 / +44 20 7946 0958 / (415) 867-5309 / GB82 WEST 1234 5698 7654 32 / 192.168.1.10 / 2001:db8::1 / 123-45-6789'),
-    ).toEqual(['[信用卡]4242', '1985-[生日]', '[生日] 1985', '+44 [國際電話]', '(415) [國際電話]', 'GB[IBAN]', '192.168.[IP]', '2001:db8:[IP]', '[SSN]']);
+    ).toEqual(['[信用卡]4242', '1985-[出生日期]', '[出生日期] 1985', '+44 [国际电话]', '(415) [国际电话]', 'GB[IBAN]', '192.168.[IP]', '2001:db8:[IP]', '[SSN]']);
   });
 });

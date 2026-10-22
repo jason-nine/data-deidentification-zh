@@ -11,7 +11,7 @@ const docx = await buildDocx(SAMPLE_DOCX_SPEC);
 writeFileSync('tests/fixtures/sample.docx', docx);
 writeFileSync('tests/fixtures/sample.xlsx', await buildXlsx(SAMPLE_XLSX_SPEC));
 
-const font = new Uint8Array(readFileSync('public/fonts/NotoSansTC-Regular.ttf'));
+const font = new Uint8Array(readFileSync('public/fonts/NotoSansSC-Regular.ttf'));
 const lines = readFileSync('tests/fixtures/sample.txt', 'utf-8').split('\n');
 const pdf = await PDFDocument.create();
 pdf.registerFontkit(fontkit);

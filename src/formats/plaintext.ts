@@ -1,8 +1,9 @@
 import type { DocFormat, LoadedDocument, TextEdit } from '../core/types';
 import { applyEdits } from '../core/redactor';
+import { decodeText } from './encoding';
 
 export async function parsePlainText(file: File, format: 'txt' | 'md'): Promise<LoadedDocument> {
-  const text = await file.text();
+  const text = await decodeText(file);
   return { fileName: file.name, format, text, handle: null };
 }
 

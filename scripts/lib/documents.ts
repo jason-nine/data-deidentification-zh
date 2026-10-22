@@ -7,7 +7,7 @@ import type { CellSpec, XlsxSpec } from '../../tests/helpers/xlsx-builder.ts';
 
 export interface Party {
   company: string;
-  taxId: string;
+  uscc: string;
   address: string;
   rep: string;
   contact: string;
@@ -20,7 +20,7 @@ function party(f: Fake): Party {
   const contact = f.name();
   return {
     company: f.company(),
-    taxId: f.taxId(),
+    uscc: f.uscc(),
     address: f.address(),
     rep: f.name(),
     contact,
@@ -30,203 +30,203 @@ function party(f: Fake): Party {
   };
 }
 
-const money = (n: number) => `NT$ ${n.toLocaleString('zh-TW')}`;
+const money = (n: number) => `¥${n.toLocaleString('zh-CN')}`;
 
 // ---------------------------------------------------------------------------------------
-// 服務契約書（Word 4 頁／PDF 3 頁）
+// 服务合同书（Word 4 页／PDF 3 页）
 // ---------------------------------------------------------------------------------------
 export function contract(seed = 101): DocModel {
   const f = new Fake(seed);
   const a = party(f);
   const bName = f.name();
-  const b = { name: bName, id: f.twId(), address: f.address(), mobile: f.mobile(), email: f.email(bName), bank: f.bankAccount() };
+  const b = { name: bName, id: f.cnId(), address: f.address(), mobile: f.mobile(), email: f.email(bName), bank: f.bankAccount() };
   const witness = f.name();
   const start = '2026-10-01';
   const end = '2027-09-30';
   const fee = 85000;
   const contactRows: string[][] = [
-    ['甲方－專案窗口', a.contact, a.phone, a.mobile, a.email],
-    ['甲方－財務窗口', f.name(), f.landline(), f.mobile(), f.email()],
-    ['甲方－資訊窗口', f.name(), f.landline(), f.mobile(), f.email()],
+    ['甲方－项目联系人', a.contact, a.phone, a.mobile, a.email],
+    ['甲方－财务联系人', f.name(), f.landline(), f.mobile(), f.email()],
+    ['甲方－信息联系人', f.name(), f.landline(), f.mobile(), f.email()],
     ['乙方', b.name, '—', b.mobile, b.email],
-    ['乙方－緊急聯絡人', f.name(), '—', f.mobile(), '—'],
+    ['乙方－紧急联系人', f.name(), '—', f.mobile(), '—'],
   ];
 
   return {
-    title: '委外服務契約書',
-    header: `${a.company}　委外服務契約書　契約編號 SC-2026-0917`,
-    footer: '機密文件　未經雙方書面同意不得揭露',
+    title: '外包服务合同书',
+    header: `${a.company}　外包服务合同书　合同编号 SC-2026-0917`,
+    footer: '机密文件　未经双方书面同意不得披露',
     blocks: [
-      { type: 'title', text: '委外服務契約書' },
-      { type: 'subtitle', text: '契約編號：SC-2026-0917　　簽約日期：2026 年 9 月 17 日' },
-      { type: 'heading', text: '立契約書人' },
+      { type: 'title', text: '外包服务合同书' },
+      { type: 'subtitle', text: '合同编号：SC-2026-0917　　签约日期：2026 年 9 月 17 日' },
+      { type: 'heading', text: '合同双方' },
       {
         type: 'kv',
         rows: [
-          ['甲方', `${a.company}（統一編號 ${a.taxId}）`],
-          ['代表人', a.rep],
+          ['甲方', `${a.company}（统一社会信用代码 ${a.uscc}）`],
+          ['法定代表人', a.rep],
           ['地址', a.address],
-          ['聯絡人', `${a.contact}　電話 ${a.phone}　手機 ${a.mobile}　電子郵件 ${a.email}`],
-          ['乙方', `${b.name}（身分證字號 ${b.id}）`],
-          ['戶籍地址', b.address],
-          ['聯絡方式', `手機 ${b.mobile}　電子郵件 ${b.email}`],
+          ['联系人', `${a.contact}　电话 ${a.phone}　手机 ${a.mobile}　邮箱 ${a.email}`],
+          ['乙方', `${b.name}（身份证号 ${b.id}）`],
+          ['户籍地址', b.address],
+          ['联系方式', `手机 ${b.mobile}　邮箱 ${b.email}`],
         ],
       },
-      { type: 'para', text: `甲乙雙方同意就甲方委託乙方提供資訊系統維運與顧問服務事宜，訂立本契約，並同意遵守下列條款：`, indent: true },
-      { type: 'heading', text: '第一條　服務內容' },
-      { type: 'para', text: '乙方應依附件一「服務項目表」所列項目提供服務，包括但不限於系統監控、例行維護、事件處理、效能調校及相關技術諮詢。服務範圍之變更應由雙方以書面另行議定。', indent: true },
-      { type: 'heading', text: '第二條　契約期間' },
-      { type: 'para', text: `本契約有效期間自 ${start} 起至 ${end} 止，共計十二個月。期滿前六十日內，任一方未以書面表示終止者，本契約自動延展一年，以後亦同。`, indent: true },
-      { type: 'heading', text: '第三條　服務報酬與付款方式' },
-      { type: 'para', text: `甲方應按月給付乙方服務報酬 ${money(fee)}（含稅）。乙方應於每月五日前開立當月請款單交付甲方聯絡人 ${a.contact}（${a.email}），甲方於收到請款單後三十日內以匯款方式支付至乙方指定帳戶：${f.pick(['第一銀行', '台北富邦', '國泰世華', '中國信託'])}　帳號 ${b.bank}　戶名 ${b.name}。`, indent: true },
-      { type: 'para', text: '匯款手續費由甲方負擔。乙方應依法開立收據或發票。', indent: true },
-      { type: 'heading', text: '第四條　服務水準' },
-      { type: 'para', text: '乙方應於甲方通報重大事件後二小時內回應，並於八小時內提出處置方案；一般事件應於一個工作日內回應。乙方每月應提供服務報告予甲方資訊窗口。', indent: true },
-      { type: 'heading', text: '第五條　保密義務' },
-      { type: 'para', text: `乙方因履行本契約而知悉或持有甲方之營業秘密、客戶資料（含客戶姓名、身分證字號、聯絡電話、地址等個人資料）及其他機密資訊，應負保密義務，非經甲方書面同意不得洩漏、交付或使第三人知悉。本條義務於契約終止後五年內仍持續有效。`, indent: true },
-      { type: 'heading', text: '第六條　個人資料保護' },
-      { type: 'para', text: '乙方處理甲方提供之個人資料，應遵守個人資料保護法及相關法令，僅得於履行本契約之必要範圍內蒐集、處理及利用，並採取適當之安全維護措施。乙方於契約終止時應將所有個人資料交還甲方或依甲方指示銷毀，並出具切結書。', indent: true },
-      { type: 'heading', text: '第七條　智慧財產權' },
-      { type: 'para', text: '乙方於履約期間所完成之工作成果（含文件、程式碼、設計圖說等），其著作財產權自完成時起歸甲方所有。乙方保證工作成果無侵害第三人智慧財產權之情事。', indent: true },
-      { type: 'heading', text: '第八條　違約責任' },
-      { type: 'para', text: `任一方違反本契約約定，經他方以書面催告限期改正而逾期未改正者，他方得終止本契約並請求損害賠償。乙方違反第五條或第六條者，應給付甲方懲罰性違約金 ${money(500000)}，甲方受有損害超過該金額者並得請求賠償。`, indent: true },
-      { type: 'heading', text: '第九條　契約終止' },
-      { type: 'para', text: '任一方得於三十日前以書面通知他方終止本契約。契約終止時，乙方應於七日內完成交接，甲方應就已提供之服務按比例給付報酬。', indent: true },
-      { type: 'heading', text: '第十條　通知' },
-      { type: 'para', text: `本契約之通知應以書面為之，送達地址以本契約首頁所載為準；以電子郵件送達者，甲方送達 ${a.email}，乙方送達 ${b.email}。地址或電子郵件變更時應即通知他方，否則以原地址送達視為已合法送達。`, indent: true },
-      { type: 'heading', text: '第十一條　準據法與管轄' },
-      { type: 'para', text: '本契約以中華民國法律為準據法。因本契約所生之爭議，雙方同意以臺灣臺北地方法院為第一審管轄法院。', indent: true },
-      { type: 'heading', text: '第十二條　其他' },
-      { type: 'para', text: '本契約未盡事宜，依相關法令及誠信原則處理。本契約一式二份，由甲乙雙方各執一份為憑。附件為本契約之一部分，與本契約具同等效力。', indent: true },
-      { type: 'heading', text: '附件一　服務項目表' },
+      { type: 'para', text: `甲乙双方同意就甲方委托乙方提供信息系统运维与顾问服务事宜，订立本合同，并同意遵守下列条款：`, indent: true },
+      { type: 'heading', text: '第一条　服务内容' },
+      { type: 'para', text: '乙方应依附件一「服务项目表」所列项目提供服务，包括但不限于系统监控、例行维护、事件处理、性能调优及相关技术咨询。服务范围的变更应由双方另行书面约定。', indent: true },
+      { type: 'heading', text: '第二条　合同期间' },
+      { type: 'para', text: `本合同有效期自 ${start} 起至 ${end} 止，共计十二个月。期满前六十日内，任何一方未书面提出终止的，本合同自动延展一年，以后亦同。`, indent: true },
+      { type: 'heading', text: '第三条　服务报酬与付款方式' },
+      { type: 'para', text: `甲方应按月向乙方支付服务报酬 ${money(fee)}（含税）。乙方应于每月五日前开具当月付款申请单送达甲方联系人 ${a.contact}（${a.email}），甲方于收到付款申请单后三十日内以转账方式支付至乙方指定账户：${f.pick(['中国工商银行', '中国建设银行', '招商银行', '中国银行'])}　账号 ${b.bank}　账户名称 ${b.name}。`, indent: true },
+      { type: 'para', text: '转账手续费由甲方承担。乙方应依法开具发票。', indent: true },
+      { type: 'heading', text: '第四条　服务水平' },
+      { type: 'para', text: '乙方应在甲方报告重大事件后两小时内响应，并于八小时内提出处置方案；一般事件应在一个工作日内响应。乙方每月应向甲方信息联系人提交服务报告。', indent: true },
+      { type: 'heading', text: '第五条　保密义务' },
+      { type: 'para', text: `乙方因履行本合同而知悉或持有甲方的商业秘密、客户信息（含客户姓名、身份证号、联系电话、地址等个人信息）及其他机密信息，应承担保密义务，未经甲方书面同意不得披露、交付或使第三方知悉。本条义务在合同终止后五年内继续有效。`, indent: true },
+      { type: 'heading', text: '第六条　个人信息保护' },
+      { type: 'para', text: '乙方处理甲方提供之个人信息，应遵守《中华人民共和国个人信息保护法》及相关法律法规，仅在履行本合同所必需的范围内收集、处理和使用，并采取适当的安全保护措施。乙方应在合同终止时将所有个人信息交还甲方或按甲方指示销毁，并出具承诺书。', indent: true },
+      { type: 'heading', text: '第七条　知识产权' },
+      { type: 'para', text: '乙方在履约期间完成的工作成果（含文档、代码、设计图纸等），其著作权自完成时起归甲方所有。乙方保证工作成果不侵害第三方知识产权。', indent: true },
+      { type: 'heading', text: '第八条　违约责任' },
+      { type: 'para', text: `任何一方违反本合同约定，经另一方书面催告限期改正而逾期未改正的，另一方有权终止本合同并要求赔偿损失。乙方违反第五条或第六条者，应向甲方支付违约金 ${money(500000)}，甲方损失超过该金额的，可另行要求赔偿。`, indent: true },
+      { type: 'heading', text: '第九条　合同终止' },
+      { type: 'para', text: '任何一方可提前三十日书面通知另一方终止本合同。合同终止时，乙方应在七日内完成交接，甲方应就已提供的服务按比例支付报酬。', indent: true },
+      { type: 'heading', text: '第十条　通知' },
+      { type: 'para', text: `本合同的通知应以书面形式作出，送达地址以本合同首页所载为准；以电子邮件送达的，甲方送达 ${a.email}，乙方送达 ${b.email}。地址或邮箱变更时应立即通知另一方，否则按原地址送达视为已合法送达。`, indent: true },
+      { type: 'heading', text: '第十一条　准据法与管辖' },
+      { type: 'para', text: '本合同以中华人民共和国法律为准据法。因本合同产生的争议，双方同意以北京市朝阳区人民法院为第一审管辖法院。', indent: true },
+      { type: 'heading', text: '第十二条　其他' },
+      { type: 'para', text: '本合同未尽事宜，依照相关法律法规及诚实信用原则处理。本合同一式两份，甲乙双方各执一份。附件为本合同的组成部分，与本合同具有同等效力。', indent: true },
+      { type: 'heading', text: '附件一　服务项目表' },
       {
         type: 'table',
-        columns: [{ header: '項次', width: 1 }, { header: '服務項目', width: 3 }, { header: '內容說明', width: 6 }, { header: '頻率', width: 2 }],
+        columns: [{ header: '序号', width: 1 }, { header: '服务项目', width: 3 }, { header: '内容说明', width: 6 }, { header: '频率', width: 2 }],
         rows: [
-          ['1', '系統監控', '主機、資料庫與應用服務之可用性及效能監控，異常即時通報甲方資訊窗口', '每日'],
-          ['2', '例行維護', '安全性更新、備份驗證、日誌清理與容量檢視', '每週'],
-          ['3', '事件處理', '故障排除、根因分析與事件報告', '依需求'],
-          ['4', '效能調校', '資料庫索引、查詢與快取策略調整', '每季'],
-          ['5', '技術諮詢', '架構、資安與新技術導入之諮詢', '每月 8 小時'],
-          ['6', '服務報告', '月報含事件統計、SLA 達成率與改善建議', '每月'],
+          ['1', '系统监控', '主机、数据库与应用服务的可用性及性能监控，异常即时报告甲方信息联系人', '每日'],
+          ['2', '例行维护', '安全性更新、备份校验、日志清理与容量检查', '每周'],
+          ['3', '事件处理', '故障排除、根因分析与事件报告', '依需求'],
+          ['4', '性能调优', '数据库索引、查询与缓存策略调整', '每季'],
+          ['5', '技术咨询', '架构、信息安全与新技术引入的咨询', '每月 8 小时'],
+          ['6', '服务报告', '月报含事件统计、SLA 达成率与改善建议', '每月'],
         ],
       },
-      { type: 'heading', text: '附件二　聯絡窗口' },
+      { type: 'heading', text: '附件二　联系人名单' },
       {
         type: 'table',
-        columns: [{ header: '角色', width: 3 }, { header: '姓名', width: 2 }, { header: '電話', width: 3 }, { header: '手機', width: 3 }, { header: '電子郵件', width: 4 }],
+        columns: [{ header: '角色', width: 3 }, { header: '姓名', width: 2 }, { header: '电话', width: 3 }, { header: '手机', width: 3 }, { header: '邮箱', width: 4 }],
         rows: contactRows,
       },
-      { type: 'para', text: '聯絡窗口異動時，應於三個工作日內以電子郵件通知他方。' },
-      { type: 'heading', text: '簽署' },
-      { type: 'para', text: '雙方確認已充分閱讀並理解本契約全部條款，同意簽署如下：' },
+      { type: 'para', text: '联系人变更时，应在三个工作日内以邮件通知另一方。' },
+      { type: 'heading', text: '签署' },
+      { type: 'para', text: '双方确认已充分阅读并理解本合同全部条款，同意签署如下：' },
       { type: 'spacer' },
-      { type: 'kv', rows: [['甲方', a.company], ['統一編號', a.taxId], ['代表人', `${a.rep}　　　　　　　　　　（簽章）`], ['地址', a.address], ['電話', a.phone]] },
+      { type: 'kv', rows: [['甲方', a.company], ['统一社会信用代码', a.uscc], ['法定代表人', `${a.rep}　　　　　　　　　　（签章）`], ['地址', a.address], ['电话', a.phone]] },
       { type: 'spacer' },
-      { type: 'kv', rows: [['乙方', `${b.name}　　　　　　　　　　（簽章）`], ['身分證字號', b.id], ['地址', b.address], ['手機', b.mobile]] },
+      { type: 'kv', rows: [['乙方', `${b.name}　　　　　　　　　　（签章）`], ['身份证号', b.id], ['地址', b.address], ['手机', b.mobile]] },
       { type: 'spacer' },
-      { type: 'kv', rows: [['見證人', `${witness}　　　　　　　　　　（簽章）`], ['身分證字號', f.twId()], ['聯絡電話', f.mobile()]] },
+      { type: 'kv', rows: [['见证人', `${witness}　　　　　　　　　　（签章）`], ['身份证号', f.cnId()], ['联系电话', f.mobile()]] },
       { type: 'spacer' },
-      { type: 'para', text: '中華民國　一一五　年　九　月　十七　日', align: 'center' },
+      { type: 'para', text: '二〇二六年九月十七日', align: 'center' },
     ],
   };
 }
 
 // ---------------------------------------------------------------------------------------
-// 報價單（3 頁）
+// 报价单（3 页）
 // ---------------------------------------------------------------------------------------
 export function quotation(seed = 202): DocModel {
   const f = new Fake(seed);
   const vendor = party(f);
   const client = party(f);
   const items: [string, string, number, number][] = [
-    ['應用伺服器', 'Dell PowerEdge R760，2×Xeon Gold 6430，256GB RAM', 2, 486000],
-    ['儲存陣列', 'NetApp AFF A250，24×3.84TB NVMe', 1, 1980000],
-    ['核心交換器', 'Cisco Catalyst 9300 48P，含 10G 上聯模組', 2, 268000],
-    ['防火牆', 'FortiGate 200F，含 3 年 UTP 授權', 1, 412000],
-    ['UPS 不斷電系統', 'APC Smart-UPS SRT 10kVA', 1, 218000],
-    ['機櫃', '42U 標準機櫃含 PDU', 2, 36000],
-    ['虛擬化平台授權', 'VMware vSphere Standard，8 CPU', 1, 356000],
-    ['備份軟體', 'Veeam Backup & Replication Enterprise，10 instance', 1, 186000],
-    ['作業系統授權', 'Windows Server 2022 Datacenter，16 core', 2, 198000],
-    ['資料庫授權', 'Microsoft SQL Server 2022 Standard，2 core pack', 4, 128000],
-    ['監控系統', 'Zabbix 建置與客製儀表板', 1, 96000],
-    ['建置服務', '硬體上架、佈線、虛擬化平台建置與移轉', 1, 320000],
-    ['資安健檢', '弱點掃描與滲透測試（一次）', 1, 150000],
-    ['教育訓練', '維運人員訓練 2 天（每場至多 12 人）', 2, 45000],
-    ['維護保固', '硬體 3 年次日到場、軟體 1 年更新', 1, 468000],
-    ['備援線路', 'MPLS VPN 100M，年費', 1, 240000],
-    ['機房環控', '溫濕度與漏水感測器含告警', 1, 58000],
-    ['線材與耗材', 'Cat6A 跳線、光纖跳線與標籤', 1, 22000],
-    ['專案管理', '專案經理駐點 3 個月', 1, 270000],
-    ['文件與移交', '架構文件、SOP 與驗收報告', 1, 40000],
+    ['应用服务器', 'Dell PowerEdge R760，2×Xeon Gold 6430，256GB RAM', 2, 486000],
+    ['存储阵列', 'NetApp AFF A250，24×3.84TB NVMe', 1, 1980000],
+    ['核心交换机', 'Cisco Catalyst 9300 48P，含 10G 上联模块', 2, 268000],
+    ['防火墙', 'FortiGate 200F，含 3 年 UTP 授权', 1, 412000],
+    ['UPS 不间断电源', 'APC Smart-UPS SRT 10kVA', 1, 218000],
+    ['机柜', '42U 标准机柜含 PDU', 2, 36000],
+    ['虚拟化平台授权', 'VMware vSphere Standard，8 CPU', 1, 356000],
+    ['备份软件', 'Veeam Backup & Replication Enterprise，10 instance', 1, 186000],
+    ['操作系统授权', 'Windows Server 2022 Datacenter，16 core', 2, 198000],
+    ['数据库授权', 'Microsoft SQL Server 2022 Standard，2 core pack', 4, 128000],
+    ['监控系统', 'Zabbix 部署与定制仪表板', 1, 96000],
+    ['实施服务', '硬件上架、布线、虚拟化平台部署与迁移', 1, 320000],
+    ['信息安全检测', '漏洞扫描与渗透测试（一次）', 1, 150000],
+    ['培训', '运维人员培训 2 天（每场至多 12 人）', 2, 45000],
+    ['维保服务', '硬件 3 年次日到场、软件 1 年更新', 1, 468000],
+    ['备份线路', 'MPLS VPN 100M，年费', 1, 240000],
+    ['机房环境监控', '温湿度与漏水传感器含告警', 1, 58000],
+    ['线材与耗材', 'Cat6A 跳线、光纤跳线与标签', 1, 22000],
+    ['项目管理', '项目经理驻场 3 个月', 1, 270000],
+    ['文档与移交', '架构文档、SOP 与验收报告', 1, 40000],
   ];
   const rows = items.map(([name, spec, qty, price], i) => [String(i + 1), name, spec, String(qty), money(price), money(qty * price)]);
   const subtotal = items.reduce((s, [, , q, p]) => s + q * p, 0);
-  const tax = Math.round(subtotal * 0.05);
+  const tax = Math.round(subtotal * 0.13);
   const sales = { name: vendor.contact, mobile: vendor.mobile, email: vendor.email };
   const support = { name: f.name(), phone: f.landline(), mobile: f.mobile() };
   const supportEmail = f.email(support.name);
 
   return {
-    title: '報價單',
-    header: `${vendor.company}　報價單 Q-2026-0912`,
+    title: '报价单',
+    header: `${vendor.company}　报价单 Q-2026-0912`,
     footer: `${vendor.company}　${vendor.phone}`,
     blocks: [
-      { type: 'title', text: '報　價　單' },
-      { type: 'subtitle', text: '報價單號：Q-2026-0912　　報價日期：2026-09-12　　有效期限：2026-10-12' },
-      { type: 'heading', text: '客戶資料' },
+      { type: 'title', text: '报　价　单' },
+      { type: 'subtitle', text: '报价单号：Q-2026-0912　　报价日期：2026-09-12　　有效期限：2026-10-12' },
+      { type: 'heading', text: '客户信息' },
       {
         type: 'kv',
         rows: [
-          ['客戶名稱', `${client.company}（統一編號 ${client.taxId}）`],
-          ['聯絡人', `${client.contact}　${f.pick(['資訊部經理', '採購課長', '總務主任', '營運處長'])}`],
-          ['電話', `${client.phone}　　手機 ${client.mobile}`],
-          ['電子郵件', client.email],
-          ['送貨地址', client.address],
-          ['發票地址', f.address()],
+          ['客户名称', `${client.company}（统一社会信用代码 ${client.uscc}）`],
+          ['联系人', `${client.contact}　${f.pick(['信息部经理', '采购主管', '行政主管', '运营总监'])}`],
+          ['电话', `${client.phone}　　手机 ${client.mobile}`],
+          ['邮箱', client.email],
+          ['收货地址', client.address],
+          ['发票地址', f.address()],
         ],
       },
-      { type: 'heading', text: '報價明細' },
+      { type: 'heading', text: '报价明细' },
       {
         type: 'table',
-        columns: [{ header: '項次', width: 1 }, { header: '品項', width: 3 }, { header: '規格', width: 6 }, { header: '數量', width: 1.2 }, { header: '單價', width: 2.4 }, { header: '小計', width: 2.6 }],
+        columns: [{ header: '序号', width: 1 }, { header: '品名', width: 3 }, { header: '规格', width: 6 }, { header: '数量', width: 1.2 }, { header: '单价', width: 2.4 }, { header: '小计', width: 2.6 }],
         rows,
       },
-      { type: 'kv', rows: [['未稅合計', money(subtotal)], ['營業稅 5%', money(tax)], ['含稅總計', money(subtotal + tax)]] },
-      { type: 'para', text: '以上金額以新台幣計價。本報價含運送至送貨地址之運費，不含進口關稅及其他規費。', indent: true },
-      { type: 'heading', text: '交貨與驗收' },
-      { type: 'para', text: `硬體設備於收到訂單後 45 個日曆天內交付至 ${client.address}；軟體授權於收到訂單後 7 個工作天內以電子方式交付。到貨後由客戶聯絡人 ${client.contact} 會同本公司人員進行驗收，驗收期間為 10 個工作天。`, indent: true },
-      { type: 'heading', text: '付款條件' },
-      { type: 'para', text: `訂單簽回時支付 30% 訂金，設備到貨驗收合格後支付 60%，保固期滿 30 日內支付尾款 10%。請匯款至：${f.pick(['台灣銀行', '兆豐銀行', '玉山銀行'])}　帳號 ${f.bankAccount()}　戶名 ${vendor.company}。`, indent: true },
-      { type: 'heading', text: '保固與維護' },
-      { type: 'para', text: '硬體設備提供 3 年原廠保固及次日到場服務；軟體提供 1 年版本更新與技術支援。保固期間內非人為因素之故障由本公司負責維修或更換。', indent: true },
-      { type: 'heading', text: '聯絡窗口' },
+      { type: 'kv', rows: [['不含税合计', money(subtotal)], ['增值税 13%', money(tax)], ['含税总计', money(subtotal + tax)]] },
+      { type: 'para', text: '以上金额以人民币计价。本报价含运送至收货地址之运费，不含进口关税及其他规费。', indent: true },
+      { type: 'heading', text: '交货与验收' },
+      { type: 'para', text: `硬件设备于收到订单后 45 个日历天内交付至 ${client.address}；软件授权于收到订单后 7 个工作日内以电子方式交付。到货后由客户联系人 ${client.contact} 会同本公司人员进行验收，验收期为 10 个工作日。`, indent: true },
+      { type: 'heading', text: '付款条件' },
+      { type: 'para', text: `订单签回时支付 30% 定金，设备到货验收合格后支付 60%，质保期满 30 日内支付尾款 10%。请转账至：${f.pick(['中国工商银行', '中国建设银行', '招商银行'])}　账号 ${f.bankAccount()}　账户名称 ${vendor.company}。`, indent: true },
+      { type: 'heading', text: '质保与维护' },
+      { type: 'para', text: '硬件设备提供 3 年原厂质保及次日到场服务；软件提供 1 年版本更新与技术支持。质保期内非人为因素导致的故障由本公司负责维修或更换。', indent: true },
+      { type: 'heading', text: '联系人' },
       {
         type: 'table',
-        columns: [{ header: '角色', width: 2 }, { header: '姓名', width: 2 }, { header: '電話', width: 3 }, { header: '手機', width: 3 }, { header: '電子郵件', width: 4 }],
+        columns: [{ header: '角色', width: 2 }, { header: '姓名', width: 2 }, { header: '电话', width: 3 }, { header: '手机', width: 3 }, { header: '邮箱', width: 4 }],
         rows: [
-          ['業務代表', sales.name, vendor.phone, sales.mobile, sales.email],
-          ['技術支援', support.name, support.phone, support.mobile, supportEmail],
-          ['客服中心', '—', '0800-000-123', '—', 'service@example.com.tw'],
+          ['业务代表', sales.name, vendor.phone, sales.mobile, sales.email],
+          ['技术支持', support.name, support.phone, support.mobile, supportEmail],
+          ['客服中心', '—', '400-800-1234', '—', 'service@example.com.cn'],
         ],
       },
-      { type: 'para', text: `本報價單有任何疑問，請洽業務代表 ${sales.name}（${sales.mobile}）。` },
-      { type: 'heading', text: '客戶確認簽回' },
-      { type: 'para', text: '本公司同意依上述報價內容與條件採購，請於簽章後回傳。' },
+      { type: 'para', text: `本报价单有任何疑问，请洽业务代表 ${sales.name}（${sales.mobile}）。` },
+      { type: 'heading', text: '客户确认签回' },
+      { type: 'para', text: '本公司同意依上述报价内容与条件采购，请于签章后回传。' },
       { type: 'spacer' },
-      { type: 'kv', rows: [['公司名稱', client.company], ['統一編號', client.taxId], ['負責人', `${client.rep}　　　　　　　　　　（簽章）`], ['採購聯絡人', `${client.contact}　${client.mobile}`], ['地址', client.address]] },
+      { type: 'kv', rows: [['公司名称', client.company], ['统一社会信用代码', client.uscc], ['法定代表人', `${client.rep}　　　　　　　　　　（签章）`], ['采购联系人', `${client.contact}　${client.mobile}`], ['地址', client.address]] },
       { type: 'spacer' },
-      { type: 'kv', rows: [['報價廠商', vendor.company], ['統一編號', vendor.taxId], ['負責人', `${vendor.rep}　　　　　　　　　　（簽章）`], ['地址', vendor.address], ['電話', vendor.phone]] },
+      { type: 'kv', rows: [['报价单位', vendor.company], ['统一社会信用代码', vendor.uscc], ['法定代表人', `${vendor.rep}　　　　　　　　　　（签章）`], ['地址', vendor.address], ['电话', vendor.phone]] },
       { type: 'spacer' },
-      { type: 'para', text: '簽回日期：　　　年　　　月　　　日', align: 'center' },
-      { type: 'para', text: `本文件含個人資料，僅供交易雙方使用；如需索取電子檔請聯絡 ${sales.email}。`, align: 'center' },
+      { type: 'para', text: '签回日期：　　　年　　　月　　　日', align: 'center' },
+      { type: 'para', text: `本文件含个人信息，仅供交易双方使用；如需电子版请联系 ${sales.email}。`, align: 'center' },
     ],
   };
 }
 
 // ---------------------------------------------------------------------------------------
-// 客戶資料（Excel：60 筆客戶 + 聯絡紀錄 + 業務窗口）
+// 客户信息（Excel：60 位客户 + 联系记录 + 业务联系人）
 // ---------------------------------------------------------------------------------------
 export function customers(seed = 303): XlsxSpec {
   const f = new Fake(seed);
@@ -234,7 +234,7 @@ export function customers(seed = 303): XlsxSpec {
   reps.forEach((r) => (r.email = f.email(r.name)));
 
   const customerRows: CellSpec[][] = [
-    ['客戶編號', '姓名', '性別', '身分證字號', '生日', '手機', '市話', '電子郵件', '通訊地址', '公司', '統一編號', '職稱', '負責業務', '累計消費(元)', '備註'],
+    ['客户编号', '姓名', '性别', '身份证号', '生日', '手机', '固定电话', '邮箱', '通信地址', '公司', '统一社会信用代码', '职称', '负责业务', '累计消费(元)', '备注'],
   ];
   const names: string[] = [];
   for (let i = 0; i < 60; i++) {
@@ -245,32 +245,32 @@ export function customers(seed = 303): XlsxSpec {
     const noteKind = f.chance();
     const note: CellSpec =
       noteKind < 0.25
-        ? `${f.date()} 由 ${rep.name} 電訪，改用手機 ${f.mobile()} 聯絡`
+        ? `${f.date()} 由 ${rep.name} 电话回访，改用手机 ${f.mobile()} 联系`
         : noteKind < 0.4
-          ? { rich: ['緊急聯絡人：', `${f.name()} ${f.mobile()}`] }
+          ? { rich: ['紧急联系人：', `${f.name()} ${f.mobile()}`] }
           : noteKind < 0.5
-            ? `發票寄送地址：${f.address()}`
+            ? `发票寄送地址：${f.address()}`
             : '';
     customerRows.push([
       `CUST-${String(10001 + i * 7)}`,
       name,
       gender === 1 ? '男' : '女',
-      f.twId(gender),
+      f.cnId(),
       f.birthday(),
       f.mobile(),
       f.chance() < 0.7 ? f.landline() : '',
       f.email(name),
       f.address(),
       f.chance() < 0.8 ? f.company() : '',
-      f.chance() < 0.8 ? f.taxId() : '',
-      f.pick(['採購專員', '資訊經理', '總務', '負責人', '會計', '業務主管', '行政助理']),
+      f.chance() < 0.8 ? f.uscc() : '',
+      f.pick(['采购专员', '信息经理', '行政专员', '法定代表人', '会计', '销售主管', '行政助理']),
       rep.name,
       f.int(12, 980) * 1000,
       note,
     ]);
   }
 
-  const logRows: CellSpec[][] = [['日期', '客戶姓名', '客戶編號', '承辦業務', '聯絡方式', '摘要']];
+  const logRows: CellSpec[][] = [['日期', '客户姓名', '客户编号', '承办业务', '联系方式', '摘要']];
   for (let i = 0; i < 30; i++) {
     const idx = f.int(0, 59);
     const rep = f.pick(reps);
@@ -279,100 +279,100 @@ export function customers(seed = 303): XlsxSpec {
       names[idx],
       `CUST-${String(10001 + idx * 7)}`,
       rep.name,
-      f.pick(['電話', '到訪', 'Email', '視訊']),
+      f.pick(['电话', '上门拜访', 'Email', '视频会议']),
       f.pick([
-        `客戶 ${names[idx]} 來電詢問報價，回撥 ${f.mobile()} 確認需求`,
-        `寄送樣品至 ${f.address()}，簽收人 ${f.name()}`,
-        `客戶更新聯絡信箱為 ${f.email(names[idx])}`,
-        `拜訪客戶公司，與 ${f.name()}（${f.landline()}）洽談年度合約`,
-        `客戶反映帳單地址有誤，更正為 ${f.address()}`,
-        `視訊會議，客戶端出席 ${f.name()}、${f.name()}`,
+        `客户 ${names[idx]} 来电询问报价，回拨 ${f.mobile()} 确认需求`,
+        `寄送样品至 ${f.address()}，签收人 ${f.name()}`,
+        `客户更新联系邮箱为 ${f.email(names[idx])}`,
+        `拜访客户公司，与 ${f.name()}（${f.landline()}）洽谈年度合同`,
+        `客户反映账单地址有误，更正为 ${f.address()}`,
+        `视频会议，客户方出席 ${f.name()}、${f.name()}`,
       ]),
     ]);
   }
 
-  const repRows: CellSpec[][] = [['業務', '分機', '手機', '電子郵件', '負責區域']];
-  for (const r of reps) repRows.push([r.name, r.ext, r.mobile, r.email, f.pick(['北區', '中區', '南區', '東區'])]);
+  const repRows: CellSpec[][] = [['业务员', '分机', '手机', '邮箱', '负责区域']];
+  for (const r of reps) repRows.push([r.name, r.ext, r.mobile, r.email, f.pick(['华北', '华东', '华南', '西南'])]);
 
   return {
     sheets: [
-      { name: '客戶資料', rows: customerRows },
-      { name: '聯絡紀錄', rows: logRows },
-      { name: '業務窗口', rows: repRows },
+      { name: '客户信息', rows: customerRows },
+      { name: '联系记录', rows: logRows },
+      { name: '业务联系人', rows: repRows },
     ],
   };
 }
 
 // ---------------------------------------------------------------------------------------
-// 文字類：客服信件（txt）與會議紀錄（md）
+// 文字类：客服邮件（txt）与会议记录（md）
 // ---------------------------------------------------------------------------------------
 export function supportEmail(seed = 404): string {
   const f = new Fake(seed);
   const c = f.name();
   const agent = f.name();
-  const id = f.twId();
-  return `主旨：Re: [客服單 #CS-2026-04471] 訂單 ORD-88213 出貨地址變更申請
+  const id = f.cnId();
+  return `主旨：Re: [客服单 #CS-2026-04471] 订单 ORD-88213 收货地址变更申请
 
 ${c} 您好：
 
-感謝您的來信。已依您 ${f.date()} 來電（${f.mobile()}）之指示，將訂單 ORD-88213 的出貨地址由
+感谢您的来信。已按您 ${f.date()} 来电（${f.mobile()}）的指示，将订单 ORD-88213 的出货地址由
 「${f.address()}」
-變更為
+变更为
 「${f.address()}」，
-收件人維持 ${c}，聯絡電話 ${f.mobile()}。
+收件人维持 ${c}，联系电话 ${f.mobile()}。
 
-為完成身分驗證，我們已核對您留存的身分證字號 ${id} 末四碼與電子郵件 ${f.email(c)}。若上述資料有誤，請於三日內回覆本信或致電客服專線 ${f.landline()}（分機 ${f.int(100, 999)}）。
+为完成身份验证，我们已核对您留存的身份证号 ${id} 末四码与邮箱 ${f.email(c)}。若上述信息有误，请在三日内回复本邮件或拨打客服热线 ${f.landline()}（分机 ${f.int(100, 999)}）。
 
-另提醒您，本次訂單之發票將寄至 ${f.address()}，統一編號 ${f.taxId()}。
+另提醒您，本次订单的发票将寄至 ${f.address()}，统一社会信用代码 ${f.uscc()}。
 
-祝　順心
+祝　商祺
 
 ${agent}
-客戶服務部
+客户服务部
 ${f.company()}
-電話 ${f.landline()}　手機 ${f.mobile()}
+电话 ${f.landline()}　手机 ${f.mobile()}
 ${f.email(agent)}
 
 -----Original Message-----
 From: ${c} <${f.email(c)}>
 Sent: ${f.date()} 14:22
-To: service@example.com.tw
-Subject: [客服單 #CS-2026-04471] 訂單 ORD-88213 出貨地址變更申請
+To: service@example.com.cn
+Subject: [客服单 #CS-2026-04471] 订单 ORD-88213 收货地址变更申请
 
-您好，我是 ${c}，想將訂單 ORD-88213 的出貨地址改到公司：${f.address()}，收件人 ${f.name()}，電話 ${f.mobile()}。
-我的會員手機是 ${f.mobile()}，身分證末四碼 ${id.slice(-4)}。麻煩協助，謝謝。
+您好，我是 ${c}，想将订单 ORD-88213 的收货地址改到公司：${f.address()}，收件人 ${f.name()}，电话 ${f.mobile()}。
+我的会员手机是 ${f.mobile()}，身份证末四码 ${id.slice(-4)}。麻烦协助，谢谢。
 `;
 }
 
 export function meetingNotes(seed = 505): string {
   const f = new Fake(seed);
   const people = Array.from({ length: 5 }, () => f.name());
-  return `# 專案啟動會議紀錄
+  return `# 项目启动会会议纪要
 
 - **日期**：${f.date()} 14:00–15:30
-- **地點**：${f.address()} 3 樓會議室
+- **地点**：${f.address()} 3 楼会议室
 - **主席**：${people[0]}
 - **出席**：${people.slice(1).join('、')}
-- **記錄**：${people[4]}
+- **记录人**：${people[4]}
 
-## 討論事項
+## 讨论事项
 
-1. 客戶端窗口確認為 ${people[1]}（${f.mobile()}、${f.email(people[1])}），備援窗口 ${people[2]}（分機 ${f.int(100, 999)}）。
-2. 測試環境帳號由 ${people[3]} 於本週五前建立，通知信寄至 ${f.email(people[3])}。
-3. 設備送達地址：${f.address()}，收件人 ${people[2]}，電話 ${f.landline()}。
-4. 保密協議簽署：乙方 ${people[4]}（身分證字號 ${f.twId()}）已於會前簽妥。
+1. 客户方联系人确认为 ${people[1]}（${f.mobile()}、${f.email(people[1])}），备份联系人 ${people[2]}（分机 ${f.int(100, 999)}）。
+2. 测试环境账号由 ${people[3]} 于本周五前建立，通知信寄至 ${f.email(people[3])}。
+3. 设备收货地址：${f.address()}，收件人 ${people[2]}，电话 ${f.landline()}。
+4. 保密协议签署：乙方 ${people[4]}（身份证号 ${f.cnId()}）已在会前签署完毕。
 
-## 決議
+## 决议
 
-| 項目 | 負責人 | 期限 |
+| 项目 | 法定代表人 | 期限 |
 | --- | --- | --- |
-| 需求規格書 v1.0 | ${people[1]} | ${f.date()} |
-| 測試環境建置 | ${people[3]} | ${f.date()} |
-| 合約用印 | ${people[0]}（${f.mobile()}） | ${f.date()} |
+| 需求规格书 v1.0 | ${people[1]} | ${f.date()} |
+| 测试环境搭建 | ${people[3]} | ${f.date()} |
+| 合同盖章 | ${people[0]}（${f.mobile()}） | ${f.date()} |
 
-## 待辦
+## 待办
 
-- [ ] ${people[2]} 提供發票資訊（統一編號 ${f.taxId()}、地址 ${f.address()}）
-- [ ] ${people[4]} 更新聯絡清單並寄給全體與會者
+- [ ] ${people[2]} 提供开票信息（统一社会信用代码 ${f.uscc()}、地址 ${f.address()}）
+- [ ] ${people[4]} 更新联系人清单并寄给全体与会者
 `;
 }

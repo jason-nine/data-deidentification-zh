@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://deanlin.net/data-deidentification/sitemap.xml
+Sitemap: __SITE_URL__sitemap.xml

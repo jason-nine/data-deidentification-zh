@@ -26,7 +26,7 @@ describe('buildMarker', () => {
 
 describe('parseMarkers', () => {
   it('returns {category, code, start, end} for every marker, in order', () => {
-    const text = '個案 [姓名:a3f9c2] 於 [身分證:0f1e2d] 就診。';
+    const text = '个案 [姓名:a3f9c2] 于 [身份证:0f1e2d] 就诊。';
     const result = parseMarkers(text);
     expect(result).toHaveLength(2);
 
@@ -36,15 +36,15 @@ describe('parseMarkers', () => {
     expect(text.slice(first.start, first.end)).toBe('[姓名:a3f9c2]');
 
     const second = result[1];
-    expect(second.category).toBe('身分證');
+    expect(second.category).toBe('身份证');
     expect(second.code).toBe('0f1e2d');
-    expect(text.slice(second.start, second.end)).toBe('[身分證:0f1e2d]');
+    expect(text.slice(second.start, second.end)).toBe('[身份证:0f1e2d]');
 
     expect(second.start).toBeGreaterThan(first.end);
   });
 
   it('returns [] for plain text with no markers', () => {
-    expect(parseMarkers('這是一段沒有標記的純文字。')).toEqual([]);
+    expect(parseMarkers('这是一段没有标记的纯文字。')).toEqual([]);
   });
 
   it('does not match uppercase hex codes', () => {
@@ -64,20 +64,20 @@ describe('parseMarkers', () => {
   });
 
   it('handles adjacent markers back-to-back', () => {
-    const text = '[姓名:abcdef][身分證:123abc]';
+    const text = '[姓名:abcdef][身份证:123abc]';
     const result = parseMarkers(text);
     expect(result).toHaveLength(2);
     expect(result[0]).toMatchObject({ category: '姓名', code: 'abcdef' });
-    expect(result[1]).toMatchObject({ category: '身分證', code: '123abc' });
+    expect(result[1]).toMatchObject({ category: '身份证', code: '123abc' });
     expect(result[0].end).toBe(result[1].start);
   });
 
   it('handles nested-looking brackets by not matching the outer pair', () => {
     // The inner "[" breaks the category character class ([^\[\]:]), so only
     // the inner marker (if well-formed) can match.
-    const text = '[姓名:[身分證:abcdef]]';
+    const text = '[姓名:[身份证:abcdef]]';
     const result = parseMarkers(text);
     expect(result).toHaveLength(1);
-    expect(result[0]).toMatchObject({ category: '身分證', code: 'abcdef' });
+    expect(result[0]).toMatchObject({ category: '身份证', code: 'abcdef' });
   });
 });
